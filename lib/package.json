@@ -1,0 +1,37 @@
+{
+  "name": "@kollateral/kollateral",
+  "version": "0.1.1",
+  "main": "dist/kollateral.js",
+  "types": "dist/kollateral.d.ts",
+  "scripts": {
+    "copy-abis": "./scripts/copy_abis.sh",
+    "build": "npm run compile",
+    "compile": "npm run generate && tsc -p .",
+    "generate": "./scripts/generate.sh",
+    "prepare": "rm -rf dist/; npm run build"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "ts-loader": "^5.3.3",
+    "typechain": "^1.0.3",
+    "typechain-target-web3-v2": "^1.0.0",
+    "typescript": "^3.2.4"
+  },
+  "dependencies": {
+    "@types/ethereumjs-abi": "^0.6.3",
+    "@types/node-fetch": "^2.5.4",
+    "@types/qs": "^6.9.1",
+    "@types/web3": "^1.2.2",
+    "bignumber.js": "^8.0.2",
+    "bn.js": "^5.1.1",
+    "ethereumjs-abi": "^0.6.8",
+    "ethers": "^4.0.44",
+    "node-fetch": "^2.6.0",
+    "qs": "^6.9.1",
+    "web3": "^1.2.4",
+    "web3-core": "^1.2.4",
+    "web3-eth-contract": "^1.2.4"
+  },
+  "description": ""
+}

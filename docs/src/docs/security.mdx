@@ -1,0 +1,13 @@
+---
+name: 4. Security
+route: /security
+---
+
+# Security Considerations
+Here we'll outline a few tips on interfacing with Kollateral while minimizing trust in its correctness.
+
+### Avoid storing funds in your invokable contract
+Invokable contracts are safest when they do not store funds at rest. Ideally your contract will perform some atomic operation such as a liquidation or a refinance, and then transfer out any profit after repaying Kollateral. In this situation the most likely *worst* case would be to lose the *profit* of one's atomic operation. All other cases should revert.
+
+### Add a safeguard limit for Kollateral's reward
+Further, the `KollateralInvokable` base class includes a `1%` emergency check, which will revert if the effective Kollateral reward is in excess of this threshold. Adding your own redundant/more strict check could further increase safety.

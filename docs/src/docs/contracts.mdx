@@ -1,0 +1,50 @@
+---
+name: 3. Contracts
+route: /contracts
+---
+
+# Contracts
+
+| Contract | Explanation |
+|--------------------------|----------------------------------------------|
+| Invoker                  | Main entrypoint for Kollateral, handles aggregation and flash loan invocation. |
+| AaveLiquidityProxy       | Proxy for sourcing liquidity from Aave. |
+| SoloLiquidityProxy       | Proxy for sourcing liquidity from Solo (DyDx). |
+| KollateralLiquidityProxy | Proxy for sourcing liquidity from Kollateral's kTokens. |
+| kEther                   | Simple Ether collateral pool with flash loans for testing. |
+| kUSDC                    | Simple USDC collateral pool with flash loans for testing. |
+| kDAI                     | Simple DAI collateral pool with flash loans for testing. |
+
+## Deployed Addresses
+
+### Mainnet
+
+| Contract | Address|
+|--------------------------|----------------------------------------------|
+| Invoker                  | `0x06d1f34fd7C055aE5CA39aa8c6a8E10100a45c01` |
+| AaveLiquidityProxy       | `0x22567078e59Cfb11f0Ba10286AaC8F42B5182A2A` |
+| SoloLiquidityProxy       | `0xff031750F29b24e6e5552382F6E0c065830085d2` |
+
+### Ropsten
+
+| Contract | Address |
+|--------------------------|----------------------------------------------|
+| Invoker                  | `0x7d687C874FC20FF71A5da4b1896014CA648C7AE1` |
+| KollateralLiquidityProxy | `0x0e97AC793DD433656B4Bf90Cce3aED2cD53F010C` |
+| kEther                   | `0x23a5Aa74be1f3885956DeCea703131D5D31054E2` |
+| kUSDC                    | `0xf15120717D7826531bBD1e7AF43EF10b6434FA83` |
+| kDAI                     | `0xbDf6f94BA6b31D71472B6C5a9a52b6A41b083d7e` |
+| USDC [For Testing]       | `0x3008B7dCED223444993B0CFa682Dd4239c47ceC0` |
+| DAI [For Testing]        | `0x5072F93Aaf8F903B9a2c0683DAE211A18859331e` |
+
+### Rinkeby
+
+| Contract | Address |
+|--------------------------|----------------------------------------------|
+| Invoker                  | `0x5121e9a309Ce995E35995B35aa20048D655Fb182` |
+| KollateralLiquidityProxy | `0xE7d87cee62AEF3BDF35F37Ff525a42254D75b3e5` |
+| kEther                   | `0x8A21157a56B81c31576B334796D2B200a882Dc57` |
+| kUSDC                    | `0xb757fdcEB7c3F064042752c288B390e4F0C6b064` |
+| kDAI                     | `0x32b6Ac4f39cBA086E4242Ca416E78463c1FFFcf4` |
+| USDC [For Testing]       | `0xCC25B712689d98099f8F401608cd8931c1499878` |
+| DAI [For Testing]        | `0xC030da418B5c0832430c36c9f7cBDc417EeDe492` |

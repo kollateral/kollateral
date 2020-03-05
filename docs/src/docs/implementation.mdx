@@ -1,0 +1,116 @@
+---
+name: 2. Implementation
+route: /implementation
+---
+
+# Implementation
+## Creating your invokable smart contract
+First we'll walk through how to set up your own contract which will be invoked via Kollateral.
+
+Install the Kollateral solidity library to your truffle project which provides interfaces, base contracts, and useful utils.
+```
+npm install @kollateral/contracts
+```
+
+Extending from the `KollateralInvokable` base contract provides the interfaces and helper methods necessary to build a basic contract.
+```
+import "@kollateral/contracts/invoke/KollateralInvokable.sol";
+
+contract MyContract is KollateralInvokable {
+  constructor () public { }
+
+  function execute(bytes calldata data) external payable {
+    // liquidate
+    // swap
+    // refinance
+    // etc...
+    repay();
+  }
+}
+```
+In this example `execute(bytes)` will be invoked after Kollateral aggregates and transfer the requested funds to your contract.
+
+## Invoking via JS with Web3
+There are multiple ways to call Kollateral. Here we'll dive into how to call it directly from web3, using Kollateral as your entrypoint to the blockchain.
+
+Install the Kollateral typescript library.
+```
+npm install @kollateral/kollateral
+```
+
+In this example we use the `ethereum` provider that MetaMask injects, any Web3 provider may be used in its place. Configurations are loaded based on the `networkId` of the provider.
+```
+import { Kollateral, Token } from '@kollateral/kollateral'
+
+const kollateral = await Kollateral.init(ethereum);
+
+kollateral.invoke({
+	contract: myContractAddress
+}, {
+  token: Token.DAI,
+  amount: web3.utils.toWei(1000)
+}).then(() => console.log("success!");
+```
+
+## Invoking via solidity
+Kollateral can also by invoked directly from within a contract.
+
+Ensure that the Kollateral solidity library is installed.
+```
+npm install @kollateral/contracts
+```
+
+In this example we make a basic call to the Kollateral invoker, this can be done anywhere within your contract.
+```
+import "@kollateral/contracts/invoke/IInvoker.sol";
+
+address internal _invokerAddress;
+
+function myMethod() external payable {
+  address to;
+  bytes memory data;
+  address tokenAddress;
+  uint256 tokenAmount;
+
+  IInvoker(_invokerAddress).invoke(to, data, tokenAddress, tokenAmount);
+}
+```
+Keep in mind that `invoke` is also optionally payable. Any funds sent will be passed on along to your invokable contract during execution.
+
+## Passing data to execute
+An invokable contract takes a single `bytes` in its `execute()` function. Clever use of abi encoding can extend this for any use case.
+
+In this example we'll send in a simple payload with a few easy parameters.
+```
+/* script.js */
+const data = ethers.utils.defaultAbiEncoder.encode(["uint256", "bytes"], ["123", "0x4568"]);
+
+/* contract.sol */
+function execute(bytes calldata data) external payable {
+  (uint256 myNum, bytes memory myData) = abi.decode(data, (uint256, bytes));
+
+  // use params
+
+  repay();
+}
+```
+Encoded data strings may be nested to create more complex parameter data structures.
+
+## Reading invocation state from helpers
+The `KollateralInvokable` base class also includes a set of helper methods for getting various information about the current execution state.
+```
+// returns the msg.sender that originally called the Kollateral Invoker
+currentSender();
+
+// returns the currently borrowed token's address
+currentTokenAddress();
+
+// returns the amount borrowed of the current token
+currentTokenAmount();
+
+// returns the amount that Kollateral is expecting to be repaid (incl. all rewards)
+currentRepaymentAmount();
+
+// returns whether the currently borrowed token is ether
+isCurrentTokenEther();
+```

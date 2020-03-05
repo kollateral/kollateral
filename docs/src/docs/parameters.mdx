@@ -1,0 +1,22 @@
+---
+name: 5. Parameters
+route: /parameters
+---
+
+# Protocol Parameters and Upgradability
+Since Kollateral is largely stateless, it is designed to be pausable in lieu of being upgradable. This means that new versions will be launch in parallel while older versions will be soft-deprecated.
+
+### Future-proofing your invokable contracts
+We aim to make new versions backwards compatible with our `IInvoker` interface. Storing our `Invoker` contract address as an updatable field in your contract vs hard-coding should allow you to upgrade to later versions.
+
+### Liquidity source ordering
+For the time being, the liquidity source priority order is set/updated by the protocol administrator. We aim to give higher priority to pools with larger liquidity and lower native fees. The current priority list is:
+
+| Asset     | 1st Priority     | 2nd Priority     |
+|-----------|------------------|------------------|
+| ETH       | Solo (DyDx)      |                  |
+| USDC      | Solo (DyDx)      | Aave             |
+| DAI       | Solo (DyDx)      | Aave             |
+
+### Kollateral Reward
+Currently Kollateral charges an additional `6bps` fee on the liquidity that is sourced (on top of each pool's native fee if applicable). All repayment calculation is handled by Kollateral and surfaced to your invokable contract via the `KollateralInvokable` helpers such as `repay()`.

@@ -1,0 +1,19 @@
+{
+  "name": "@kollateral/contracts",
+  "version": "0.1.1",
+  "description": "Smart Contract helpers for Kollateral",
+  "files": [
+    "**/*.sol",
+    "/build/contracts/*.json"
+  ],
+  "scripts": {
+    "prepare": "cd ../../ && npm run build && cd contracts/common"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kbrizzle/kollateral.git"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^2.4.0"
+  }
+}

@@ -1,0 +1,38 @@
+---
+name: 1. Introduction
+route: /
+---
+
+# Kollateral
+The flash loan building block.
+
+## Disclaimer
+Though we make our best efforts to provide thorough test coverage, Kollateral is as of yet unaudited. We appreciate your interest in building on Kollateral, please consider this alpha software and use at your own risk.
+
+```
+Copyright 2020 Kollateral LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use the included code except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
+
+## Transaction Lifecycle
+Kollateral uses a simple pass-through architecture to enable flash loans, allowing developers to borrow-then-invoke through the protocol to their own contract. This allows any of the supported assets to be borrowed as long as they are paid back by the end of the invokable contract's method.
+
+![image](https://user-images.githubusercontent.com/747165/74313722-16d0c500-4d29-11ea-99c8-144982239e0e.png)
+
+Kollateral handles aggregating liquidity from multiple flash-loan-enabled pools such as DyDx and Aave. As new pools come online, they will be added to the protocol ensuring that Kollateral always has the greatest available liquidity.
+
+## Connect
+- [Twitter](https://twitter.com/kollateralco)
+- [Github](https://github.com/kollateral)
+- [Discord](https://discord.gg/qn7RM2x)
