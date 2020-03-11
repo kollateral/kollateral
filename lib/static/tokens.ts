@@ -16,13 +16,13 @@ const tokenToAddressMap: Map<Network, Map<Token, string>> = new Map([
   ])],
   [Network.Ropsten, new Map([
     [Token.ETH, ETHER_TOKEN_ADDRESS],
-    [Token.USDC, "0x3008B7dCED223444993B0CFa682Dd4239c47ceC0"],
-    [Token.DAI, "0x5072F93Aaf8F903B9a2c0683DAE211A18859331e"]
+    [Token.USDC, "0x5e8B3C9eE77C6951D4D91eF7510aAc60C5313638"],
+    [Token.DAI, "0xD8FAE8336297A17180445F93b43B17b5b554c6dD"]
   ])],
   [Network.Rinkeby, new Map([
     [Token.ETH, ETHER_TOKEN_ADDRESS],
-    [Token.USDC, "0xCC25B712689d98099f8F401608cd8931c1499878"],
-    [Token.DAI, "0xC030da418B5c0832430c36c9f7cBDc417EeDe492"]
+    [Token.USDC, "0x902cB36aa5F9B33E7d04E0D3F75ABC027c8E2DA7"],
+    [Token.DAI, "0x21AD750D8Eac5Fc7278cf93De9Aa4e68eF261BF7"]
   ])]
 ]);
 

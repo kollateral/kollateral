@@ -1,6 +1,6 @@
 {
   "name": "@kollateral/kollateral",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "main": "dist/kollateral.js",
   "types": "dist/kollateral.d.ts",
   "scripts": {

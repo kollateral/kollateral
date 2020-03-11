@@ -3,14 +3,14 @@ import { Token } from "./tokens";
 
 const kTokenToAddressMap: Map<Network, Map<Token, string>> = new Map([
   [Network.Ropsten, new Map([
-    [Token.ETH, "0x23a5Aa74be1f3885956DeCea703131D5D31054E2"],
-    [Token.USDC, "0xf15120717D7826531bBD1e7AF43EF10b6434FA83"],
-    [Token.DAI, "0xbDf6f94BA6b31D71472B6C5a9a52b6A41b083d7e"]
+    [Token.ETH, "0x0996AABB1d0143Ca0E80b169FaFa148cAd2282A5"],
+    [Token.USDC, "0x3380746b6D42f92A1C1EA61a0f80166d1f0c700F"],
+    [Token.DAI, "0x35a3494D8890130b9F92d62D611feC1D525429E6"]
   ])],
   [Network.Rinkeby, new Map([
-    [Token.ETH, "0x8A21157a56B81c31576B334796D2B200a882Dc57"],
-    [Token.USDC, "0xb757fdcEB7c3F064042752c288B390e4F0C6b064"],
-    [Token.DAI, "0x32b6Ac4f39cBA086E4242Ca416E78463c1FFFcf4"]
+    [Token.ETH, "0x2E112e9D94410f6246C9729DB0C491Cb73B73242"],
+    [Token.USDC, "0xCaDF007f7a7805B9c60a26bB7a0F2AdBadB10d62"],
+    [Token.DAI, "0xD9321a7C65D34429478aeD92Ae031A2cafAA0C03"]
   ])]
 ]);
 

@@ -4,7 +4,7 @@ route: /parameters
 ---
 
 # Protocol Parameters and Upgradability
-Since Kollateral is largely stateless, it is designed to be pausable in lieu of being upgradable. This means that new versions will be launch in parallel while older versions will be soft-deprecated.
+Since Kollateral is largely stateless, it is not designed to be upgradable. This means that new versions will be launched in parallel while older versions will be soft-deprecated.
 
 ### Future-proofing your invokable contracts
 We aim to make new versions backwards compatible with our `IInvoker` interface. Storing our `Invoker` contract address as an updatable field in your contract vs hard-coding should allow you to upgrade to later versions.
@@ -14,7 +14,7 @@ For the time being, the liquidity source priority order is set/updated by the pr
 
 | Asset     | 1st Priority     | 2nd Priority     |
 |-----------|------------------|------------------|
-| ETH       | Solo (DyDx)      |                  |
+| ETH       | Solo (DyDx)      | Aave             |
 | USDC      | Solo (DyDx)      | Aave             |
 | DAI       | Solo (DyDx)      | Aave             |
 
