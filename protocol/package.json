@@ -1,5 +1,5 @@
 {
-  "name": "@kollateral/contracts",
+  "name": "@kollateral/protocol",
   "version": "0.0.0",
   "private": false,
   "description": "",
@@ -15,6 +15,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@kollateral/contracts": "^0.1.1",
     "@openzeppelin/contracts": "^2.5.0"
   },
   "devDependencies": {
