@@ -1,11 +1,12 @@
-# Kollateral
+# Kingmaker
 The flash loan building block.
 
 ## Disclaimer
-Though we make our best efforts to provide thorough test coverage, Kollateral is as of yet unaudited. We appreciate your interest in building on Kollateral, so please consider this alpha software and use at your own risk.
+Though we make our best efforts to provide thorough test coverage, Kingmaker is as of yet unaudited. We appreciate your interest in building on Kingmaker, so please consider this alpha software and use at your own risk.
 
 ```
 Copyright 2020 Kollateral LLC
+Copyright 2020 ARM Finance LTD
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use the included code except in compliance with the License.
@@ -21,4 +22,4 @@ limitations under the License.
 ```
 
 ## Documentation
-Please view full documentation [here](https://docs.kollateral.co).
+Please view full documentation [here](https://docs.kingmaker.dev).
