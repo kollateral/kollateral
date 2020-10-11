@@ -12,7 +12,7 @@
   "scripts": {
     "start": "lerna run start --parallel",
     "compile": "lerna run compile",
-    "clean": "lerna run clean",
+    "clean": "lerna run clean && rimraf node_modules",
     "lint": "lerna run lint",
     "test": "lerna run test",
     "update-version": "lerna publish --skip-git --skip-npm --force-publish '*'",
@@ -37,12 +37,12 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ARM-Finance/ARM.git"
+    "url": "git+https://github.com/ARM-Finance/kingmaker.git"
   },
   "devDependencies": {
     "dotenv": "^8.2.0",
     "husky": "^1.1.2",
-    "lerna": "^3.4.3",
+    "lerna": "^3.22.1",
     "rimraf": "^3.0.2"
   }
 }
