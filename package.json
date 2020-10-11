@@ -25,15 +25,24 @@
     "client:build": "lerna run build:webpack",
     "server:dev": "lerna run server:dev --no-bail"
   },
-  "keywords": ["kingmaker", "flashloan", "flash-loans", "defi", "ethereum", "web3"],
+  "keywords": [
+    "kingmaker",
+    "flashloan",
+    "flash-loans",
+    "defi",
+    "ethereum",
+    "web3"
+  ],
   "author": "lepidotteri",
-  "license": "Unlicense",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ARM-Finance/ARM.git"
   },
   "devDependencies": {
+    "dotenv": "^8.2.0",
     "husky": "^1.1.2",
-    "lerna": "^3.4.3"
+    "lerna": "^3.4.3",
+    "rimraf": "^3.0.2"
   }
 }

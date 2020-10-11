@@ -17,11 +17,12 @@
  * phrase from a file you've .gitignored so it doesn't accidentally become public.
  *
  */
+require('dotenv').config();
 
 // const HDWalletProvider = require('truffle-hdwallet-provider');
 const PrivateKeyProvider = require('truffle-privatekey-provider');
-const infuraId = process.env.KOLLATERAL_INFURA_ID;
-const privateKey = process.env.KOLLATERAL_PRIVATE_KEY;
+const projectId = process.env.KINGMAKER_PROJECT_ID;
+const privateKey = process.env.KINGMAKER_PRIVATE_KEY;
 //
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
@@ -52,7 +53,7 @@ module.exports = {
 
     //Another network with more advanced options...
     mainnet: {
-      provider: () => new PrivateKeyProvider(privateKey, 'https://mainnet.infura.io/v3/' + infuraId),
+      provider: () => new PrivateKeyProvider(privateKey, 'https://eth-mainnet.alchemyapi.io/v2/' + projectId),
       network_id: 1,          // Mainnet's id
       gas: 5500000,           // Gas sent with each transaction (default: ~6700000)
       gasPrice: 1100000000,  // 20 gwei (in wei) (default: 100 gwei)
@@ -62,7 +63,7 @@ module.exports = {
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
     ropsten: {
-      provider: () => new PrivateKeyProvider(privateKey, 'https://ropsten.infura.io/v3/' + infuraId),
+      provider: () => new PrivateKeyProvider(privateKey, 'https://eth-ropsten.alchemyapi.io/v2/' + projectId),
       network_id: 3,       // Ropsten's id
       gas: 5500000,        // Ropsten has a lower block limit than mainnet
       confirmations: 2,    // # of confs to wait between deployments. (default: 0)
@@ -71,7 +72,7 @@ module.exports = {
     },
 
     rinkeby: {
-      provider: () => new PrivateKeyProvider(privateKey, 'https://rinkeby.infura.io/v3/' + infuraId),
+      provider: () => new PrivateKeyProvider(privateKey, 'https://eth-rinkeby.alchemyapi.io/v2/' + projectId),
       network_id: 4,       // rinkeby's id
       gas: 7500000,        // rinkeby has a lower block limit than mainnet
       confirmations: 2,    // # of confs to wait between deployments. (default: 0)
