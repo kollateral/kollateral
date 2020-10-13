@@ -15,7 +15,8 @@
 
 */
 
-pragma solidity ^0.5.7;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "./Types.sol";
@@ -26,8 +27,7 @@ import "./Types.sol";
  *
  * Interface that Callees for Solo must implement in order to ingest data.
  */
-contract ICallee {
-
+interface ICallee {
     // ============ Public Functions ============
 
     /**
@@ -41,6 +41,5 @@ contract ICallee {
         address sender,
         Types.AccountInfo memory accountInfo,
         bytes memory data
-    )
-    public;
+    ) external;
 }

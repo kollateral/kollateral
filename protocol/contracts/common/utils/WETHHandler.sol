@@ -16,25 +16,32 @@
 
 */
 
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 
 import "./IWETH.sol";
 
-contract WETHHandler {
+abstract contract WETHHandler {
     address payable internal _wethAddress;
 
-    constructor(address payable wethAddress) internal {
+    constructor(address payable wethAddress) {
         _wethAddress = wethAddress;
     }
 
     function wrap(uint256 tokenAmount) internal {
-        require(address(this).balance >= tokenAmount, "WETHHandler: not enough ether balance");
-        IWETH(_wethAddress).deposit.value(tokenAmount)();
+        require(
+            address(this).balance >= tokenAmount,
+            "WETHHandler: not enough ether balance"
+        );
+        IWETH(_wethAddress).deposit{value: tokenAmount}();
     }
 
     function unwrap(uint256 tokenAmount) internal {
         IWETH weth = IWETH(_wethAddress);
-        require(weth.balanceOf(address(this)) >= tokenAmount, "WETHHandler: not enough weth balance");
+        require(
+            weth.balanceOf(address(this)) >= tokenAmount,
+            "WETHHandler: not enough weth balance"
+        );
         weth.withdraw(tokenAmount);
     }
 }

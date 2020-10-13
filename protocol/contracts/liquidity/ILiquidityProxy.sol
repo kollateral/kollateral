@@ -16,14 +16,24 @@
 
 */
 
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 
-contract ILiquidityProxy {
-    function getTotalReserve(address tokenAddress) external view returns (uint256);
+interface ILiquidityProxy {
+    function getTotalReserve(address tokenAddress)
+        external
+        view
+        returns (uint256);
 
-    function getRepaymentAddress(address tokenAddress) external view returns (address);
+    function getRepaymentAddress(address tokenAddress)
+        external
+        view
+        returns (address);
 
-    function getRepaymentAmount(address tokenAddress, uint256 tokenAmount) view external returns (uint256);
+    function getRepaymentAmount(address tokenAddress, uint256 tokenAmount)
+        external
+        view
+        returns (uint256);
 
     function borrow(address tokenAddress, uint256 tokenAmount) external;
 }

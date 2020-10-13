@@ -16,7 +16,8 @@
 
 */
 
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
@@ -24,7 +25,11 @@ contract ExtendedMath {
     using SafeMath for uint256;
 
     // divide a/b then optionally floor or ceiling
-    function divAndRound(uint256 a, uint256 b, bool ceiling) internal pure returns (uint256) {
+    function divAndRound(
+        uint256 a,
+        uint256 b,
+        bool ceiling
+    ) internal pure returns (uint256) {
         uint256 floor = a.div(b);
         return (ceiling && a.mod(b) != 0) ? floor.add(1) : floor;
     }

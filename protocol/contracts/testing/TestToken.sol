@@ -16,15 +16,19 @@
 
 */
 
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 
-import "../token/UnlimitedApprovalDetailedErc20.sol";
+import "../token/UnlimitedApprovalErc20.sol";
 
-contract TestToken is UnlimitedApprovalDetailedErc20 {
-    constructor (string memory name, string memory symbol, uint8 decimals)
-    public
-    ERC20Detailed(name, symbol, decimals)
-    { }
+contract TestToken is UnlimitedApprovalErc20 {
+    constructor(
+        string memory name,
+        string memory symbol,
+        uint8 numDecimals
+    ) ERC20(name, symbol) {
+        _setupDecimals(numDecimals);
+    }
 
     /**
      * Allows anyone to arbitrarily mint themselves tokens for testing.

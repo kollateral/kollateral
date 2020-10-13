@@ -16,18 +16,30 @@
 
 */
 
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 
-contract UnlimitedApprovalDetailedErc20 is ERC20, ERC20Detailed {
+abstract contract UnlimitedApprovalErc20 is ERC20 {
+    using SafeMath for uint256;
 
-    function transferFrom(address sender, address recipient, uint256 amount) public returns (bool) {
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) public virtual override returns (bool) {
         _transfer(sender, recipient, amount);
         if (allowance(sender, _msgSender()) != uint256(-1)) {
-            _approve(sender, _msgSender(), allowance(sender, _msgSender())
-                .sub(amount, "UnlimitedApprovalDetailedErc20: transfer amount exceeds allowance"));
+            _approve(
+                sender,
+                _msgSender(),
+                allowance(sender, _msgSender()).sub(
+                    amount,
+                    "UnlimitedApprovalErc20: transfer amount exceeds allowance"
+                )
+            );
         }
         return true;
     }

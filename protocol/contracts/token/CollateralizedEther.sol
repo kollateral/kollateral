@@ -16,42 +16,44 @@
 
 */
 
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./CollateralizedToken.sol";
 import "../common/utils/ExternalCaller.sol";
 
-contract CollateralizedEther is CollateralizedToken, ExternalCaller {
+abstract contract CollateralizedEther is CollateralizedToken, ExternalCaller {
     using SafeMath for uint256;
 
-    constructor()
-    public
-    CollateralizedToken(address(1))
-    { }
+    constructor() CollateralizedToken(address(1)) {}
 
-    function mint() external payable returns (bool)
-    {
+    function mint() external payable returns (bool) {
         return mintInternal(msg.value);
     }
 
     function transferUnderlying(address to, uint256 amount)
-    internal
-    returns (bool)
+        internal
+        override
+        returns (bool)
     {
-        require(address(this).balance >= amount, "KEther: not enough ether balance");
+        require(
+            address(this).balance >= amount,
+            "KEther: not enough ether balance"
+        );
         externalTransfer(to, amount);
         return true;
     }
 
-    function isUnderlyingEther() public view returns (bool) {
+    function isUnderlyingEther() public pure override returns (bool) {
         return true;
     }
 
-    function totalReserve() public view returns (uint256)
-    {
+    function totalReserve() public view override returns (uint256) {
         return address(this).balance;
     }
 
-    function () external payable { }
+    receive() external payable {}
+
+    fallback() external payable {}
 }

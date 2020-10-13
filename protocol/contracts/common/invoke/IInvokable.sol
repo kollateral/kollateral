@@ -16,8 +16,9 @@
 
 */
 
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 
-contract IInvokable {
+interface IInvokable {
     function execute(bytes calldata data) external payable;
 }

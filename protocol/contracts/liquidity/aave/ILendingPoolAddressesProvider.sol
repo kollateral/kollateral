@@ -16,10 +16,13 @@
 
 */
 
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 
-contract ILendingPoolAddressesProvider {
-    function getLendingPool() public view returns (address);
-    function getLendingPoolCore() public view returns (address payable);
-    function getLendingPoolParametersProvider() public view returns (address);
+interface ILendingPoolAddressesProvider {
+    function getLendingPool() external view returns (address);
+
+    function getLendingPoolCore() external view returns (address payable);
+
+    function getLendingPoolParametersProvider() external view returns (address);
 }
