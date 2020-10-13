@@ -16,20 +16,24 @@
 
 */
 
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "./Ktoken.sol";
+import "./KToken.sol";
 import "../token/CollateralizedEther.sol";
 
 contract KEther is KToken, CollateralizedEther {
-    constructor ()
-    CollateralizedEther()
-    ERC20Detailed("Kollateral Ether", "kETH", 18)
-    public
-    { }
+    constructor() CollateralizedEther() ERC20("Kollateral Ether", "kETH") {
+        _setupDecimals(18);
+    }
 
-    function payableReserveAdjustment() internal returns (uint256) {
+    function payableReserveAdjustment()
+        internal
+        view
+        override
+        returns (uint256)
+    {
         return msg.value;
     }
 }

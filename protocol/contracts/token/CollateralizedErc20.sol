@@ -16,36 +16,37 @@
 
 */
 
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./CollateralizedToken.sol";
 
-contract CollateralizedErc20 is CollateralizedToken {
+abstract contract CollateralizedErc20 is CollateralizedToken {
     using SafeMath for uint256;
 
-    function mint(uint256 tokenAmount) external returns (bool)
-    {
+    function mint(uint256 tokenAmount) external returns (bool) {
         IERC20 token = IERC20(underlying());
         require(
             token.transferFrom(msg.sender, address(this), tokenAmount),
-                "CollateralizedErc20: token transferFrom failed");
+            "CollateralizedErc20: token transferFrom failed"
+        );
         return mintInternal(tokenAmount);
     }
 
     function transferUnderlying(address to, uint256 amount)
-    internal
-    returns (bool)
+        internal
+        override
+        returns (bool)
     {
         return IERC20(underlying()).transfer(to, amount);
     }
 
-    function isUnderlyingEther() public view returns (bool) {
+    function isUnderlyingEther() public pure override returns (bool) {
         return false;
     }
 
-    function totalReserve() public view returns (uint256)
-    {
+    function totalReserve() public view override returns (uint256) {
         return IERC20(underlying()).balanceOf(address(this));
     }
 }

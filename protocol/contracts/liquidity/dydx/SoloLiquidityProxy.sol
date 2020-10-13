@@ -16,11 +16,12 @@
 
 */
 
-pragma solidity ^0.5.7;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/ownership/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../../common/invoke/IInvoker.sol";
 import "../../common/utils/BalanceCarrier.sol";
@@ -30,7 +31,13 @@ import "./ISoloMargin.sol";
 import "./Types.sol";
 import "./ICallee.sol";
 
-contract SoloLiquidityProxy is Ownable, ILiquidityProxy, BalanceCarrier, ICallee, WETHHandler {
+contract SoloLiquidityProxy is
+    Ownable,
+    ILiquidityProxy,
+    BalanceCarrier,
+    ICallee,
+    WETHHandler
+{
     using SafeMath for uint256;
 
     uint256 internal NULL_ACCOUNT_ID = 0;
@@ -52,24 +59,33 @@ contract SoloLiquidityProxy is Ownable, ILiquidityProxy, BalanceCarrier, ICallee
     address internal _scheduleTokenAddress;
     uint256 internal _scheduleTokenAmount;
 
-
-    constructor (address soloMarginAddress, address payable wethAddress)
-    BalanceCarrier(address(1))
-    WETHHandler(wethAddress)
-    public {
+    constructor(address soloMarginAddress, address payable wethAddress)
+        BalanceCarrier(address(1))
+        WETHHandler(wethAddress)
+    {
         _soloMarginAddress = soloMarginAddress;
     }
 
-    function () external payable { }
+    receive() external payable {}
+
+    fallback() external payable {}
 
     function registerPool(uint256 marketId) external onlyOwner {
-        address tokenAddress = unmapTokenAddress(ISoloMargin(_soloMarginAddress).getMarketTokenAddress(marketId));
-        require(tokenAddress != address(0), "SoloLiquidityProxy: cannot register empty market");
+        address tokenAddress = unmapTokenAddress(
+            ISoloMargin(_soloMarginAddress).getMarketTokenAddress(marketId)
+        );
+        require(
+            tokenAddress != address(0),
+            "SoloLiquidityProxy: cannot register empty market"
+        );
 
         _tokenAddressToMarketId[tokenAddress] = marketId;
         _marketIdToTokenAddress[marketId] = tokenAddress;
         _tokenAddressRegistered[tokenAddress] = true;
-        IERC20(remapTokenAddress(tokenAddress)).approve(_soloMarginAddress, uint256(-1));
+        IERC20(remapTokenAddress(tokenAddress)).approve(
+            _soloMarginAddress,
+            uint256(-1)
+        );
     }
 
     function deregisterPool(uint256 marketId) external onlyOwner {
@@ -81,28 +97,53 @@ contract SoloLiquidityProxy is Ownable, ILiquidityProxy, BalanceCarrier, ICallee
         IERC20(remapTokenAddress(tokenAddress)).approve(_soloMarginAddress, 0);
     }
 
-    function getRepaymentAddress(address tokenAddress) external view returns (address) {
+    function getRepaymentAddress(address tokenAddress)
+        external
+        view
+        override
+        returns (address)
+    {
         return address(this);
     }
 
-    function getTotalReserve(address tokenAddress) external view returns (uint256) {
+    function getTotalReserve(address tokenAddress)
+        external
+        view
+        override
+        returns (uint256)
+    {
         if (isRegistered(tokenAddress) && !isClosing(tokenAddress)) {
-            return IERC20(remapTokenAddress(tokenAddress)).balanceOf(_soloMarginAddress);
+            return
+                IERC20(remapTokenAddress(tokenAddress)).balanceOf(
+                    _soloMarginAddress
+                );
         }
 
         return 0;
     }
 
-    function getRepaymentAmount(address tokenAddress, uint256 tokenAmount) external view returns (uint256) {
+    function getRepaymentAmount(address tokenAddress, uint256 tokenAmount)
+        external
+        view
+        override
+        returns (uint256)
+    {
         return getRepaymentAmountInternal(tokenAddress, tokenAmount);
     }
 
-    function getRepaymentAmountInternal(address tokenAddress, uint256 tokenAmount) internal view returns (uint256) {
+    function getRepaymentAmountInternal(
+        address tokenAddress,
+        uint256 tokenAmount
+    ) internal view returns (uint256) {
         // Add 1 wei for markets 0-1 and 2 wei for markets 2-3
-        return tokenAmount.add(marketIdFromTokenAddress(tokenAddress) < 2 ? 1 : 2);
+        return
+            tokenAmount.add(marketIdFromTokenAddress(tokenAddress) < 2 ? 1 : 2);
     }
 
-    function borrow(address tokenAddress, uint256 tokenAmount) external {
+    function borrow(address tokenAddress, uint256 tokenAmount)
+        external
+        override
+    {
         _scheduleInvokerAddress = msg.sender;
         _scheduleTokenAddress = tokenAddress;
         _scheduleTokenAmount = tokenAmount;
@@ -111,7 +152,10 @@ contract SoloLiquidityProxy is Ownable, ILiquidityProxy, BalanceCarrier, ICallee
         Types.ActionArgs[] memory operations = new Types.ActionArgs[](3);
         operations[0] = getWithdrawAction(tokenAddress, tokenAmount);
         operations[1] = getCallAction();
-        operations[2] = getDepositAction(tokenAddress, getRepaymentAmountInternal(tokenAddress, tokenAmount));
+        operations[2] = getDepositAction(
+            tokenAddress,
+            getRepaymentAmountInternal(tokenAddress, tokenAmount)
+        );
         Types.AccountInfo[] memory accountInfos = new Types.AccountInfo[](1);
         accountInfos[0] = getAccountInfo();
 
@@ -126,108 +170,127 @@ contract SoloLiquidityProxy is Ownable, ILiquidityProxy, BalanceCarrier, ICallee
         address sender,
         Types.AccountInfo memory accountInfo,
         bytes memory data
-    )
-    public
-    {
-        require(_scheduleInvokerAddress != address(0), "SoloLiquidityProxy: not scheduled");
+    ) public override {
+        require(
+            _scheduleInvokerAddress != address(0),
+            "SoloLiquidityProxy: not scheduled"
+        );
 
         if (_scheduleTokenAddress == address(1)) {
             unwrap(_scheduleTokenAmount);
         }
 
         require(
-            transfer(_scheduleTokenAddress, _scheduleInvokerAddress, _scheduleTokenAmount),
-            "SoloLiquidityProxy: transfer to invoker failed");
+            transfer(
+                _scheduleTokenAddress,
+                _scheduleInvokerAddress,
+                _scheduleTokenAmount
+            ),
+            "SoloLiquidityProxy: transfer to invoker failed"
+        );
 
         IInvoker invoker = IInvoker(_scheduleInvokerAddress);
         invoker.invokeCallback();
 
         if (_scheduleTokenAddress == address(1)) {
-            wrap(getRepaymentAmountInternal(_scheduleTokenAddress, _scheduleTokenAmount));
+            wrap(
+                getRepaymentAmountInternal(
+                    _scheduleTokenAddress,
+                    _scheduleTokenAmount
+                )
+            );
         }
     }
 
     function getAccountInfo() internal view returns (Types.AccountInfo memory) {
-        return Types.AccountInfo({
-            owner: address(this),
-            number: 1
-        });
+        return Types.AccountInfo({owner: address(this), number: 1});
     }
 
     function getWithdrawAction(address tokenAddress, uint256 tokenAmount)
-    internal
-    view
-    returns (Types.ActionArgs memory)
+        internal
+        view
+        returns (Types.ActionArgs memory)
     {
-        return Types.ActionArgs({
-            actionType: Types.ActionType.Withdraw,
-            accountId: 0,
-            amount: Types.AssetAmount({
-                sign: false,
-                denomination: Types.AssetDenomination.Wei,
-                ref: Types.AssetReference.Delta,
-                value: tokenAmount
-            }),
-            primaryMarketId: marketIdFromTokenAddress(tokenAddress),
-            secondaryMarketId: NULL_MARKET_ID,
-            otherAddress: address(this),
-            otherAccountId: NULL_ACCOUNT_ID,
-            data: NULL_DATA
-        });
+        return
+            Types.ActionArgs({
+                actionType: Types.ActionType.Withdraw,
+                accountId: 0,
+                amount: Types.AssetAmount({
+                    sign: false,
+                    denomination: Types.AssetDenomination.Wei,
+                    ref: Types.AssetReference.Delta,
+                    value: tokenAmount
+                }),
+                primaryMarketId: marketIdFromTokenAddress(tokenAddress),
+                secondaryMarketId: NULL_MARKET_ID,
+                otherAddress: address(this),
+                otherAccountId: NULL_ACCOUNT_ID,
+                data: NULL_DATA
+            });
     }
 
     function getDepositAction(address tokenAddress, uint256 repaymentAmount)
-    internal
-    view
-    returns (Types.ActionArgs memory)
+        internal
+        view
+        returns (Types.ActionArgs memory)
     {
-        return Types.ActionArgs({
-            actionType: Types.ActionType.Deposit,
-            accountId: 0,
-            amount: Types.AssetAmount({
-                sign: true,
-                denomination: Types.AssetDenomination.Wei,
-                ref: Types.AssetReference.Delta,
-                value: repaymentAmount
-            }),
-            primaryMarketId: marketIdFromTokenAddress(tokenAddress),
-            secondaryMarketId: NULL_MARKET_ID,
-            otherAddress: address(this),
-            otherAccountId: NULL_ACCOUNT_ID,
-            data: NULL_DATA
-        });
+        return
+            Types.ActionArgs({
+                actionType: Types.ActionType.Deposit,
+                accountId: 0,
+                amount: Types.AssetAmount({
+                    sign: true,
+                    denomination: Types.AssetDenomination.Wei,
+                    ref: Types.AssetReference.Delta,
+                    value: repaymentAmount
+                }),
+                primaryMarketId: marketIdFromTokenAddress(tokenAddress),
+                secondaryMarketId: NULL_MARKET_ID,
+                otherAddress: address(this),
+                otherAccountId: NULL_ACCOUNT_ID,
+                data: NULL_DATA
+            });
     }
 
-    function getCallAction()
-    internal
-    view
-    returns (Types.ActionArgs memory)
-    {
-        return Types.ActionArgs({
-            actionType: Types.ActionType.Call,
-            accountId: 0,
-            amount: NULL_AMOUNT,
-            primaryMarketId: NULL_MARKET_ID,
-            secondaryMarketId: NULL_MARKET_ID,
-            otherAddress: address(this),
-            otherAccountId: NULL_ACCOUNT_ID,
-            data: NULL_DATA
-        });
+    function getCallAction() internal view returns (Types.ActionArgs memory) {
+        return
+            Types.ActionArgs({
+                actionType: Types.ActionType.Call,
+                accountId: 0,
+                amount: NULL_AMOUNT,
+                primaryMarketId: NULL_MARKET_ID,
+                secondaryMarketId: NULL_MARKET_ID,
+                otherAddress: address(this),
+                otherAccountId: NULL_ACCOUNT_ID,
+                data: NULL_DATA
+            });
     }
 
     function isRegistered(address tokenAddress) internal view returns (bool) {
         return _tokenAddressRegistered[tokenAddress];
     }
 
-    function marketIdFromTokenAddress(address tokenAddress) internal view returns (uint256) {
+    function marketIdFromTokenAddress(address tokenAddress)
+        internal
+        view
+        returns (uint256)
+    {
         return _tokenAddressToMarketId[tokenAddress];
     }
 
-    function remapTokenAddress(address tokenAddress) internal view returns (address) {
+    function remapTokenAddress(address tokenAddress)
+        internal
+        view
+        returns (address)
+    {
         return tokenAddress == address(1) ? _wethAddress : tokenAddress;
     }
 
-    function unmapTokenAddress(address tokenAddress) internal view returns (address) {
+    function unmapTokenAddress(address tokenAddress)
+        internal
+        view
+        returns (address)
+    {
         return tokenAddress == _wethAddress ? address(1) : tokenAddress;
     }
 

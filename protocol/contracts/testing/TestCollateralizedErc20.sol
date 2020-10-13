@@ -16,15 +16,19 @@
 
 */
 
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 
 import "../token/CollateralizedErc20.sol";
 import "../token/CollateralizedToken.sol";
 
 contract TestCollateralizedErc20 is CollateralizedErc20 {
-    constructor (address underlying, string memory name, string memory symbol, uint8 decimals)
-    public
-    ERC20Detailed(name, symbol, decimals)
-    CollateralizedToken(underlying)
-    { }
+    constructor(
+        address underlying,
+        string memory name,
+        string memory symbol,
+        uint8 numDecimals
+    ) ERC20(name, symbol) CollateralizedToken(underlying) {
+        _setupDecimals(numDecimals);
+    }
 }

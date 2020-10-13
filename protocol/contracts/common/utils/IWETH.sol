@@ -16,10 +16,13 @@
 
 */
 
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 
-contract IWETH {
+abstract contract IWETH {
     mapping(address => uint256) public balanceOf;
-    function deposit() public payable;
-    function withdraw(uint wad) public;
+
+    function deposit() public payable virtual;
+
+    function withdraw(uint256 wad) public virtual;
 }

@@ -16,7 +16,8 @@
 
 */
 
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -35,19 +36,30 @@ contract MockSoloMargin is ISoloMargin {
     address internal _scheduleAccountAddress;
     uint256 internal _scheduleAccountNumber;
 
-    constructor(uint256[] memory marketIds, address[] memory tokenAddresses) public {
+    constructor(uint256[] memory marketIds, address[] memory tokenAddresses) {
         for (uint256 i = 0; i < marketIds.length; i++) {
             _markets[marketIds[i]] = tokenAddresses[i];
         }
         _isClosed = false;
     }
 
-    function () external payable { }
+    receive() external payable {}
 
-    function operate(Types.AccountInfo[] memory accounts, Types.ActionArgs[] memory actions) public {
+    fallback() external payable {}
+
+    function operate(
+        Types.AccountInfo[] memory accounts,
+        Types.ActionArgs[] memory actions
+    ) public override {
         /* data */
-        require(accounts.length == 1, "MockSoloMargin: incorrect accounts length");
-        require(actions.length == 3, "MockSoloMargin: incorrect actions length");
+        require(
+            accounts.length == 1,
+            "MockSoloMargin: incorrect accounts length"
+        );
+        require(
+            actions.length == 3,
+            "MockSoloMargin: incorrect actions length"
+        );
         _scheduleAccountAddress = accounts[0].owner;
         _scheduleAccountNumber = accounts[0].number;
 
@@ -56,47 +68,110 @@ contract MockSoloMargin is ISoloMargin {
         _scheduledTokenAmount = withdraw.amount.value;
         _scheduleMarketId = withdraw.primaryMarketId;
 
-        require(withdraw.amount.sign == false, "MockSoloMargin: incorrect withdraw sign");
-        require(withdraw.amount.denomination == Types.AssetDenomination.Wei, "MockSoloMargin: incorrect withdraw denomination");
-        require(withdraw.amount.ref == Types.AssetReference.Delta, "MockSoloMargin: incorrect withdraw reference");
+        require(
+            withdraw.amount.sign == false,
+            "MockSoloMargin: incorrect withdraw sign"
+        );
+        require(
+            withdraw.amount.denomination == Types.AssetDenomination.Wei,
+            "MockSoloMargin: incorrect withdraw denomination"
+        );
+        require(
+            withdraw.amount.ref == Types.AssetReference.Delta,
+            "MockSoloMargin: incorrect withdraw reference"
+        );
 
-        require(withdraw.actionType == Types.ActionType.Withdraw, "MockSoloMargin: incorrect withdraw action type");
-        require(withdraw.accountId == 0, "MockSoloMargin: must use first account");
-        require(withdraw.otherAddress == msg.sender, "MockSoloMargin: not sending to proxy");
+        require(
+            withdraw.actionType == Types.ActionType.Withdraw,
+            "MockSoloMargin: incorrect withdraw action type"
+        );
+        require(
+            withdraw.accountId == 0,
+            "MockSoloMargin: must use first account"
+        );
+        require(
+            withdraw.otherAddress == msg.sender,
+            "MockSoloMargin: not sending to proxy"
+        );
 
         /* call */
         Types.ActionArgs memory call = actions[1];
-        require(call.actionType == Types.ActionType.Call, "MockSoloMargin: incorrect call action type");
+        require(
+            call.actionType == Types.ActionType.Call,
+            "MockSoloMargin: incorrect call action type"
+        );
         require(call.accountId == 0, "MockSoloMargin: must use first account");
-        require(call.otherAddress == msg.sender, "MockSoloMargin: not invoking proxy");
+        require(
+            call.otherAddress == msg.sender,
+            "MockSoloMargin: not invoking proxy"
+        );
 
         /* deposit */
         Types.ActionArgs memory deposit = actions[2];
-        require(_scheduleMarketId == deposit.primaryMarketId, "MockSoloMargin: marketId mismatch");
+        require(
+            _scheduleMarketId == deposit.primaryMarketId,
+            "MockSoloMargin: marketId mismatch"
+        );
 
-        uint256 depositValue = withdraw.amount.value.add(repaymentFee(withdraw.primaryMarketId));
-        require(deposit.amount.value == depositValue, "MockSoloMargin: incorrect deposit value");
-        require(deposit.amount.sign == true, "MockSoloMargin: incorrect deposit sign");
-        require(deposit.amount.denomination == Types.AssetDenomination.Wei, "MockSoloMargin: incorrect deposit denomination");
-        require(deposit.amount.ref == Types.AssetReference.Delta, "MockSoloMargin: incorrect deposit reference");
+        uint256 depositValue = withdraw.amount.value.add(
+            repaymentFee(withdraw.primaryMarketId)
+        );
+        require(
+            deposit.amount.value == depositValue,
+            "MockSoloMargin: incorrect deposit value"
+        );
+        require(
+            deposit.amount.sign == true,
+            "MockSoloMargin: incorrect deposit sign"
+        );
+        require(
+            deposit.amount.denomination == Types.AssetDenomination.Wei,
+            "MockSoloMargin: incorrect deposit denomination"
+        );
+        require(
+            deposit.amount.ref == Types.AssetReference.Delta,
+            "MockSoloMargin: incorrect deposit reference"
+        );
 
-        require(deposit.actionType == Types.ActionType.Deposit, "MockSoloMargin: incorrect deposit action type");
-        require(deposit.accountId == 0, "MockSoloMargin: must use first account");
-        require(deposit.otherAddress == msg.sender, "MockSoloMargin: not sending to proxy");
+        require(
+            deposit.actionType == Types.ActionType.Deposit,
+            "MockSoloMargin: incorrect deposit action type"
+        );
+        require(
+            deposit.accountId == 0,
+            "MockSoloMargin: must use first account"
+        );
+        require(
+            deposit.otherAddress == msg.sender,
+            "MockSoloMargin: not sending to proxy"
+        );
 
         uint256 balanceBefore = balanceOf(withdraw.primaryMarketId);
 
         transfer(withdraw.primaryMarketId, msg.sender, withdraw.amount.value);
 
-        ICallee(msg.sender).callFunction(msg.sender, Types.AccountInfo({
-            owner: _scheduleAccountAddress,
-            number: _scheduleAccountNumber
-        }), "");
+        ICallee(msg.sender).callFunction(
+            msg.sender,
+            Types.AccountInfo({
+                owner: _scheduleAccountAddress,
+                number: _scheduleAccountNumber
+            }),
+            ""
+        );
 
-        transferFrom(deposit.primaryMarketId, msg.sender, address(this), deposit.amount.value);
+        transferFrom(
+            deposit.primaryMarketId,
+            msg.sender,
+            address(this),
+            deposit.amount.value
+        );
         uint256 balanceAfter = balanceOf(withdraw.primaryMarketId);
 
-        require(balanceAfter == balanceBefore.add(repaymentFee(withdraw.primaryMarketId)), "MockSoloMargin: Incorrect ending balance");
+        require(
+            balanceAfter ==
+                balanceBefore.add(repaymentFee(withdraw.primaryMarketId)),
+            "MockSoloMargin: Incorrect ending balance"
+        );
 
         _scheduledTokenAmount = 0;
         _scheduleMarketId = 0;
@@ -104,7 +179,12 @@ contract MockSoloMargin is ISoloMargin {
         _scheduleAccountNumber = 0;
     }
 
-    function getMarketIsClosing(uint256 marketId) public view returns (bool) {
+    function getMarketIsClosing(uint256 marketId)
+        public
+        view
+        override
+        returns (bool)
+    {
         return _isClosed;
     }
 
@@ -112,23 +192,37 @@ contract MockSoloMargin is ISoloMargin {
         _isClosed = closed;
     }
 
-    function getMarketTokenAddress(uint256 marketId) public view returns (address) {
+    function getMarketTokenAddress(uint256 marketId)
+        public
+        view
+        override
+        returns (address)
+    {
         return _markets[marketId];
     }
 
-    function repaymentFee(uint256 marketId) internal returns (uint256) {
+    function repaymentFee(uint256 marketId) internal pure returns (uint256) {
         return marketId < 2 ? 1 : 2;
     }
 
-    function transfer(uint256 marketId, address to, uint256 amount) internal returns (bool) {
+    function transfer(
+        uint256 marketId,
+        address to,
+        uint256 amount
+    ) internal returns (bool) {
         return IERC20(_markets[marketId]).transfer(to, amount);
     }
 
-    function transferFrom(uint256 marketId, address from, address to, uint256 amount) internal returns (bool) {
+    function transferFrom(
+        uint256 marketId,
+        address from,
+        address to,
+        uint256 amount
+    ) internal returns (bool) {
         return IERC20(_markets[marketId]).transferFrom(from, to, amount);
     }
 
     function balanceOf(uint256 marketId) internal view returns (uint256) {
-            return IERC20(_markets[marketId]).balanceOf(address(this));
+        return IERC20(_markets[marketId]).balanceOf(address(this));
     }
 }

@@ -16,19 +16,24 @@
 
 */
 
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./ExternalCaller.sol";
 
-contract BalanceCarrier is ExternalCaller {
+abstract contract BalanceCarrier is ExternalCaller {
     address private _ethTokenAddress;
 
-    constructor (address ethTokenAddress) internal {
+    constructor(address ethTokenAddress) {
         _ethTokenAddress = ethTokenAddress;
     }
 
-    function transfer(address tokenAddress, address to, uint256 amount) internal returns (bool) {
+    function transfer(
+        address tokenAddress,
+        address to,
+        uint256 amount
+    ) internal returns (bool) {
         if (tokenAddress == _ethTokenAddress) {
             externalTransfer(to, amount);
             return true;

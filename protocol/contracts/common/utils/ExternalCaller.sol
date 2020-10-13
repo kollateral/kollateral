@@ -16,16 +16,26 @@
 
 */
 
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 
 contract ExternalCaller {
     function externalTransfer(address _to, uint256 _value) internal {
-        require(address(this).balance >= _value, "ExternalCaller: insufficient ether balance");
+        require(
+            address(this).balance >= _value,
+            "ExternalCaller: insufficient ether balance"
+        );
         externalCall(_to, _value, "");
     }
 
-    function externalCall(address _to, uint256 _value, bytes memory _data) internal {
-        (bool success, bytes memory returndata) = _to.call.value(_value)(_data);
+    function externalCall(
+        address _to,
+        uint256 _value,
+        bytes memory _data
+    ) internal {
+        (bool success, bytes memory returndata) = _to.call{value: _value}(
+            _data
+        );
         require(success, string(returndata));
     }
 }

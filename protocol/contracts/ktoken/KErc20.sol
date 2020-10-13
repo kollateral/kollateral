@@ -16,15 +16,19 @@
 
 */
 
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 
-import "./Ktoken.sol";
+import "./KToken.sol";
 import "../token/CollateralizedErc20.sol";
 
 contract KErc20 is KToken, CollateralizedErc20 {
-    constructor (address underlying, string memory name, string memory symbol, uint8 decimals)
-    CollateralizedToken(underlying)
-    ERC20Detailed(name, symbol, decimals)
-    public
-    { }
+    constructor(
+        address underlying,
+        string memory name,
+        string memory symbol,
+        uint8 numDecimals
+    ) CollateralizedToken(underlying) ERC20(name, symbol) {
+        _setupDecimals(numDecimals);
+    }
 }

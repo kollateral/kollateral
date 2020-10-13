@@ -16,26 +16,34 @@
 
 */
 
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 
 import "../utils/BalanceCarrier.sol";
 import "./IInvocationHook.sol";
 import "./IInvokable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-contract KollateralInvokable is IInvokable, BalanceCarrier {
+abstract contract KollateralInvokable is IInvokable, BalanceCarrier {
     using SafeMath for uint256;
 
     uint256 internal MAX_REWARD_BIPS = 100;
 
-    constructor () BalanceCarrier(address(1)) internal { }
+    constructor() BalanceCarrier(address(1)) {}
 
-    function () external payable { }
+    receive() external payable {}
+
+    fallback() external payable {}
 
     function repay() internal repaymentSafeguard {
         require(
-            transfer(currentTokenAddress(), msg.sender, currentRepaymentAmount()),
-                "KollateralInvokable: failed to repay");
+            transfer(
+                currentTokenAddress(),
+                msg.sender,
+                currentRepaymentAmount()
+            ),
+            "KollateralInvokable: failed to repay"
+        );
     }
 
     function currentSender() internal view returns (address) {
@@ -59,10 +67,15 @@ contract KollateralInvokable is IInvokable, BalanceCarrier {
     }
 
     modifier repaymentSafeguard() {
-        uint256 effectiveReward = currentRepaymentAmount().sub(currentTokenAmount())
-        .mul(10000).div(currentTokenAmount());
+        uint256 effectiveReward = currentRepaymentAmount()
+            .sub(currentTokenAmount())
+            .mul(10000)
+            .div(currentTokenAmount());
 
-        require(effectiveReward <= MAX_REWARD_BIPS, "KollateralInvokable: repayment reward too high");
+        require(
+            effectiveReward <= MAX_REWARD_BIPS,
+            "KollateralInvokable: repayment reward too high"
+        );
 
         _;
     }

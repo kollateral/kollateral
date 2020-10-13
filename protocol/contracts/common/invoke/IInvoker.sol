@@ -16,26 +16,39 @@
 
 */
 
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 
 import "./IInvocationHook.sol";
 
-contract IInvoker is IInvocationHook {
-    function invoke(address invokeTo, bytes calldata invokeData, address tokenAddress, uint256 tokenAmount)
-    external
-    payable;
+interface IInvoker is IInvocationHook {
+    function invoke(
+        address invokeTo,
+        bytes calldata invokeData,
+        address tokenAddress,
+        uint256 tokenAmount
+    ) external payable;
 
     function invokeCallback() external;
 
     function poolReward() external view returns (uint256);
 
-    function poolRewardAddress(address tokenAddress) external view returns (address);
+    function poolRewardAddress(address tokenAddress)
+        external
+        view
+        returns (address);
 
     function platformReward() external view returns (uint256);
 
     function platformVaultAddress() external view returns (address);
 
-    function isTokenAddressRegistered(address tokenAddress) public view returns (bool);
+    function isTokenAddressRegistered(address tokenAddress)
+        external
+        view
+        returns (bool);
 
-    function totalLiquidity(address tokenAddress) external view returns (uint256);
+    function totalLiquidity(address tokenAddress)
+        external
+        view
+        returns (uint256);
 }

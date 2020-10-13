@@ -16,44 +16,56 @@
 
 */
 
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 
 import "../common/invoke/KollateralInvokable.sol";
 
 contract TestInvokable is KollateralInvokable {
-    constructor()
-    public
-    { }
+    constructor() {}
 
-    event HelperDump(address sender, bytes32 dataHash, address currentTokenAddress, uint256 currentTokenAmount,
-        uint256 currentRepaymentAmount, bool isCurrentTokenEther);
+    event HelperDump(
+        address sender,
+        bytes32 dataHash,
+        address currentTokenAddress,
+        uint256 currentTokenAmount,
+        uint256 currentRepaymentAmount,
+        bool isCurrentTokenEther
+    );
     event SwapDump(bytes swapData);
 
-    function () external payable { }
-
     // To setup state for specific tests
-    function invoke(address invokeAddress, bytes calldata invokeData) external payable {
+    function invoke(address invokeAddress, bytes calldata invokeData)
+        external
+        payable
+    {
         externalCall(invokeAddress, msg.value, invokeData);
     }
 
-    function execute(bytes calldata data) external payable {
+    function execute(bytes calldata data) external payable override {
         emitHelper(data);
 
         if (data.length == 0) {
             return executeNoop();
         }
 
-        (uint256 testType, bytes memory testData) = abi.decode(data, (uint256, bytes));
+        (uint256 testType, bytes memory testData) = abi.decode(
+            data,
+            (uint256, bytes)
+        );
         if (testType == 1) {
-            (uint256 repaymentAmount) = abi.decode(testData, (uint256));
+            uint256 repaymentAmount = abi.decode(testData, (uint256));
             return executeRepayAmount(repaymentAmount);
         }
         if (testType == 3) {
-            (address invokeAddress, bytes memory invokeData) = abi.decode(testData, (address, bytes));
+            (address invokeAddress, bytes memory invokeData) = abi.decode(
+                testData,
+                (address, bytes)
+            );
             return executeInvoke(invokeAddress, invokeData);
         }
         if (testType == 4) {
-            (uint256 amount) = abi.decode(testData, (uint256));
+            uint256 amount = abi.decode(testData, (uint256));
             return executePayable(amount);
         }
     }
@@ -66,7 +78,9 @@ contract TestInvokable is KollateralInvokable {
         transfer(currentTokenAddress(), msg.sender, amount);
     }
 
-    function executeInvoke(address invokeAddress, bytes memory invokeData) internal {
+    function executeInvoke(address invokeAddress, bytes memory invokeData)
+        internal
+    {
         externalCall(invokeAddress, msg.value, invokeData);
         repay();
     }
@@ -83,6 +97,7 @@ contract TestInvokable is KollateralInvokable {
             currentTokenAddress(),
             currentTokenAmount(),
             currentRepaymentAmount(),
-            isCurrentTokenEther());
+            isCurrentTokenEther()
+        );
     }
 }
