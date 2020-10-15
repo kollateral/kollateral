@@ -1,46 +1,15 @@
 {
   "name": "@kingmaker/contracts",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": false,
   "description": "",
-  "files": [
-    "/contracts/**/*.sol",
-    "/build/contracts/*.json"
-  ],
   "scripts": {
-    "clean": "rimraf node_modules artifacts build cache",
-    "build": "yarn run compile",
-    "compile": "npx buidler compile",
-    "test": "npx buidler test",
-    "coverage": "yarn run build && npx buidler coverage --temp artifacts --network coverage",
-
-    "compile:legacy": "truffle.cmd compile",
-    "build:legacy": "rimraf build && yarn run compile",
-    "test:legacy": "mocha --timeout 10000 --exit --recursive test"
   },
   "license": "Apache-2.0",
   "dependencies": {
     "@openzeppelin/contracts": "^2.5.0"
   },
   "devDependencies": {
-    "@nomiclabs/buidler": "^1.4.7",
-    "@nomiclabs/buidler-ethers": "2.0.0",
-    "@nomiclabs/buidler-truffle5": "^1.3.4",
-    "@nomiclabs/buidler-waffle": "2.0.0",
-    "@nomiclabs/buidler-web3": "^1.3.4",
-    "@openzeppelin/test-environment": "^0.1.2",
-    "@openzeppelin/test-helpers": "^0.5.4",
-    "@types/chai": "^4.2.13",
-    "@types/mocha": "^8.0.3",
-    "@types/node": "^14.11.8",
-    "chai": "^4.2.0",
-    "ethereum-waffle": "3.0.0",
-    "ethers": "5.0.0",
-    "mocha": "^7.0.0",
-    "truffle": "^5.1.48",
-    "truffle-privatekey-provider": "^1.3.0",
-    "ts-node": "^9.0.0",
-    "typescript": "^4.0.3",
-    "verify-on-etherscan": "^1.2.1"
+    "@nomiclabs/buidler": "^1.4.7"
   }
 }

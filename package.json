@@ -5,6 +5,7 @@
   "description": "The Kingmaker protocol and TypeScript library",
   "main": "index.js",
   "workspaces": [
+    "kingmaker",
     "docs",
     "lib",
     "protocol"
@@ -43,6 +44,8 @@
     "dotenv": "^8.2.0",
     "husky": "^1.1.2",
     "lerna": "^3.22.1",
-    "rimraf": "^3.0.2"
+    "rimraf": "^3.0.2",
+    "ts-node": "^9.0.0",
+    "typescript": "^4.0.3"
   }
 }
