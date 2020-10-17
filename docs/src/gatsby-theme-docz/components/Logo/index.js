@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import { primary } from '../colors'
+// import { primary } from '../colors'
 
 const StyledLogo = styled.span`
   font-family: Ubuntu;
@@ -10,26 +10,17 @@ const StyledLogo = styled.span`
   margin-left: 12px;
 `
 export const Logo = () => (
-  <a
-    href="https://kingmaker.dev"
-    style={{
-      color: 'inherit',
-      display: 'flex',
-      alignItems: 'center',
-      textDecoration: 'none',
-    }}
-  >
-{/*    <svg
-      fill={primary[400]}
-      viewBox="0 0 212 212"
-      height={32}
-      width={32}
+    <a
+        href="https://kingmaker.dev"
+        style={{
+            color: 'inherit',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            textDecoration: 'none',
+        }}
     >
-      <rect x="0" y="0" width="70.667" height="212" />
-      <rect x="0" y="70.667" width="141.333" height="70.667" />
-      <rect x="141.333" y="141.333" width="70.667" height="70.667" />
-      <rect x="141.333" y="0" width="70.667" height="70.667" />
-    </svg>*/}
-    <StyledLogo>Kingmaker</StyledLogo>
-  </a>
+        <img src="../../../../public/favicon.png" alt="Kingmaker" width="64" height="64fire" />
+        <StyledLogo>Kingmaker</StyledLogo>
+    </a>
 )
