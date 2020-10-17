@@ -1,10 +1,11 @@
-# Kingmaker
-The flash loan building block.
+# Kingmaker / Smart Contracts
+Solidity Smart Contracts for the Kingmaker protocol
 
 ## Disclaimer
 Though we make our best efforts to provide thorough test coverage, Kingmaker is as of yet unaudited. We appreciate your interest in building on Kingmaker, so please consider this alpha software and use at your own risk.
 
 ```
+Copyright 2020 Kollateral LLC
 Copyright 2020 ARM Finance LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +20,3 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
-
-## Documentation
-Please view full documentation [here](https://docs.kingmaker.dev).

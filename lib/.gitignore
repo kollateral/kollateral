@@ -1,0 +1,18 @@
+.gradle
+**/build
+/target
+**/out
+**/dist
+**/generated
+.idea
+*.iml
+.env
+.DS_Store
+logs
+**/node_modules
+.cache
+
+# TypeChain
+lib
+lib/abi
+lib/generated

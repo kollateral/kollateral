@@ -1,13 +1,8 @@
 import {BigNumber} from "bignumber.js";
 import {Utils} from "./util/utils";
-import {KollateralConfig} from "./config/kollateral-config";
-import {Invoker} from "./generated/Invoker";
-import {KErc20} from "./generated/KErc20";
-import {KEther} from "./generated/KEther";
+import {KingmakerConfig} from "./config/kingmaker";
 import Web3 from "web3";
-import {TestToken} from "./generated/TestToken";
 import {AbiItem} from "web3-utils";
-import {KToken} from "./generated/KToken";
 import {Network, NetworkUtils} from "./static/network";
 import {InvokerUtils} from "./static/invoker";
 import {Token, TokenUtils} from "./static/tokens";
@@ -16,13 +11,25 @@ import {Execution} from "./models/Invocation";
 import {TokenAmount} from "./models/token-amount";
 import {TransactionConfig} from "web3-core";
 import {AnyNumber} from "./models/const";
+import BN from "bn.js";
 
-export class Kollateral {
+// @ts-ignore
+import {TestToken} from "./generated/TestToken";
+// @ts-ignore
+import {KToken} from "./generated/KToken";
+// @ts-ignore
+import {Invoker} from "./generated/Invoker";
+// @ts-ignore
+import {KErc20} from "./generated/KErc20";
+// @ts-ignore
+import {KEther} from "./generated/KEther";
+
+export class Kingmaker {
   public static MAX_UINT256: BigNumber =
     new BigNumber('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', 16);
 
   private _provider: any;
-  private _config: KollateralConfig;
+  private _config: KingmakerConfig;
   private _web3: Web3;
   private _invoker: Invoker;
   private _kEther: KEther;
@@ -30,7 +37,7 @@ export class Kollateral {
   private _kTokens: Map<string, KToken>;
   private _erc20Abi: AbiItem;
 
-  constructor(provider: any, config: KollateralConfig) {
+  constructor(provider: any, config: KingmakerConfig) {
     this._provider = provider;
     this._config = config;
     this._web3 = new Web3(provider);
@@ -57,16 +64,16 @@ export class Kollateral {
     });
   }
 
-  static async init(provider: any): Promise<Kollateral> {
+  static async init(provider: any): Promise<Kingmaker> {
     const networkId = await new Web3(provider).eth.net.getId();
     const network = NetworkUtils.fromId(networkId);
 
     /* Fail if not a complete static config available for network */
-    if (!Kollateral.isSupportedNetwork(network)) {
+    if (!Kingmaker.isSupportedNetwork(network)) {
       throw("Unsupported Network");
     }
 
-    const config: KollateralConfig = {
+    const config: KingmakerConfig = {
       invokerAddress: InvokerUtils.getAddress(network)!,
       network: {
         network: network,
@@ -78,7 +85,7 @@ export class Kollateral {
       }
     };
 
-    return new Kollateral(provider, config);
+    return new Kingmaker(provider, config);
   }
 
   static isSupportedNetwork(network: Network): boolean {
@@ -86,9 +93,8 @@ export class Kollateral {
   }
 
   /* KToken Supplying */
-
   public unlock(sender: string, kTokenAddress: string): Promise<boolean> {
-    return this.unlockAmount(sender, kTokenAddress, Kollateral.MAX_UINT256);
+    return this.unlockAmount(sender, kTokenAddress, Kingmaker.MAX_UINT256);
   }
 
   public async unlockAmount(sender: string, kTokenAddress: string, amount: BigNumber): Promise<boolean> {
@@ -100,12 +106,12 @@ export class Kollateral {
 
   public async allowance(owner: string, kTokenAddress: string): Promise<BigNumber> {
     const tokenAddress = await this._kTokens.get(kTokenAddress)!.methods.underlying().call();
-    return this.tokenOf(tokenAddress).methods.allowance(owner, kTokenAddress).call().then(bn => Utils.bnToBigNumber(bn));
+    return this.tokenOf(tokenAddress).methods.allowance(owner, kTokenAddress).call().then((bn: BN) => Utils.bnToBigNumber(bn));
   }
 
   public async isUnlocked(owner: string, kTokenAddress: string): Promise<boolean> {
     const allowance = await this.allowance(owner, kTokenAddress);
-    return allowance.eq(Kollateral.MAX_UINT256);
+    return allowance.eq(Kingmaker.MAX_UINT256);
   }
 
   public mint(sender: string, kTokenAddress: string, amount: BigNumber): Promise<boolean> {
@@ -139,32 +145,32 @@ export class Kollateral {
 
   public balanceOf(owner: string, tokenAddress: string): Promise<BigNumber> {
     return this.tokenOf(tokenAddress).methods.balanceOf(owner).call()
-      .then(bn => Utils.bnToBigNumber(bn));
+      .then((bn: BN) => Utils.bnToBigNumber(bn));
   }
 
   public balanceOfUnderlying(owner: string, kTokenAddress: string): Promise<BigNumber> {
     return this._kTokens.get(kTokenAddress)!.methods.balanceOfUnderlying(owner).call()
-      .then(bn => Utils.bnToBigNumber(bn));
+      .then((bn: BN) => Utils.bnToBigNumber(bn));
   }
 
   public underlyingAmountToNativeAmount(kTokenAddress: string, tokenAmount: BigNumber, ceiling = false): Promise<BigNumber> {
     return this._kTokens.get(kTokenAddress)!.methods.underlyingAmountToNativeAmount(tokenAmount.toFixed(), ceiling).call()
-      .then(bn => Utils.bnToBigNumber(bn));
+      .then((bn: BN) => Utils.bnToBigNumber(bn));
   }
 
   public nativeAmountToUnderlyingAmount(kTokenAddress: string, kTokenAmount: BigNumber): Promise<BigNumber> {
     return this._kTokens.get(kTokenAddress)!.methods.nativeAmountToUnderlyingAmount(kTokenAmount.toFixed()).call()
-      .then(bn => Utils.bnToBigNumber(bn));
+      .then((bn: BN) => Utils.bnToBigNumber(bn));
   }
 
   public totalSupply(tokenAddress: string): Promise<BigNumber> {
     return this.tokenOf(tokenAddress).methods.totalSupply().call()
-      .then(bn => Utils.bnToBigNumber(bn));
+      .then((bn: BN) => Utils.bnToBigNumber(bn));
   }
 
   public totalReserve(kTokenAddress: string): Promise<BigNumber> {
     return this._kTokens.get(kTokenAddress)!.methods.totalReserve().call()
-      .then(bn => Utils.bnToBigNumber(bn));
+      .then((bn: BN) => Utils.bnToBigNumber(bn));
   }
 
   private tokenOf(tokenAddress: string): TestToken {
@@ -172,7 +178,6 @@ export class Kollateral {
   }
 
   /* Invocation */
-
   public async invoke(
     execution: Execution,
     tokenAmount: TokenAmount,
@@ -195,11 +200,10 @@ export class Kollateral {
   public totalLiquidity(token: Token): Promise<BigNumber> {
     const tokenAddress = this.getTokenAddressOrThrow(token);
     return this._invoker.methods.totalLiquidity(tokenAddress).call()
-      .then(bn => Utils.bnToBigNumber(bn));
+      .then((bn: BN) => Utils.bnToBigNumber(bn));
   }
 
   /* Testnet */
-
   public faucet(sender: string, tokenAmount: TokenAmount): Promise<boolean> {
     const tokenAddress = this.getTokenAddressOrThrow(tokenAmount.token);
     const token = new this._web3.eth.Contract(this._erc20Abi, tokenAddress) as TestToken;
@@ -210,7 +214,6 @@ export class Kollateral {
   }
 
   /* Private */
-
   private getTokenAddressOrThrow(token: Token): string {
     if (!TokenUtils.isSupportedToken(this._config.network.network, token)) {
       throw("Unsupported token");
