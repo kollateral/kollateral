@@ -4,13 +4,13 @@ route: /parameters
 ---
 
 # Protocol Parameters and Upgradability
-Since Kollateral is largely stateless, it is not designed to be upgradable. This means that new versions will be launched in parallel while older versions will be soft-deprecated.
+Since Kingmaker is largely stateless, it is not designed to be upgradable. This means that new versions will be launched in parallel while older versions will be soft-deprecated.
 
 ### Future-proofing your invokable contracts
 We aim to make new versions backwards compatible with our `IInvoker` interface. Storing our `Invoker` contract address as an updatable field in your contract vs hard-coding should allow you to upgrade to later versions.
 
 ### Liquidity source ordering
-For the time being, the liquidity source priority order is set/updated by the protocol administrator. We aim to give higher priority to pools with larger liquidity and lower native fees. The current priority list is:
+For the time being, the liquidity source priority order is set and updated by the protocol administrator. We aim to give higher priority to pools with larger liquidity and lower native fees. The current priority list is:
 
 | Asset     | Address                                    | 1st Priority     | 2nd Priority     |
 |-----------|--------------------------------------------|------------------|------------------|
@@ -18,5 +18,5 @@ For the time being, the liquidity source priority order is set/updated by the pr
 | USDC      | 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48 | Solo (DyDx)      | Aave             |
 | DAI       | 0x6b175474e89094c44da98b954eedeac495271d0f | Solo (DyDx)      | Aave             |
 
-### Kollateral Fee
-Currently Kollateral charges an additional `6bps` fee on the liquidity that is sourced (on top of each pool's native fee if applicable). All repayment calculation is handled by Kollateral and surfaced to your invokable contract via the `KollateralInvokable` helpers such as `repay()`.
+### Kingmaker Fee
+Currently Kingmaker charges an additional `6bps` fee on the liquidity that is sourced (on top of each pool's native fee if applicable). All repayment calculation is handled by Kingmaker and surfaced to your invokable contract via the `KingmakerInvokable` helpers such as `repay()`.

@@ -8,13 +8,17 @@
     "serve": "docz serve"
   },
   "dependencies": {
-    "docz": "^2.3.0-alpha.13",
-    "gatsby": "^2.19.25",
-    "gatsby-theme-docz": "^2.3.0-alpha.13",
+    "docz": "^2.3.1",
+    "gatsby": "^2.24.80",
+    "gatsby-theme-docz": "^2.3.1",
     "prop-types": "^15.7.2",
-    "react": "^16.11.0",
-    "react-dom": "^16.11.0",
-    "react-helmet-async": "^1.0.4",
-    "styled-components": "^5.0.1"
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
+    "react-helmet-async": "^1.0.7",
+    "styled-components": "^5.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.11.0",
+    "eslint-plugin-mdx": "^1.8.2"
   }
 }

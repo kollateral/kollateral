@@ -1,20 +1,20 @@
 import * as colors from './colors'
 import prismDark from './prism/dark'
-import prismLight from './prism/light'
+// import prismLight from './prism/light'
 
 export const light = {
   ...colors,
-  primary: '#E235F5',
+  primary: 'rgb(130, 170, 255)',
   text: colors.grayDark,
   muted: colors.gray,
-  link: '#E235F5',
+  link: 'rgb(130, 170, 255)',
   background: colors.white,
   border: colors.grayLight,
   sidebar: {
     bg: colors.grayExtraLight,
     navGroup: colors.grayDark,
     navLink: colors.grayDark,
-    navLinkActive: '#E235F5',
+    navLinkActive: 'rgb(130, 170, 255)',
     tocLink: colors.gray,
     tocLinkActive: colors.grayExtraDark,
   },
@@ -51,7 +51,7 @@ export const light = {
 
 export const dark = {
   ...colors,
-  primary: '#E235F5',
+  primary: 'rgb(130, 170, 255)',
   text: colors.grayExtraLight,
   muted: colors.gray,
   link: colors.skyBlue,
@@ -61,7 +61,7 @@ export const dark = {
     bg: colors.grayExtraDark,
     navGroup: colors.gray,
     navLink: colors.grayLight,
-    navLinkActive: '#E235F5',
+    navLinkActive: 'rgb(130, 170, 255)',
     tocLink: colors.gray,
     tocLinkActive: colors.grayLight,
   },

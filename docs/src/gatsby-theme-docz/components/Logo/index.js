@@ -11,7 +11,7 @@ const StyledLogo = styled.span`
 `
 export const Logo = () => (
   <a
-    href="https://kollateral.co"
+    href="https://kingmaker.dev"
     style={{
       color: 'inherit',
       display: 'flex',
@@ -19,7 +19,7 @@ export const Logo = () => (
       textDecoration: 'none',
     }}
   >
-    <svg
+{/*    <svg
       fill={primary[400]}
       viewBox="0 0 212 212"
       height={32}
@@ -29,7 +29,7 @@ export const Logo = () => (
       <rect x="0" y="70.667" width="141.333" height="70.667" />
       <rect x="141.333" y="141.333" width="70.667" height="70.667" />
       <rect x="141.333" y="0" width="70.667" height="70.667" />
-    </svg>
-    <StyledLogo>Kollateral</StyledLogo>
+    </svg>*/}
+    <StyledLogo>Kingmaker</StyledLogo>
   </a>
 )

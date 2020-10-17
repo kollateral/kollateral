@@ -3,5 +3,5 @@ export default {
   htmlContext: {
     favicon: 'public/favicon.ico'
   },
-  title: 'Kollateral'
+  title: 'Kingmaker'
 }

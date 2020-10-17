@@ -4,7 +4,6 @@ import { media } from '~theme/breakpoints'
 export const wrapper = {
   bg: 'header.bg',
   position: 'relative',
-  zIndex: 1,
   borderBottom: t => `1px solid ${t.colors.border}`,
   boxShadow: '0px 4px 24px -10px rgba(0,0,0,0.1)',
   zIndex: 10,

@@ -62,7 +62,7 @@ export default {
     {
       types: ['function-variable'],
       style: {
-        color: '#6f42c1',
+        color: '#B9C8DB',
       },
     },
     {

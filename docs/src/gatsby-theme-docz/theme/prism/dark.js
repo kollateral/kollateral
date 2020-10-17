@@ -62,13 +62,13 @@ export default {
       // so that punctuations are not italicised
       types: ['punctuation'],
       style: {
-        color: 'rgb(199, 146, 234)',
+        color: 'rgb(130, 170, 255)',
       },
     },
     {
       types: ['selector', 'doctype'],
       style: {
-        color: 'rgb(199, 146, 234)',
+        color: 'rgb(130, 170, 255)',
         fontStyle: 'italic',
       },
     },

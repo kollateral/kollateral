@@ -9,9 +9,9 @@ const Wrapper = ({ children }) => <React.Fragment>
         <meta charSet="utf-8" />
         <link rel="icon"
             type="image/png"
-              href="https://docs.kollateral.co/public/favicon.png"
+              href="https://docs.kingmaker.dev/public/favicon.png"
         />
-        <link href="https://fonts.googleapis.com/css?family=Ubuntu&display=swap" rel="stylesheet"></link>
+        <link href="https://fonts.googleapis.com/css?family=Ubuntu&display=swap" rel="stylesheet"/>
     </Helmet>
     {children}
 </React.Fragment>

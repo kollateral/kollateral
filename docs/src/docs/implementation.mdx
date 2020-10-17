@@ -5,18 +5,18 @@ route: /implementation
 
 # Implementation
 ## Creating your invokable smart contract
-First we'll walk through how to set up your own contract which will be invoked via Kollateral.
+First we'll walk through how to set up your own contract which will be invoked via Kingmaker.
 
-Install the Kollateral solidity library to your truffle project which provides interfaces, base contracts, and useful utils.
+Install the Kingmaker solidity library to your truffle project which provides interfaces, base contracts, and useful utils.
 ```
-npm install @kollateral/contracts
+npm install @kingmaker/contracts
 ```
 
-Extending from the `KollateralInvokable` base contract provides the interfaces and helper methods necessary to build a basic contract.
+Extending from the `KingmakerInvokable` base contract provides the interfaces and helper methods necessary to build a basic contract.
 ```
-import "@kollateral/contracts/invoke/KollateralInvokable.sol";
+import "@kingmaker/contracts/invoke/KingmakerInvokable.sol";
 
-contract MyContract is KollateralInvokable {
+contract MyContract is KingmakerInvokable {
   constructor () public { }
 
   function execute(bytes calldata data) external payable {
@@ -28,23 +28,23 @@ contract MyContract is KollateralInvokable {
   }
 }
 ```
-In this example `execute(bytes)` will be invoked after Kollateral aggregates and transfer the requested funds to your contract.
+In this example `execute(bytes)` will be invoked after Kingmaker aggregates and transfer the requested funds to your contract.
 
 ## Invoking via JS with Web3
-There are multiple ways to call Kollateral. Here we'll dive into how to call it directly from web3, using Kollateral as your entrypoint to the blockchain.
+There are multiple ways to call Kingmaker. Here we'll dive into how to call it directly from web3, using Kingmaker as your entrypoint to the blockchain.
 
-Install the Kollateral typescript library.
+Install the Kingmaker typescript library.
 ```
-npm install @kollateral/kollateral
+npm install @kingmaker/Kingmaker
 ```
 
 In this example we use the `ethereum` provider that MetaMask injects, any Web3 provider may be used in its place. Configurations are loaded based on the `networkId` of the provider.
 ```
-import { Kollateral, Token } from '@kollateral/kollateral'
+import { Kingmaker, Token } from '@kingmaker/Kingmaker'
 
-const kollateral = await Kollateral.init(ethereum);
+const Kingmaker = await Kingmaker.init(ethereum);
 
-kollateral.invoke({
+Kingmaker.invoke({
 	contract: myContractAddress
 }, {
   token: Token.DAI,
@@ -53,16 +53,16 @@ kollateral.invoke({
 ```
 
 ## Invoking via solidity
-Kollateral can also by invoked directly from within a contract.
+Kingmaker can also by invoked directly from within a contract.
 
-Ensure that the Kollateral solidity library is installed.
+Ensure that the Kingmaker solidity library is installed.
 ```
-npm install @kollateral/contracts
+npm install @kingmaker/contracts
 ```
 
-In this example we make a basic call to the Kollateral invoker, this can be done anywhere within your contract.
+In this example we make a basic call to the Kingmaker invoker, this can be done anywhere within your contract.
 ```
-import "@kollateral/contracts/invoke/IInvoker.sol";
+import "@kingmaker/contracts/invoke/IInvoker.sol";
 
 address internal _invokerAddress;
 
@@ -97,9 +97,9 @@ function execute(bytes calldata data) external payable {
 Encoded data strings may be nested to create more complex parameter data structures.
 
 ## Reading invocation state from helpers
-The `KollateralInvokable` base class also includes a set of helper methods for getting various information about the current execution state.
+The `KingmakerInvokable` base class also includes a set of helper methods for getting various information about the current execution state.
 ```
-// returns the msg.sender that originally called the Kollateral Invoker
+// returns the msg.sender that originally called the Kingmaker Invoker
 currentSender();
 
 // returns the currently borrowed token's address
@@ -108,7 +108,7 @@ currentTokenAddress();
 // returns the amount borrowed of the current token
 currentTokenAmount();
 
-// returns the amount that Kollateral is expecting to be repaid (incl. all rewards)
+// returns the amount that Kingmaker is expecting to be repaid (incl. all rewards)
 currentRepaymentAmount();
 
 // returns whether the currently borrowed token is ether
