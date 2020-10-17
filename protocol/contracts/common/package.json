@@ -1,0 +1,15 @@
+{
+  "name": "@kingmaker/contracts-utils",
+  "version": "0.1.1",
+  "description": "Smart Contract helpers for Kingmaker",
+  "files": [
+    "**/*.sol",
+    "/build/contracts/*.json"
+  ],
+  "scripts": {
+    "prepare": "cd ../../ && yarn build"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^2.5.0"
+  }
+}

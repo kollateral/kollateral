@@ -11,5 +11,8 @@ describe("Token", function() {
 
   it("should do something right", async function() {
     // Do something with the accounts
+    for (let account of accounts) {
+      // console.log(await account.getAddress());
+    }
   });
 });

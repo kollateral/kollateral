@@ -6,7 +6,7 @@ Though we make our best efforts to provide thorough test coverage, Kingmaker is 
 
 ```
 Copyright 2020 Kollateral LLC
-Copyright 2020 ARM Finance LTD
+Copyright 2020 ARM Finance LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use the included code except in compliance with the License.
