@@ -1,5 +1,30 @@
+<h1 align="center">
+  <br>
+  <a href="https://kingmaker.dev"><img src="https://docs.kingmaker.dev/public/favicon.png" alt="Kingmaker" width="200"></a>
+  <br>
+  Kingmaker
+  <br>
+</h1>
+
+<h4 align="center">The flash-loan building block</h4>
+
+<p align="center">
+  <a href="https://discord.gg/gxFD9Kd">
+    <img src="https://img.shields.io/badge/Join-Discord-7354F6?style=flat-square"
+         alt="Discord Invite">
+  </a>
+</p>
+
+<p align="center">
+  <a href="#Disclaimer">Disclaimer</a> •
+  <a href="#Documentation">Documentation</a>
+</p>
+
+![Banner](https://docs.kingmaker.dev/static/banner-83d84d3cfbba17a400c474cd24d5197d.png)
+
+
 # Kingmaker
-The flash loan building block.
+The flash-loan building block
 
 ## Disclaimer
 Though we make our best efforts to provide thorough test coverage, Kingmaker is as of yet unaudited. We appreciate your interest in building on Kingmaker, so please consider this alpha software and use at your own risk.
