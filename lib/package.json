@@ -14,6 +14,7 @@
     "@types/ethereumjs-abi": "^0.6.3",
     "@types/node-fetch": "^2.5.4",
     "@types/qs": "^6.9.1",
+    "@types/shelljs": "^0.8.8",
     "@types/web3": "^1.2.2",
     "rimraf": "^3.0.2",
     "shelljs": "^0.8.4",

@@ -1,11 +1,14 @@
 {
   "name": "@kingmaker/docs",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "license": "Apache-2.0",
   "scripts": {
-    "dev": "docz dev",
+    "clean": "rimraf node_modules .docz",
+    "dev": "yarn clean:dev && docz dev",
+    "clean:dev": "docz clean",
     "build": "docz build",
-    "serve": "docz serve"
+    "serve": "docz serve",
+    "deploy": "node scripts/deployToS3.js"
   },
   "dependencies": {
     "docz": "^2.3.1",
@@ -18,7 +21,11 @@
     "styled-components": "^5.2.0"
   },
   "devDependencies": {
+    "deploy-aws-s3-cloudfront": "^3.2.4",
+    "dotenv": "^8.2.0",
     "eslint": "^7.11.0",
-    "eslint-plugin-mdx": "^1.8.2"
+    "eslint-plugin-mdx": "^1.8.2",
+    "rimraf": "^3.0.2",
+    "shelljs": "^0.8.4"
   }
 }

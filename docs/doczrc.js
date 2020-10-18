@@ -3,5 +3,11 @@ export default {
   htmlContext: {
     favicon: 'public/favicon.ico'
   },
-  title: 'Kingmaker'
+  title: 'Kingmaker',
+  description: "Documentation for the Kingmaker protocol",
+  themeConfig: {
+    mode: 'dark',
+  },
+//src: "src",
+  port: 3030
 }

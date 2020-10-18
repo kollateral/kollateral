@@ -10,7 +10,7 @@ moraga.headerWeight = 700
 const typography = toTheme(moraga)
 
 export default merge(typography, {
-  initialColorMode: 'light',
+  initialColorMode: 'dark',
   // Show errors above playground editor
   showLiveError: true,
   // Show preview of the code inside playground
@@ -18,7 +18,7 @@ export default merge(typography, {
   // Show editor when a playground is rendered
   showPlaygroundEditor: true,
   // Show dark/light mode switch toggle in header
-  showDarkModeSwitch: false,
+  showDarkModeSwitch: true,
   // Display edit this page button on every page
   showMarkdownEditButton: true,
   // Wrap the playground editor and preview in iframes to avoid style/script collisions
@@ -35,8 +35,8 @@ export default merge(typography, {
   fontSizes: [12, 14, 16, 20, 24, 32, 48, 64],
   fontWeights: {
     body: 400,
-    heading: 700,
-    bold: 700,
+    heading: 500,
+    bold: 400,
   },
   lineHeights: {
     body: 1.5,
