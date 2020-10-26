@@ -32,7 +32,7 @@ const config: BuidlerConfig = {
     }
   },
   solc: {
-    version: "0.5.7",
+    version: "0.5.17",
     optimizer: {
       enabled: false,
       runs: 200

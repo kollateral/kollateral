@@ -23,7 +23,7 @@ import "@openzeppelin/contracts/ownership/Ownable.sol";
 import "@openzeppelin/contracts/lifecycle/Pausable.sol";
 import "../ILiquidityProxy.sol";
 import "../../token/CollateralizedToken.sol";
-import "../../ktoken/KToken.sol";
+import "../../token/ktoken/KToken.sol";
 import "../../common/invoke/IInvoker.sol";
 import "../../common/utils/BalanceCarrier.sol";
 

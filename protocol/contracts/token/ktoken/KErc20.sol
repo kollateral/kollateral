@@ -19,7 +19,7 @@
 pragma solidity ^0.5.0;
 
 import "./Ktoken.sol";
-import "../token/CollateralizedErc20.sol";
+import "../CollateralizedErc20.sol";
 
 contract KErc20 is KToken, CollateralizedErc20 {
     constructor (address underlying, string memory name, string memory symbol, uint8 decimals)

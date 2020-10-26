@@ -21,9 +21,9 @@ pragma solidity ^0.5.0;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/ownership/Ownable.sol";
 import "@openzeppelin/contracts/lifecycle/Pausable.sol";
-import "../token/CollateralizedToken.sol";
-import "../common/invoke/IInvocationHook.sol";
-import "../common/invoke/IInvokable.sol";
+import "../CollateralizedToken.sol";
+import "../../common/invoke/IInvocationHook.sol";
+import "../../common/invoke/IInvokable.sol";
 
 contract KToken is IInvocationHook, CollateralizedToken, Ownable, Pausable {
     using SafeMath for uint256;
