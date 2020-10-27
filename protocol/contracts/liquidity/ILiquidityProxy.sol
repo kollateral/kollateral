@@ -1,6 +1,7 @@
 /*
 
-    Copyright 2020 Kollateral LLC.
+    Copyright 2020 Kollateral LLC
+    Copyright 2020 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,14 +17,14 @@
 
 */
 
-pragma solidity ^0.5.0;
+pragma solidity ^0.7.0;
 
-contract ILiquidityProxy {
+interface ILiquidityProxy {
     function getTotalReserve(address tokenAddress) external view returns (uint256);
 
     function getRepaymentAddress(address tokenAddress) external view returns (address);
 
-    function getRepaymentAmount(address tokenAddress, uint256 tokenAmount) view external returns (uint256);
+    function getRepaymentAmount(address tokenAddress, uint256 tokenAmount) external view returns (uint256);
 
     function borrow(address tokenAddress, uint256 tokenAmount) external;
 }

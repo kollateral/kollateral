@@ -1,6 +1,7 @@
 /*
 
-    Copyright 2020 Kollateral LLC.
+    Copyright 2020 Kollateral LLC
+    Copyright 2020 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,25 +17,28 @@
 
 */
 
-pragma solidity ^0.5.0;
+pragma solidity ^0.7.0;
 
-import "@openzeppelin/contracts/ownership/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "../common/invoke/KingmakerInvokable.sol";
 
 /*
- *  WARNING: ONLY FOR ON-CHAIN TESTING - THIS CONTRACT IS VULNERABLE TO LOSS OF FUNDS
+ *  NOTICE: ONLY FOR ON-CHAIN TESTING - THIS CONTRACT IS VULNERABLE TO LOSS OF FUNDS
  */
-contract TestOnchainInvokable is KingmakerInvokable, Ownable {
+contract TestOnChainInvokable is KingmakerInvokable, Ownable {
     constructor() public { }
 
-    event HelperDump(address sender, bytes32 dataHash, address currentTokenAddress, uint256 currentTokenAmount,
-        uint256 currentRepaymentAmount, bool isCurrentTokenEther);
+    event HelperDump(
+        address sender,
+        bytes32 dataHash,
+        address currentTokenAddress,
+        uint256 currentTokenAmount,
+        uint256 currentRepaymentAmount,
+        bool isCurrentTokenEther
+    );
 
-    function () external payable { }
-
-    function execute(bytes calldata data) external payable {
+    function execute(bytes calldata data) external override payable {
         emitHelper(data);
-
         repay();
     }
 
@@ -48,11 +52,9 @@ contract TestOnchainInvokable is KingmakerInvokable, Ownable {
             isCurrentTokenEther());
     }
 
-    function withdraw(address tokenAddress, address to, uint256 amount)
-    external
-    onlyOwner
-    returns (bool)
-    {
+    function withdraw(address tokenAddress, address to, uint256 amount) external onlyOwner returns (bool) {
         return transfer(tokenAddress, msg.sender, amount);
     }
+
+    fallback() external { }
 }

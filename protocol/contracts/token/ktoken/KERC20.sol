@@ -1,6 +1,7 @@
 /*
 
-    Copyright 2020 Kollateral LLC.
+    Copyright 2020 Kollateral LLC
+    Copyright 2020 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,10 +17,14 @@
 
 */
 
-pragma solidity ^0.5.0;
+pragma solidity ^0.7.0;
 
-contract IWETH {
-    mapping(address => uint256) public balanceOf;
-    function deposit() public payable;
-    function withdraw(uint wad) public;
+import "./KToken.sol";
+import "../CollateralizedERC20.sol";
+
+abstract contract KERC20 is KToken, CollateralizedERC20 {
+    constructor (address underlying, string memory name, string memory symbol)
+    CollateralizedToken(underlying)
+    ERC20(name, symbol)
+    { }
 }

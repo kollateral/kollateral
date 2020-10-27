@@ -1,6 +1,7 @@
 /*
 
-    Copyright 2020 Kollateral LLC.
+    Copyright 2020 Kollateral LLC
+    Copyright 2020 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,13 +17,13 @@
 
 */
 
-pragma solidity ^0.5.7;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "./Types.sol";
 
-contract ISoloMargin {
-    function operate(Types.AccountInfo[] memory accounts, Types.ActionArgs[] memory actions) public;
-    function getMarketIsClosing(uint256 marketId) public view returns (bool);
-    function getMarketTokenAddress(uint256 marketId) public view returns (address);
+interface ISoloMargin {
+    function operate(Types.AccountInfo[] memory accounts, Types.ActionArgs[] memory actions) external;
+    function getMarketIsClosing(uint256 marketId) external view returns (bool);
+    function getMarketTokenAddress(uint256 marketId) external view returns (address);
 }

@@ -17,20 +17,20 @@
 
 */
 
-pragma solidity ^0.5.0;
+pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "./Ktoken.sol";
+import "./KToken.sol";
 import "../CollateralizedEther.sol";
 
 contract KEther is KToken, CollateralizedEther {
     constructor ()
     CollateralizedEther()
-    ERC20Detailed("Kingmaker", "kMKR", 18)
+    ERC20("Kingmaker", "KING")
     public
     { }
 
-    function payableReserveAdjustment() internal returns (uint256) {
+    function payableReserveAdjustment() internal override returns (uint256) {
         return msg.value;
     }
 }

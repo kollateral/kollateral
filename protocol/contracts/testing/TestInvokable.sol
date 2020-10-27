@@ -1,6 +1,7 @@
 /*
 
-    Copyright 2020 Kollateral LLC.
+    Copyright 2020 Kollateral LLC
+    Copyright 2020 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,27 +17,29 @@
 
 */
 
-pragma solidity ^0.5.0;
+pragma solidity ^0.7.0;
 
 import "../common/invoke/KingmakerInvokable.sol";
 
 contract TestInvokable is KingmakerInvokable {
-    constructor()
-    public
-    { }
 
-    event HelperDump(address sender, bytes32 dataHash, address currentTokenAddress, uint256 currentTokenAmount,
-        uint256 currentRepaymentAmount, bool isCurrentTokenEther);
+    constructor() public { }
+
+    event HelperDump(
+        address sender,
+        bytes32 dataHash,
+        address currentTokenAddress,
+        uint256 currentTokenAmount,
+        uint256 currentRepaymentAmount,
+        bool isCurrentTokenEther);
     event SwapDump(bytes swapData);
-
-    function () external payable { }
 
     // To setup state for specific tests
     function invoke(address invokeAddress, bytes calldata invokeData) external payable {
         externalCall(invokeAddress, msg.value, invokeData);
     }
 
-    function execute(bytes calldata data) external payable {
+    function execute(bytes calldata data) external override payable {
         emitHelper(data);
 
         if (data.length == 0) {
@@ -85,4 +88,6 @@ contract TestInvokable is KingmakerInvokable {
             currentRepaymentAmount(),
             isCurrentTokenEther());
     }
+
+    fallback() external { }
 }

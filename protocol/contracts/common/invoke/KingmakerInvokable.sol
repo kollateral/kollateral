@@ -17,21 +17,20 @@
 
 */
 
-pragma solidity ^0.5.0;
+pragma solidity ^0.7.0;
 
-import "../utils/BalanceCarrier.sol";
-import "./IInvocationHook.sol";
-import "./IInvokable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-contract KingmakerInvokable is IInvokable, BalanceCarrier {
+import "./IInvokable.sol";
+import "./IInvocationHook.sol";
+import "../utils/BalanceCarrier.sol";
+
+abstract contract KingmakerInvokable is BalanceCarrier, IInvokable {
     using SafeMath for uint256;
 
     uint256 internal MAX_REWARD_BIPS = 100;
 
     constructor () BalanceCarrier(address(1)) internal { }
-
-    function () external payable { }
 
     function repay() internal repaymentSafeguard {
         require(
@@ -64,7 +63,6 @@ contract KingmakerInvokable is IInvokable, BalanceCarrier {
         .mul(10000).div(currentTokenAmount());
 
         require(effectiveReward <= MAX_REWARD_BIPS, "KingmakerInvokable: repayment reward too high");
-
         _;
     }
 }

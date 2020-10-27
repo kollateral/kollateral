@@ -1,6 +1,7 @@
 /*
 
-    Copyright 2020 Kollateral LLC.
+    Copyright 2020 Kollateral LLC
+    Copyright 2020 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,10 +17,10 @@
 
 */
 
-pragma solidity ^0.5.0;
+pragma solidity ^0.7.0;
 
-contract ILendingPoolAddressesProvider {
-    function getLendingPool() public view returns (address);
-    function getLendingPoolCore() public view returns (address payable);
-    function getLendingPoolParametersProvider() public view returns (address);
+interface ILendingPoolAddressesProvider {
+    function getLendingPool() external view returns (address);
+    function getLendingPoolCore() external view returns (address payable);
+    function getLendingPoolParametersProvider() external view returns (address);
 }

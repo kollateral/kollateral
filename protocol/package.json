@@ -6,25 +6,24 @@
   "scripts": {
     "clean": "rimraf artifacts cache",
     "build": "yarn clean && yarn run compile",
-    "compile": "npx buidler compile",
-    "test": "npx buidler test",
-    "deploy:dev": "npx buidler run scripts/sample-script.ts",
-    "deploy:rinkeby": "npx buidler run scripts/sample-script.ts --network rinkeby"
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "deploy:dev": "npx hardhat run scripts/sample-script.js"
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@openzeppelin/contracts": "^2.5.0"
+    "@openzeppelin/contracts": "^3.2.1-solc-0.7"
   },
   "devDependencies": {
-    "@nomiclabs/buidler": "^1.4.8",
-    "@nomiclabs/buidler-ethers": "^2.0.2",
-    "@nomiclabs/buidler-waffle": "^2.1.0",
+    "@nomiclabs/hardhat-ethers": "^2.0.0",
+    "@nomiclabs/hardhat-waffle": "^2.0.0",
     "@types/chai": "^4.2.13",
     "@types/mocha": "^8.0.3",
     "@types/node": "^14.11.8",
     "chai": "^4.2.0",
-    "ethereum-waffle": "^3.1.1",
-    "ethers": "^5.0.17",
+    "ethereum-waffle": "^3.1.2",
+    "ethers": "^5.0.19",
+    "hardhat": "^2.0.1",
     "rimraf": "^3.0.2",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.3"

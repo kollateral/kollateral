@@ -15,17 +15,18 @@
     limitations under the License.
 
 */
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.7.0;
 
-pragma solidity ^0.5.0;
-
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/ownership/Ownable.sol";
+
 import "./common/utils/BalanceCarrier.sol";
-import "./liquidity/ILiquidityProxy.sol";
 import "./common/invoke/IInvokable.sol";
 import "./common/invoke/IInvoker.sol";
+import "./liquidity/ILiquidityProxy.sol";
 
-contract Invoker is IInvoker, Ownable, BalanceCarrier {
+contract Invoker is BalanceCarrier, IInvoker, Ownable {
     using SafeMath for uint256;
 
     event Invocation(address invokeTo, uint256 invokeValue, bytes32 invokeDataHash, uint256 underlyingAmount);
@@ -55,6 +56,7 @@ contract Invoker is IInvoker, Ownable, BalanceCarrier {
     constructor () public BalanceCarrier(address(1)) { }
 
     function invoke(address invokeTo, bytes calldata invokeData, address tokenAddress, uint256 tokenAmount)
+    override
     external
     payable
     onlyFresh
@@ -76,7 +78,7 @@ contract Invoker is IInvoker, Ownable, BalanceCarrier {
         proxy.borrow(_scheduleTokenAddress, _scheduleTokenAmounts[_scheduleIndex]);
     }
 
-    function invokeCallback() external onlyScheduled {
+    function invokeCallback() external override onlyScheduled {
         _scheduleIndex++;
         if (_scheduleIndex == _scheduleTokenAmounts.length) {
             invokeFinal();
@@ -91,7 +93,7 @@ contract Invoker is IInvoker, Ownable, BalanceCarrier {
         require(currentTokenAmount == expectedPriorTokenAmount, "Invoker: incorrect liquidity amount sourced");
         require(transfer(_scheduleTokenAddress, _scheduleInvokeTo, _scheduleTokenAmount), "Invoker: transfer failed");
 
-        IInvokable(_scheduleInvokeTo).execute.value(_scheduleInvokeValue)(_scheduleInvokeData);
+        IInvokable(_scheduleInvokeTo).execute{ value: _scheduleInvokeValue }(_scheduleInvokeData);
         emit Invocation(_scheduleInvokeTo, _scheduleInvokeValue, keccak256(_scheduleInvokeData), _scheduleTokenAmount);
 
         uint256 expectedResultingTokenAmount = _schedulePriorTokenAmount.add(_scheduleRepayAmount);
@@ -186,19 +188,19 @@ contract Invoker is IInvoker, Ownable, BalanceCarrier {
      * INVOKABLE HELPERS
      */
 
-    function currentSender() external view returns (address) {
+    function currentSender() external override view returns (address) {
         return _scheduleInvokeSender;
     }
 
-    function currentTokenAddress() external view returns (address) {
+    function currentTokenAddress() external override view returns (address) {
         return _scheduleTokenAddress;
     }
 
-    function currentTokenAmount() external view returns (uint256) {
+    function currentTokenAmount() external override view returns (uint256) {
         return _scheduleTokenAmount;
     }
 
-    function currentRepaymentAmount() external view returns (uint256) {
+    function currentRepaymentAmount() external override view returns (uint256) {
         return _scheduleRepayAmount;
     }
 
@@ -241,19 +243,19 @@ contract Invoker is IInvoker, Ownable, BalanceCarrier {
         return tokenAmount.mul(_platformRewardBips).div(10000);
     }
 
-    function poolReward() external view returns (uint256) {
+    function poolReward() external override view returns (uint256) {
         return _poolRewardBips;
     }
 
-    function poolRewardAddress(address tokenAddress) external view returns (address) {
+    function poolRewardAddress(address tokenAddress) external override view returns (address) {
         return _poolRewardAddresses[tokenAddress];
     }
 
-    function platformReward() external view returns (uint256) {
+    function platformReward() external override view returns (uint256) {
         return _platformRewardBips;
     }
 
-    function platformVaultAddress() external view returns (address) {
+    function platformVaultAddress() external override view returns (address) {
         return _platformVaultAddress;
     }
 
@@ -293,7 +295,7 @@ contract Invoker is IInvoker, Ownable, BalanceCarrier {
         return _liquidityProxies[tokenAddress];
     }
 
-    function isTokenAddressRegistered(address tokenAddress) public view returns (bool) {
+    function isTokenAddressRegistered(address tokenAddress) public override view returns (bool) {
         return _liquidityProxies[tokenAddress].length > 0;
     }
 
@@ -305,7 +307,7 @@ contract Invoker is IInvoker, Ownable, BalanceCarrier {
         return _liquidityProxies[_scheduleTokenAddress].length;
     }
 
-    function totalLiquidity(address tokenAddress) external view returns (uint256) {
+    function totalLiquidity(address tokenAddress) external override view returns (uint256) {
         if (isTokenAddressRegistered(tokenAddress)) {
             uint256 total = 0;
             for (uint256 i = 0; i < _liquidityProxies[tokenAddress].length; i++) {
@@ -317,8 +319,7 @@ contract Invoker is IInvoker, Ownable, BalanceCarrier {
         return 0;
     }
 
-    /* This contract should never have a token balance at rest. If so it is in error,
-       allow tokens to be moved to vault */
+    /* This contract should never have a token balance at rest. If so it is in error, then transfer the tokens to vault */
     function removeStuckTokens(address tokenAddress, address to, uint256 amount)
     external
     onlyFresh
@@ -342,5 +343,5 @@ contract Invoker is IInvoker, Ownable, BalanceCarrier {
         _;
     }
 
-    function () external payable { }
+    fallback() external { }
 }

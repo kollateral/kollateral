@@ -1,6 +1,7 @@
 /*
 
-    Copyright 2020 Kollateral LLC.
+    Copyright 2020 Kollateral LLC
+    Copyright 2020 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,16 +17,16 @@
 
 */
 
-pragma solidity ^0.5.0;
+pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/ownership/Ownable.sol";
-import "@openzeppelin/contracts/lifecycle/Pausable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 import "../CollateralizedToken.sol";
 import "../../common/invoke/IInvocationHook.sol";
 import "../../common/invoke/IInvokable.sol";
 
-contract KToken is IInvocationHook, CollateralizedToken, Ownable, Pausable {
+abstract contract KToken is IInvocationHook, CollateralizedToken, Ownable, Pausable {
     using SafeMath for uint256;
 
     event Invocation(address invokeTo, uint256 invokeValue, bytes32 invokeDataHash, uint256 underlyingAmount);
@@ -49,7 +50,7 @@ contract KToken is IInvocationHook, CollateralizedToken, Ownable, Pausable {
     /* Helper - store expected balance for currently executing transaction */
     uint256 internal _currentExpectedBalance;
 
-    constructor () public { }
+    constructor () { }
 
     function invoke(address invokeTo, bytes calldata invokeData, uint256 underlyingAmount)
     external
@@ -67,7 +68,7 @@ contract KToken is IInvocationHook, CollateralizedToken, Ownable, Pausable {
         require(transferUnderlying(invokeTo, underlyingAmount), "KToken: unable to transfer invocation amount");
 
         /* Invoke caller's function */
-        IInvokable(invokeTo).execute.value(msg.value)(invokeData);
+        IInvokable(invokeTo).execute{ value: msg.value }(invokeData);
         emit Invocation(invokeTo, msg.value, keccak256(invokeData), underlyingAmount);
 
         /* Verify tokens were returned with correct reward */
@@ -83,15 +84,11 @@ contract KToken is IInvocationHook, CollateralizedToken, Ownable, Pausable {
         setInvocationState(address(0), 0, 0);
     }
 
-    function payableReserveAdjustment() internal returns (uint256) {
+    function payableReserveAdjustment() internal virtual returns (uint256) {
         return 0;
     }
 
-    function setInvocationState(
-        address currentSender,
-        uint256 currentTokenAmount,
-        uint256 currentExpectedBalance
-    ) internal {
+    function setInvocationState(address currentSender, uint256 currentTokenAmount, uint256 currentExpectedBalance) internal {
         _currentSender = currentSender;
         _currentTokenAmount = currentTokenAmount;
         _currentExpectedBalance = currentExpectedBalance;
@@ -130,19 +127,19 @@ contract KToken is IInvocationHook, CollateralizedToken, Ownable, Pausable {
     }
 
     /* Helper hook for invoked transaction */
-    function currentSender() external view returns (address) {
+    function currentSender() external override view returns (address) {
         return _currentSender;
     }
 
-    function currentTokenAddress() external view returns (address) {
+    function currentTokenAddress() external override view returns (address) {
         return _underlying;
     }
 
-    function currentTokenAmount() external view returns (uint256) {
+    function currentTokenAmount() external override view returns (uint256) {
         return _currentTokenAmount;
     }
 
-    function currentRepaymentAmount() external view returns (uint256) {
+    function currentRepaymentAmount() external override view returns (uint256) {
         return _currentExpectedBalance.sub(totalReserve());
     }
 

@@ -1,6 +1,7 @@
 /*
 
-    Copyright 2020 Kollateral LLC.
+    Copyright 2020 Kollateral LLC
+    Copyright 2020 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,21 +17,22 @@
 
 */
 
-pragma solidity ^0.5.7;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/ownership/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+
+import "./ICallee.sol";
+import "./ISoloMargin.sol";
+import "./Types.sol";
+import "../ILiquidityProxy.sol";
 import "../../common/invoke/IInvoker.sol";
 import "../../common/utils/BalanceCarrier.sol";
 import "../../common/utils/WETHHandler.sol";
-import "../ILiquidityProxy.sol";
-import "./ISoloMargin.sol";
-import "./Types.sol";
-import "./ICallee.sol";
 
-contract SoloLiquidityProxy is Ownable, ILiquidityProxy, BalanceCarrier, ICallee, WETHHandler {
+contract SoloLiquidityProxy is BalanceCarrier, ICallee, ILiquidityProxy, Ownable, WETHHandler {
     using SafeMath for uint256;
 
     uint256 internal NULL_ACCOUNT_ID = 0;
@@ -53,14 +55,9 @@ contract SoloLiquidityProxy is Ownable, ILiquidityProxy, BalanceCarrier, ICallee
     uint256 internal _scheduleTokenAmount;
 
 
-    constructor (address soloMarginAddress, address payable wethAddress)
-    BalanceCarrier(address(1))
-    WETHHandler(wethAddress)
-    public {
+    constructor (address soloMarginAddress, address payable wethAddress) BalanceCarrier(address(1)) WETHHandler(wethAddress) public {
         _soloMarginAddress = soloMarginAddress;
     }
-
-    function () external payable { }
 
     function registerPool(uint256 marketId) external onlyOwner {
         address tokenAddress = unmapTokenAddress(ISoloMargin(_soloMarginAddress).getMarketTokenAddress(marketId));
@@ -81,11 +78,11 @@ contract SoloLiquidityProxy is Ownable, ILiquidityProxy, BalanceCarrier, ICallee
         IERC20(remapTokenAddress(tokenAddress)).approve(_soloMarginAddress, 0);
     }
 
-    function getRepaymentAddress(address tokenAddress) external view returns (address) {
+    function getRepaymentAddress(address tokenAddress) external override view returns (address) {
         return address(this);
     }
 
-    function getTotalReserve(address tokenAddress) external view returns (uint256) {
+    function getTotalReserve(address tokenAddress) external override view returns (uint256) {
         if (isRegistered(tokenAddress) && !isClosing(tokenAddress)) {
             return IERC20(remapTokenAddress(tokenAddress)).balanceOf(_soloMarginAddress);
         }
@@ -93,7 +90,7 @@ contract SoloLiquidityProxy is Ownable, ILiquidityProxy, BalanceCarrier, ICallee
         return 0;
     }
 
-    function getRepaymentAmount(address tokenAddress, uint256 tokenAmount) external view returns (uint256) {
+    function getRepaymentAmount(address tokenAddress, uint256 tokenAmount) external override view returns (uint256) {
         return getRepaymentAmountInternal(tokenAddress, tokenAmount);
     }
 
@@ -102,7 +99,7 @@ contract SoloLiquidityProxy is Ownable, ILiquidityProxy, BalanceCarrier, ICallee
         return tokenAmount.add(marketIdFromTokenAddress(tokenAddress) < 2 ? 1 : 2);
     }
 
-    function borrow(address tokenAddress, uint256 tokenAmount) external {
+    function borrow(address tokenAddress, uint256 tokenAmount) external override {
         _scheduleInvokerAddress = msg.sender;
         _scheduleTokenAddress = tokenAddress;
         _scheduleTokenAmount = tokenAmount;
@@ -122,13 +119,7 @@ contract SoloLiquidityProxy is Ownable, ILiquidityProxy, BalanceCarrier, ICallee
         _scheduleTokenAmount = 0;
     }
 
-    function callFunction(
-        address sender,
-        Types.AccountInfo memory accountInfo,
-        bytes memory data
-    )
-    public
-    {
+    function callFunction(address sender, Types.AccountInfo memory accountInfo, bytes memory data) public override {
         require(_scheduleInvokerAddress != address(0), "SoloLiquidityProxy: not scheduled");
 
         if (_scheduleTokenAddress == address(1)) {
@@ -235,4 +226,6 @@ contract SoloLiquidityProxy is Ownable, ILiquidityProxy, BalanceCarrier, ICallee
         uint256 marketId = _tokenAddressToMarketId[tokenAddress];
         return ISoloMargin(_soloMarginAddress).getMarketIsClosing(marketId);
     }
+
+    fallback() external { }
 }

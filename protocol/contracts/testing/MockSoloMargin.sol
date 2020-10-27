@@ -1,6 +1,7 @@
 /*
 
-    Copyright 2020 Kollateral LLC.
+    Copyright 2020 Kollateral LLC
+    Copyright 2020 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,7 +17,7 @@
 
 */
 
-pragma solidity ^0.5.0;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -42,9 +43,7 @@ contract MockSoloMargin is ISoloMargin {
         _isClosed = false;
     }
 
-    function () external payable { }
-
-    function operate(Types.AccountInfo[] memory accounts, Types.ActionArgs[] memory actions) public {
+    function operate(Types.AccountInfo[] memory accounts, Types.ActionArgs[] memory actions) public override {
         /* data */
         require(accounts.length == 1, "MockSoloMargin: incorrect accounts length");
         require(actions.length == 3, "MockSoloMargin: incorrect actions length");
@@ -104,7 +103,7 @@ contract MockSoloMargin is ISoloMargin {
         _scheduleAccountNumber = 0;
     }
 
-    function getMarketIsClosing(uint256 marketId) public view returns (bool) {
+    function getMarketIsClosing(uint256 marketId) public override view returns (bool) {
         return _isClosed;
     }
 
@@ -112,7 +111,7 @@ contract MockSoloMargin is ISoloMargin {
         _isClosed = closed;
     }
 
-    function getMarketTokenAddress(uint256 marketId) public view returns (address) {
+    function getMarketTokenAddress(uint256 marketId) public override view returns (address) {
         return _markets[marketId];
     }
 
@@ -131,4 +130,6 @@ contract MockSoloMargin is ISoloMargin {
     function balanceOf(uint256 marketId) internal view returns (uint256) {
             return IERC20(_markets[marketId]).balanceOf(address(this));
     }
+
+    fallback() external { }
 }

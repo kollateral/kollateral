@@ -17,17 +17,18 @@
 
 */
 
-pragma solidity ^0.5.0;
+pragma solidity ^0.7.0;
 
-import "@openzeppelin/contracts/ownership/Ownable.sol";
-import "@openzeppelin/contracts/lifecycle/Pausable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
+
 import "../ILiquidityProxy.sol";
-import "../../token/CollateralizedToken.sol";
-import "../../token/ktoken/KToken.sol";
 import "../../common/invoke/IInvoker.sol";
 import "../../common/utils/BalanceCarrier.sol";
+import "../../token/CollateralizedToken.sol";
+import "../../token/ktoken/KToken.sol";
 
-contract KingmakerLiquidityProxy is Ownable, BalanceCarrier, ILiquidityProxy, IInvokable {
+contract KingmakerLiquidityProxy is BalanceCarrier, IInvokable, ILiquidityProxy, Ownable {
     mapping(address => address) _tokenAddressToKTokenAddress;
 
     address payable internal _scheduleInvokerAddress;
@@ -35,8 +36,6 @@ contract KingmakerLiquidityProxy is Ownable, BalanceCarrier, ILiquidityProxy, II
     uint256 internal _scheduleTokenAmount;
 
     constructor () BalanceCarrier(address(1)) public { }
-
-    function () external payable { }
 
     function registerPool(address tokenAddress, address kTokenAddress) external onlyOwner {
         _tokenAddressToKTokenAddress[tokenAddress] = kTokenAddress;
@@ -46,11 +45,11 @@ contract KingmakerLiquidityProxy is Ownable, BalanceCarrier, ILiquidityProxy, II
         _tokenAddressToKTokenAddress[tokenAddress] = address(0);
     }
 
-    function getRepaymentAddress(address tokenAddress) external view returns (address) {
+    function getRepaymentAddress(address tokenAddress) external override view returns (address) {
         return poolAddress(tokenAddress);
     }
 
-    function getTotalReserve(address tokenAddress) external view returns (uint256) {
+    function getTotalReserve(address tokenAddress) external override view returns (uint256) {
         if (isRegistered(tokenAddress) && !isPaused(tokenAddress)) {
             CollateralizedToken pool = CollateralizedToken(poolAddress(tokenAddress));
             return pool.totalReserve();
@@ -58,12 +57,12 @@ contract KingmakerLiquidityProxy is Ownable, BalanceCarrier, ILiquidityProxy, II
         return 0;
     }
 
-    function getRepaymentAmount(address tokenAddress, uint256 tokenAmount) external view returns (uint256) {
+    function getRepaymentAmount(address tokenAddress, uint256 tokenAmount) external override view returns (uint256) {
         KToken pool = KToken(poolAddress(tokenAddress));
         return pool.calculateRepaymentAmount(tokenAmount);
     }
 
-    function borrow(address tokenAddress, uint256 tokenAmount) external {
+    function borrow(address tokenAddress, uint256 tokenAmount) external override {
         _scheduleInvokerAddress = msg.sender;
         _scheduleTokenAddress = tokenAddress;
         _scheduleTokenAmount = tokenAmount;
@@ -76,7 +75,7 @@ contract KingmakerLiquidityProxy is Ownable, BalanceCarrier, ILiquidityProxy, II
         _scheduleTokenAmount = 0;
     }
 
-    function execute(bytes calldata data) external payable {
+    function execute(bytes calldata data) external override payable {
         require(_scheduleInvokerAddress != address(0), "KingmakerLiquidityProxy: not scheduled");
 
         require(
@@ -98,4 +97,6 @@ contract KingmakerLiquidityProxy is Ownable, BalanceCarrier, ILiquidityProxy, II
     function isPaused(address tokenAddress) internal view returns (bool) {
         return Pausable(poolAddress(tokenAddress)).paused();
     }
+
+    fallback() external { }
 }

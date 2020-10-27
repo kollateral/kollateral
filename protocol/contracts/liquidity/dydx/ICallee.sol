@@ -1,5 +1,6 @@
 /*
     Copyright 2019 dYdX Trading Inc.
+    Copyright 2020 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -15,7 +16,7 @@
 
 */
 
-pragma solidity ^0.5.7;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "./Types.sol";
@@ -26,10 +27,7 @@ import "./Types.sol";
  *
  * Interface that Callees for Solo must implement in order to ingest data.
  */
-contract ICallee {
-
-    // ============ Public Functions ============
-
+interface ICallee {
     /**
      * Allows users to send this contract arbitrary data.
      *
@@ -37,10 +35,5 @@ contract ICallee {
      * @param  accountInfo  The account from which the data is being sent
      * @param  data         Arbitrary data given by the sender
      */
-    function callFunction(
-        address sender,
-        Types.AccountInfo memory accountInfo,
-        bytes memory data
-    )
-    public;
+    function callFunction(address sender, Types.AccountInfo memory accountInfo, bytes memory data) external;
 }

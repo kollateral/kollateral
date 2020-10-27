@@ -1,7 +1,8 @@
 /*
 
     Copyright 2019 dYdX Trading Inc.
-    Copyright 2020 Kollateral LLC.
+    Copyright 2020 Kollateral LLC
+    Copyright 2020 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -17,7 +18,7 @@
 
 */
 
-pragma solidity ^0.5.7;
+pragma solidity ^0.7.0;
 
 library Types {
     enum ActionType {

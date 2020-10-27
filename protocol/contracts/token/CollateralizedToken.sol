@@ -1,6 +1,7 @@
 /*
 
-    Copyright 2020 Kollateral LLC.
+    Copyright 2020 Kollateral LLC
+    Copyright 2020 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,14 +17,15 @@
 
 */
 
-pragma solidity ^0.5.0;
+pragma solidity ^0.7.0;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "../common/utils/ExtendedMath.sol";
-import "./UnlimitedApprovalDetailedErc20.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 
-contract CollateralizedToken is UnlimitedApprovalDetailedErc20, ReentrancyGuard, ExtendedMath {
+import "../common/utils/ExtendedMath.sol";
+import "./UnlimitedApprovalERC20.sol";
+
+abstract contract CollateralizedToken is ExtendedMath, ReentrancyGuard, UnlimitedApprovalERC20 {
     using SafeMath for uint256;
 
     event Mint(address minter, uint256 tokenAmount, uint256 kTokenAmount);
@@ -31,9 +33,7 @@ contract CollateralizedToken is UnlimitedApprovalDetailedErc20, ReentrancyGuard,
 
     address internal _underlying;
 
-    constructor(address underlying)
-    internal
-    {
+    constructor(address underlying) internal {
         _underlying = underlying;
     }
 
@@ -41,27 +41,17 @@ contract CollateralizedToken is UnlimitedApprovalDetailedErc20, ReentrancyGuard,
      * BALANCE UPDATE
      */
 
-    function redeem(uint256 kTokenAmount)
-    external
-    returns (bool)
-    {
+    function redeem(uint256 kTokenAmount) external returns (bool) {
         require(totalSupply() > 0, "CollateralizedToken: no supply");
         return redeemInternal(nativeAmountToUnderlyingAmount(kTokenAmount), kTokenAmount);
     }
 
-    function redeemUnderlying(uint256 tokenAmount)
-    external
-    returns (bool)
-    {
+    function redeemUnderlying(uint256 tokenAmount) external returns (bool) {
         require(totalReserve() > 0, "CollateralizedToken: no reserve");
         return redeemInternal(tokenAmount, underlyingAmountToNativeAmountInternal(tokenAmount, true, false));
     }
 
-    function mintInternal(uint256 amount)
-    internal
-    nonReentrant
-    returns (bool)
-    {
+    function mintInternal(uint256 amount) internal nonReentrant returns (bool) {
         uint256 kTokenAmount;
         if (totalReserve().sub(amount) > 0) {
             kTokenAmount = underlyingAmountToNativeAmountInternal(amount, false, true);
@@ -74,11 +64,7 @@ contract CollateralizedToken is UnlimitedApprovalDetailedErc20, ReentrancyGuard,
         return true;
     }
 
-    function redeemInternal(uint256 tokenAmount, uint256 kTokenAmount)
-    internal
-    nonReentrant
-    returns (bool)
-    {
+    function redeemInternal(uint256 tokenAmount, uint256 kTokenAmount) internal nonReentrant returns (bool) {
         _burn(msg.sender, kTokenAmount);
         require(transferUnderlying(msg.sender, tokenAmount), "CollateralizedToken: token transfer failed");
         emit Redeem(msg.sender, tokenAmount, kTokenAmount);
@@ -86,7 +72,7 @@ contract CollateralizedToken is UnlimitedApprovalDetailedErc20, ReentrancyGuard,
         return true;
     }
 
-    function transferUnderlying(address to, uint256 amount) internal returns (bool);
+    function transferUnderlying(address to, uint256 amount) internal virtual returns (bool);
 
     /*
      * VIEWS
@@ -104,11 +90,7 @@ contract CollateralizedToken is UnlimitedApprovalDetailedErc20, ReentrancyGuard,
         return underlyingAmountToNativeAmountInternal(underlyingAmount, ceil, false);
     }
 
-    function underlyingAmountToNativeAmountInternal(uint256 underlyingAmount, bool ceil, bool subtractDeposit)
-    internal
-    view
-    returns (uint256)
-    {
+    function underlyingAmountToNativeAmountInternal(uint256 underlyingAmount, bool ceil, bool subtractDeposit) internal view returns (uint256) {
         if (totalReserve() == 0) {
             return 0;
         }
@@ -120,9 +102,9 @@ contract CollateralizedToken is UnlimitedApprovalDetailedErc20, ReentrancyGuard,
         return divAndRound(underlyingAmount.mul(totalSupply()), adjustedTotalReserve, ceil);
     }
 
-    function isUnderlyingEther() public view returns (bool);
+    function isUnderlyingEther() public virtual view returns (bool);
 
-    function totalReserve() public view returns (uint256);
+    function totalReserve() public virtual view returns (uint256);
 
     function balanceOfUnderlying(address owner) public view returns (uint256) {
         return nativeAmountToUnderlyingAmount(balanceOf(owner));

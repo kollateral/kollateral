@@ -1,6 +1,6 @@
 /*
 
-    Copyright 2020 Kollateral LLC
+    Copyright 2020 Kollateral LLC.
     Copyright 2020 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,19 +19,13 @@
 
 pragma solidity ^0.7.0;
 
-import "../token/UnlimitedApprovalERC20.sol";
+import "../token/CollateralizedERC20.sol";
+import "../token/CollateralizedToken.sol";
 
-contract TestToken is UnlimitedApprovalERC20 {
-    constructor (string memory name, string memory symbol)
+contract TestCollateralizedERC20 is CollateralizedERC20 {
+    constructor (address underlying, string memory name, string memory symbol)
     public
     ERC20(name, symbol)
+    CollateralizedToken(underlying)
     { }
-
-    /**
-     * Allows anyone to arbitrarily mint themselves tokens for testing.
-     */
-    function mint(uint256 amount) public returns (bool) {
-        _mint(msg.sender, amount);
-        return true;
-    }
 }
