@@ -2,13 +2,13 @@
   "name": "@kingmaker/contracts",
   "version": "0.0.1",
   "private": false,
-  "description": "",
+  "description": "Solidity smart contracts for the Kingmaker protocol",
   "scripts": {
-    "clean": "rimraf artifacts cache",
+    "clean": "rimraf artifacts cache typechain",
     "build": "yarn clean && yarn run compile",
-    "compile": "npx hardhat compile",
-    "test": "npx hardhat test",
-    "deploy:dev": "npx hardhat run scripts/sample-script.js"
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:dev": "hardhat run scripts/sample-script.js"
   },
   "license": "Apache-2.0",
   "dependencies": {
@@ -17,6 +17,7 @@
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",
     "@nomiclabs/hardhat-waffle": "^2.0.0",
+    "@typechain/ethers-v5": "^2.0.0",
     "@types/chai": "^4.2.13",
     "@types/mocha": "^8.0.3",
     "@types/node": "^14.11.8",
@@ -24,8 +25,11 @@
     "ethereum-waffle": "^3.1.2",
     "ethers": "^5.0.19",
     "hardhat": "^2.0.1",
+    "hardhat-typechain": "^0.3.3",
     "rimraf": "^3.0.2",
+    "ts-generator": "^0.1.1",
     "ts-node": "^9.0.0",
+    "typechain": "^3.0.0",
     "typescript": "^4.0.3"
   }
 }

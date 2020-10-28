@@ -4,10 +4,11 @@
   "main": "dist/kingmaker.js",
   "types": "dist/kingmaker.d.ts",
   "scripts": {
-    "clean": "rimraf dist",
-    "generate": "ts-node ./scripts/generateTypings.ts",
-    "compile": "yarn generate && tsc -p .",
-    "build": "yarn clean && yarn compile"
+    "build": "yarn clean && yarn compile",
+    "clean": "rimraf dist protocol",
+    "cleanse": "rimraf node_modules",
+    "compile": "tsc -p src",
+    "generate": "ts-node ./scripts/generateTypings.ts"
   },
   "license": "Apache-2.0",
   "devDependencies": {

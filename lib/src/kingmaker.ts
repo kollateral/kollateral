@@ -1,39 +1,33 @@
-import {BigNumber} from "bignumber.js";
-import {Utils} from "./util/utils";
-import {KingmakerConfig} from "./config/kingmaker";
-import Web3 from "web3";
-import {AbiItem} from "web3-utils";
-import {Network, NetworkUtils} from "./static/network";
-import {InvokerUtils} from "./static/invoker";
-import {Token, TokenUtils} from "./static/tokens";
-import {KTokenUtils} from "./static/ktokens";
-import {Execution} from "./models/Invocation";
-import {TokenAmount} from "./models/token-amount";
-import {TransactionConfig} from "web3-core";
-import {AnyNumber} from "./models/const";
+import { BigNumber } from "bignumber.js";
+// @ts-ignore
 import BN from "bn.js";
 
+import { KingmakerConfig } from "./config/kingmaker";
+import { AnyNumber } from "./models/const";
+import { Execution } from "./models/invocation";
+import { TokenAmount } from "./models/token-amount";
+import { Network, NetworkUtils } from "./static/network";
+import { InvokerUtils } from "./static/invoker";
+import { Token, TokenUtils } from "./static/tokens";
+import { KTokenUtils } from "./static/ktokens";
+import { Utils } from "./util/utils";
+
+import Web3 from "web3";
+import { TransactionConfig } from "web3-core";
+import { AbiItem } from "web3-utils";
+
 // @ts-ignore
-import {TestToken} from "./generated/TestToken";
-// @ts-ignore
-import {KToken} from "./generated/KToken";
-// @ts-ignore
-import {Invoker} from "./generated/Invoker";
-// @ts-ignore
-import {KErc20} from "./generated/KErc20";
-// @ts-ignore
-import {KEther} from "./generated/KEther";
+import { TestToken, KToken, Invoker, Kerc20, KEther } from "../protocol/typechain";
 
 export class Kingmaker {
-  public static MAX_UINT256: BigNumber =
-    new BigNumber('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', 16);
+  public static MAX_UINT256: BigNumber = new BigNumber('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', 16);
 
   private _provider: any;
   private _config: KingmakerConfig;
   private _web3: Web3;
   private _invoker: Invoker;
   private _kEther: KEther;
-  private _kErc20s: Map<string, KErc20>;
+  private _kERC20s: Map<string, Kerc20>;
   private _kTokens: Map<string, KToken>;
   private _erc20Abi: AbiItem;
 
@@ -42,23 +36,23 @@ export class Kingmaker {
     this._config = config;
     this._web3 = new Web3(provider);
 
-    const invokerAbi = require('./abi/Invoker.json').abi;
-    this._invoker = new this._web3.eth.Contract(invokerAbi, config.invokerAddress) as Invoker;
+    const invokerAbi = require('../protocol/artifacts/contracts/Invoker.sol/Invoker.json').abi;
+    this._invoker = new this._web3.eth.Contract(invokerAbi, config.invokerAddress) as unknown as Invoker;
 
-    const kEtherAbi = require('./abi/KEther.json').abi;
-    this._kEther = new this._web3.eth.Contract(kEtherAbi, config.network.tokens.get(Token.ETH)!.kTokenAddress) as KEther;
+    const kEtherAbi = require('../protocol/artifacts/contracts/token/ktoken/KEther.sol/KEther.json').abi;
+    this._kEther = new this._web3.eth.Contract(kEtherAbi, config.network.tokens.get(Token.ETH)!.kTokenAddress) as unknown as KEther;
 
-    const kErc20Abi = require('./abi/KErc20.json').abi;
-    this._kErc20s = new Map<string, KErc20>();
+    const kERC20Abi = require('../protocol/artifacts/contracts/token/ktoken/KERC20.sol/KERC20.json').abi;
+    this._kERC20s = new Map<string, Kerc20>();
 
-    const kTokenAbi = require('./abi/KToken.json').abi;
+    const kTokenAbi = require('../protocol/artifacts/contracts/token/ktoken/KToken.sol/KToken.json').abi;
     this._kTokens = new Map<string, KToken>();
 
-    this._erc20Abi = require('./abi/TestToken.json').abi;
+    this._erc20Abi = require('../protocol/artifacts/contracts/testing/TestToken.sol/TestToken.json').abi;
 
     config.network.tokens.forEach((config, token) => {
       if (token != Token.ETH) {
-        this._kErc20s.set(config.kTokenAddress, new this._web3.eth.Contract(kErc20Abi, config.kTokenAddress) as KErc20);
+        this._kERC20s.set(config.kTokenAddress, new this._web3.eth.Contract(kERC20Abi, config.kTokenAddress) as Kerc20);
       }
       this._kTokens.set(config.kTokenAddress, new this._web3.eth.Contract(kTokenAbi, config.kTokenAddress) as KToken);
     });
@@ -121,7 +115,7 @@ export class Kingmaker {
         value: amount.toFixed()
       });
     } else {
-      return this._kErc20s.get(kTokenAddress)!.methods.mint(amount.toFixed()).send({
+      return this._kERC20s.get(kTokenAddress)!.methods.mint(amount.toFixed()).send({
         from: sender
       });
     }
@@ -174,43 +168,37 @@ export class Kingmaker {
   }
 
   private tokenOf(tokenAddress: string): TestToken {
-    return new this._web3.eth.Contract(this._erc20Abi, tokenAddress) as TestToken;
+    return new this._web3.eth.Contract(this._erc20Abi, tokenAddress) as unknown as TestToken;
   }
 
   /* Invocation */
-  public async invoke(
-    execution: Execution,
-    tokenAmount: TokenAmount,
-    txOpt: TransactionConfig = {}
-  ): Promise<void> {
+  public async invoke(execution: Execution, tokenAmount: TokenAmount, txOpt: TransactionConfig = {}): Promise<void> {
     if (txOpt.from == undefined) {
       txOpt.from = (await this._web3.eth.getAccounts())[0];
     }
-    txOpt.value = this.valueOrDefault(execution.value).toFixed();
+    txOpt.value = Kingmaker.valueOrDefault(execution.value).toFixed();
 
     const tokenAddress = this.getTokenAddressOrThrow(tokenAmount.token);
-    return this._invoker.methods.invoke(
-      execution.contract,
-      this.dataOrDefault(execution.data),
-      tokenAddress,
-      Utils.normalizeNumber(tokenAmount.amount).toFixed()
-    ).send(txOpt);
+    const _tokenAmount = Utils.normalizeNumber(tokenAmount.amount).toFixed();
+
+    return this._invoker.methods
+        .invoke(execution.contract, Kingmaker.dataOrDefault(execution.data), tokenAddress, _tokenAmount).send(txOpt);
   }
 
   public totalLiquidity(token: Token): Promise<BigNumber> {
     const tokenAddress = this.getTokenAddressOrThrow(token);
-    return this._invoker.methods.totalLiquidity(tokenAddress).call()
-      .then((bn: BN) => Utils.bnToBigNumber(bn));
+    return this._invoker.methods
+        .totalLiquidity(tokenAddress).call()
+        .then((bn: BN) => Utils.bnToBigNumber(bn));
   }
 
   /* Testnet */
   public faucet(sender: string, tokenAmount: TokenAmount): Promise<boolean> {
     const tokenAddress = this.getTokenAddressOrThrow(tokenAmount.token);
-    const token = new this._web3.eth.Contract(this._erc20Abi, tokenAddress) as TestToken;
+    const _tokenAmount = Utils.normalizeNumber(tokenAmount.amount).toFixed();
+    const token = new this._web3.eth.Contract(this._erc20Abi, tokenAddress) as unknown as TestToken;
 
-    return token.methods.mint(Utils.normalizeNumber(tokenAmount.amount).toFixed()).send({
-      from: sender
-    });
+    return token.methods.mint(_tokenAmount).send({ from: sender });
   }
 
   /* Private */
@@ -221,11 +209,11 @@ export class Kingmaker {
     return TokenUtils.getAddress(this._config.network.network, token)!;
   }
 
-  private valueOrDefault(value: AnyNumber | undefined): BigNumber {
+  private static valueOrDefault(value: AnyNumber | undefined): BigNumber {
     return Utils.normalizeNumber(value == undefined ? 0 : value);
   }
 
-  private dataOrDefault(data: string | undefined): string | number[] {
+  private static dataOrDefault(data: string | undefined): string | number[] {
     return data == undefined ? [] : data;
   }
 }

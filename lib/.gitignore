@@ -12,7 +12,7 @@ logs
 **/node_modules
 .cache
 
-# TypeChain
-lib
-lib/abi
-lib/generated
+# protocol
+protocol
+protocol/**
+

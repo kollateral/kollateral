@@ -1,4 +1,6 @@
 import "@nomiclabs/hardhat-waffle";
+import "hardhat-typechain";
+
 import { HardhatUserConfig } from "hardhat/config";
 
 require('dotenv').config();
@@ -34,7 +36,11 @@ const config: HardhatUserConfig = {
                 settings: { }
             }
         ]
-    }
+    },
+    typechain: {
+        // outDir: "src/types",
+        target: "ethers-v5",
+    },
 };
 
 export default config;
