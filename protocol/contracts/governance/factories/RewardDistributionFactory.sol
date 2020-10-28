@@ -1,7 +1,3 @@
-/**
- *Submitted for verification at Etherscan.io on 2020-10-12
-*/
-
 /*
 
  This contract is provided "as is" and "with all faults." The deployer makes no representations or warranties
@@ -44,9 +40,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 */
 
-// File: @openzeppelin/contracts/math/Math.sol
-
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.5.15;
 
 /**
  * @dev Standard math utilities missing in the Solidity language.

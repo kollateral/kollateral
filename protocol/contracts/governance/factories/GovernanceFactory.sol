@@ -1,7 +1,3 @@
-/**
- *Submitted for verification at Etherscan.io on 2020-10-13
-*/
-
 /*
 
  This contract is provided "as is" and "with all faults." The deployer makes no representations or warranties
@@ -12,7 +8,7 @@
  using, modifying, or distributing this contract.
 
 */
-
+// SPDX-License-Identifier: Unlicense
 pragma solidity ^0.5.15;
 pragma experimental ABIEncoderV2;
 
