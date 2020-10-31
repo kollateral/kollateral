@@ -21,12 +21,16 @@ pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
+import "hardhat/console.sol";
 abstract contract UnlimitedApprovalERC20 is ERC20 {
 
     function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
+        console.log("Trying to send %s tokens to %s", amount, recipient);
         _transfer(sender, recipient, amount);
         if (allowance(sender, _msgSender()) != uint256(-1)) {
+            console.log("Is there still allowance?");
             _approve(sender, _msgSender(), allowance(sender, _msgSender()) - amount);
+            console.log("Did we actually decrease allowance?");
         }
         return true;
     }

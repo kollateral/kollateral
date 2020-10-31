@@ -30,6 +30,7 @@
     "ts-generator": "^0.1.1",
     "ts-node": "^9.0.0",
     "typechain": "^3.0.0",
+    "typechain-target-ethers-v5": "^1.2.2",
     "typescript": "^4.0.3"
   }
 }

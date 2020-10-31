@@ -20485,6 +20485,13 @@ type@^2.0.0:
   resolved "https://registry.yarnpkg.com/type/-/type-2.1.0.tgz#9bdc22c648cf8cf86dd23d32336a41cfb6475e3f"
   integrity sha512-G9absDWvhAWCV2gmF1zKud3OyC61nZDwWvBL2DApaVFogI07CprggiQAOOjvp2NRjYWFzPyu7vwtDrQFq8jeSA==
 
+typechain-target-ethers-v5@^1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/typechain-target-ethers-v5/-/typechain-target-ethers-v5-1.2.2.tgz#a3282e4a05683eeac7595dc9e70b9e1b6c66a7b6"
+  integrity sha512-PmeZakMAAjnPbA8Ovf6a8Q+QFrrx8s9/XRatw6ab0hJmpIsP307W5T3kZvJ78qB+jd4D5qPpXRyxcpm9AnGGMw==
+  dependencies:
+    ethers "^5.0.2"
+
 typechain-target-web3-v2@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/typechain-target-web3-v2/-/typechain-target-web3-v2-1.0.0.tgz#92718b926062464ba9154db1cdf463af4b67aadf"
