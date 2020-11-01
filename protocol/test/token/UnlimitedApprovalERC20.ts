@@ -4,8 +4,6 @@ import { ethers } from "hardhat";
 
 import { expect } from "chai";
 
-const MAX_UINT256 = ethers.BigNumber.from(2).pow(256).sub(1);
-
 describe("UnlimitedApprovalERC20", () => {
   let accounts: SignerWithAddress[];
   let owner: SignerWithAddress;
@@ -92,6 +90,8 @@ describe("UnlimitedApprovalERC20", () => {
     * https://docs.ethers.io/v5/getting-started/#getting-started--history
     */
     describe('when allowance is maximally approved', () => {
+      const MAX_UINT256 = ethers.BigNumber.from(2).pow(256).sub(1);
+
       let approveEvent: any;
       let xferEvent: any;
       beforeEach('transferring...', async () => {
