@@ -1,15 +1,16 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { BigNumber } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expect } from "chai";
 
+// TODO: improve event assertions throughout test suites
 describe("TestCollateralizedEther", () => {
     let accounts: SignerWithAddress[];
     let owner: SignerWithAddress;
     let user: SignerWithAddress;
 
-    let TestCollateralizedEther: any;
+    let TestCollateralizedEther: Contract;
 
     before(async () => {
         accounts = await ethers.getSigners();
@@ -26,30 +27,26 @@ describe("TestCollateralizedEther", () => {
     describe('mint', () => {
         const amount = ethers.BigNumber.from(1000);
         const paybackAmount = ethers.BigNumber.from(500);
+        describe('when supplying more than user balance', () => {
+            let balance: BigNumber;
 
-        /*
-            describe('when supplying more than user balance', () => {
-              let balance: BigNumber;
-
-              beforeEach('minting', async () => {
+            beforeEach('minting', async () => {
                 balance = await user.getBalance();
-                console.log(ethers.BigNumber.from(balance).toString());
-              });
-
-              it('reverts', async () => {
-                await expect(
-                    TestCollateralizedEther.connect(user).mint({ value: balance })
-                ).to.be.revertedWith('sender doesn\'t have enough funds to send tx.');
-              });
             });
-        */
+
+            it('throws', async () => {
+                try {
+                     await TestCollateralizedEther.connect(user).mint({ value: balance });
+                } catch (e) {
+                    expect(e).to.be.not.null;
+                }
+            });
+        });
 
         describe('for an empty pool',() => {
             beforeEach('minting...', async () => {
                 const tx = await TestCollateralizedEther.connect(user).mint({ value: amount });
                 const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-                // @ts-ignore
-                console.log(receipt.logs[0].topics);
             });
 
             it('increments user tkETH balance', async () => {
@@ -217,10 +214,6 @@ describe("TestCollateralizedEther", () => {
         const amount = ethers.BigNumber.from(1000);
         const paybackAmount = ethers.BigNumber.from(500);
         describe('when redeeming with zero balance',() => {
-            let balance: BigNumber;
-            beforeEach('redeem', async () => {
-                balance = await TestCollateralizedEther.balanceOfUnderlying(user.address);
-            });
 
             it('reverts', async () => {
                 await expect(TestCollateralizedEther.connect(user).redeemUnderlying(amount))
@@ -229,14 +222,129 @@ describe("TestCollateralizedEther", () => {
         });
 
         describe('when redeeming more than balance',() => {
-            let balance: BigNumber;
-            beforeEach('redeem', async () => {
-                balance = await TestCollateralizedEther.balanceOfUnderlying(user.address);
-            });
 
             it('reverts', async () => {
                 await expect(TestCollateralizedEther.connect(user).redeemUnderlying(amount))
-                    .to.be.revertedWith('ERC20: burn amount exceeds balance');
+                    .to.be.revertedWith('CollateralizedToken: no reserve');
+            });
+        });
+
+        describe('for a single mint pool', () => {
+            let redeemEvent: any;
+            beforeEach('minting and redeeming...', async () => {
+                await TestCollateralizedEther.connect(user).mint({ value: amount });
+                await TestCollateralizedEther.connect(user).redeemUnderlying(amount);
+                TestCollateralizedEther.once('Redeem', (redeemer: any, tokenAmount: any, kTokenAmount: any, evt: any) => {
+                    redeemEvent = evt;
+                });
+            });
+
+            it('decrements user tkETH balance', async () => {
+                expect(await TestCollateralizedEther.balanceOf(user.address)).to.be.equal(zero);
+            });
+
+            it('decrements totalReserve', async function () {
+                expect(await TestCollateralizedEther.totalReserve()).to.be.equal(zero);
+            });
+
+            it('emits Redeem event with correct arguments', async () => {
+                expect(redeemEvent).not.to.be.undefined;
+                expect(redeemEvent.args.tokenAmount).to.be.equal(amount);
+                expect(redeemEvent.args.kTokenAmount).to.be.equal(amount);
+            });
+        });
+
+        describe('for a multi mint/redeem pool', () => {
+            let redeemEvent: any;
+            beforeEach('minting redeeming...', async () => {
+                await TestCollateralizedEther.connect(user).mint({ value: amount });
+                const alternativeMintTx = await user.sendTransaction({
+                    to: TestCollateralizedEther.address,
+                    value: amount
+                });
+                await TestCollateralizedEther.connect(user).redeemUnderlying(amount);
+                TestCollateralizedEther.once('Redeem', (redeemer: any, tokenAmount: any, kTokenAmount: any, evt: any) => {
+                    redeemEvent = evt;
+                });
+            });
+
+            it('decrements user tkETH balance', async () => {
+                expect(await TestCollateralizedEther.balanceOf(user.address)).to.be.equal(amount);
+            });
+
+            it('decrements totalReserve', async function () {
+                expect(await TestCollateralizedEther.totalReserve()).to.be.equal(amount);
+            });
+
+            it('emits Redeem event', async function () {
+                const event = TestCollateralizedEther.filters.Redeem();
+                expect(event).not.to.be.undefined;
+            });
+        });
+
+        describe('for emptying multi mint/redeem pool', () => {
+            let redeemEvent: any;
+            beforeEach('minting redeeming...', async () => {
+                await TestCollateralizedEther.connect(user).mint({ value: amount });
+                const alternativeMintTx = await user.sendTransaction({
+                    to: TestCollateralizedEther.address,
+                    value: amount
+                });
+                await TestCollateralizedEther.connect(user).mint({ value: amount });
+                await TestCollateralizedEther.connect(user).redeemUnderlying(amount);
+                await TestCollateralizedEther.connect(user).redeemUnderlying(amount.mul(2));
+
+                TestCollateralizedEther.once('Redeem', (redeemer: any, tokenAmount: any, kTokenAmount: any, evt: any) => {
+                    redeemEvent = evt;
+                });
+            });
+
+            it('decrements user tkETH balance', async () => {
+                expect(await TestCollateralizedEther.balanceOf(user.address)).to.be.equal(zero);
+            });
+
+            it('decrements totalReserve', async function () {
+                expect(await TestCollateralizedEther.totalReserve()).to.be.equal(zero);
+            });
+
+            it('emits Redeem event', async function () {
+                const event = TestCollateralizedEther.filters.Redeem();
+                expect(event).not.to.be.undefined;
+            });
+        });
+
+        describe('for emptying non-clean multi mint/redeem pool', () => {
+            let redeemEvent: any;
+            beforeEach('minting redeeming...', async () => {
+                await TestCollateralizedEther.connect(user).mint({ value: amount });
+                const alternativeMintTx = await user.sendTransaction({
+                    to: TestCollateralizedEther.address,
+                    value: amount.add(555)
+                });
+                await TestCollateralizedEther.connect(user).redeemUnderlying(amount);
+                const userBalance = await TestCollateralizedEther.balanceOf(user.address);
+                await TestCollateralizedEther.connect(user).redeemUnderlying(userBalance.div(2));
+
+                TestCollateralizedEther.once('Redeem', (redeemer: any, tokenAmount: any, kTokenAmount: any, evt: any) => {
+                    redeemEvent = evt;
+                });
+            });
+
+            it('decrements user tkETH balance', async () => {
+                expect(await TestCollateralizedEther.balanceOf(user.address)).to.be.equal(
+                    amount.add(555).div(2).add(1)
+                )
+            });
+
+            it('decrements totalReserve', async function () {
+                expect(await TestCollateralizedEther.totalReserve()).to.be.equal(
+                    amount.add(555).div(2).add(1)
+                );
+            });
+
+            it('emits Redeem event', async function () {
+                const event = TestCollateralizedEther.filters.Redeem();
+                expect(event).not.to.be.undefined;
             });
         });
     });
