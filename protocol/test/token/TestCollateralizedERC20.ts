@@ -5,12 +5,12 @@ import { ethers } from "hardhat";
 import { expect } from "chai";
 
 
-describe('TestCollateralizedErc20', function () {
+describe('TestCollateralizedERC20', () => {
   let accounts: SignerWithAddress[];
   let owner: SignerWithAddress;
   let user: SignerWithAddress;
 
-  let TestCollateralizedErc20: Contract;
+  let TestCollateralizedERC20: Contract;
   let TestToken: Contract; 
 
   before(async () => {
@@ -19,124 +19,120 @@ describe('TestCollateralizedErc20', function () {
       user = accounts[1];
   });
 
-  beforeEach(async function () {
+  beforeEach(async () => {
     const TestTokenFactory = await ethers.getContractFactory("TestToken");
     TestToken = await TestTokenFactory.deploy("TestToken TT", "TT");
     await TestToken.deployed();
 
-    const TestCollateralizedErc20Factory = await ethers.getContractFactory("TestCollateralizedERC20");
-    TestCollateralizedErc20 = await TestCollateralizedErc20Factory.deploy(TestToken.address, "Collateraize TT", "colTT");
-    await TestCollateralizedErc20.deployed();
+    const TestCollateralizedERC20Factory = await ethers.getContractFactory("TestCollateralizedERC20");
+    TestCollateralizedERC20 = await TestCollateralizedERC20Factory.deploy(TestToken.address, "Collateralized TT", "kTT");
+    await TestCollateralizedERC20.deployed();
 
     await TestToken.connect(owner).mint(await owner.getBalance());
     await TestToken.connect(user).mint(await user.getBalance());
-
   });
 
-  describe('mint', function () {
+  describe('mint', () => {
 
     const amount = ethers.BigNumber.from(1000);
     const amountAfterPayback = ethers.BigNumber.from(500);
 
-    describe('when supplying more than balance', function () {
+    describe('when supplying more than balance', () => {
       let balance: BigNumber;
 
-      beforeEach('minting', async function () {
+      beforeEach('minting', async () => {
         balance = await TestToken.balanceOf(user.address);
       });
 
-      it('reverts', async function () {
-          await expect(TestCollateralizedErc20.connect(user).mint(balance.add(1)))
-          .to.be
-          .revertedWith("VM Exception while processing transaction: revert ERC20: transfer amount exceeds balance");
+      it('reverts', async () => {
+        await TestToken.connect(owner).approve(TestCollateralizedERC20.address, balance.add(1));
+        await expect(TestCollateralizedERC20.connect(user).mint(balance.add(1)))
+            .to.be.revertedWith("ERC20: transfer amount exceeds balance");
       });
     });
 
 
-    describe('when supplying more than approval', function () {
+    describe('when supplying more than approval', () => {
       let balance: BigNumber;
-
-      beforeEach('minting', async function () {
+      beforeEach('minting', async () => {
         balance = await TestToken.balanceOf(user.address);
       });
 
-      it('reverts', async function () {
-        await TestToken.connect(owner).approve(TestCollateralizedErc20.address, balance.sub(1));
-        await expect(TestCollateralizedErc20.connect(user).mint(balance))
-        .to.be
-        .revertedWith("UnlimitedApprovalDetailedErc20: transfer amount exceeds allowance");
+      it('reverts', async () => {
+        await TestToken.connect(owner).approve(TestCollateralizedERC20.address, balance.sub(1));
+        await expect(TestCollateralizedERC20.connect(user).mint(balance))
+        .to.be.revertedWith("UnlimitedApprovalERC20: transfer amount exceeds allowance");
       });
     });
 
-    describe('for an empty pool', function () {
-
-      beforeEach('minting', async function () {
-        await TestToken.connect(user).approve(TestCollateralizedErc20.address, amount);
-        await TestCollateralizedErc20.connect(user).mint(amount);
+    describe('for an empty pool', () => {
+      beforeEach('minting', async () => {
+        await TestToken.connect(user).approve(TestCollateralizedERC20.address, amount);
+        await TestCollateralizedERC20.connect(user).mint(amount);
       });
 
-      it('increments recipient collateralizedErc20 balance', async function () {
-        expect(await TestCollateralizedErc20.balanceOf(user.address)).to.be.equal(amount);
+      it('increments recipient collateralizedErc20 balance', async () => {
+        expect(await TestCollateralizedERC20.balanceOf(user.address)).to.be.equal(amount);
       });
 
-      it('increments totalReserve', async function () {
-        expect(await TestCollateralizedErc20.totalReserve()).to.be.equal(amount);
+      it('increments totalReserve', async () => {
+        expect(await TestCollateralizedERC20.totalReserve()).to.be.equal(amount);
       });
 
-      it('emits Mint event', async function () {
-        const event = TestCollateralizedErc20.filters.Mint();
+      it('emits Mint event', async () => {
+        const event = TestCollateralizedERC20.filters.Mint();
         // TODO verify event correctly reports tokenAmount and kTokenAmount
         expect(event).to.be.not.null;
       });
     });    
 
 
-    describe('for a not empty pool', function () {
+    describe('for a not empty pool', () => {
 
-      beforeEach('minting', async function () {
-        await TestToken.connect(user).approve(TestCollateralizedErc20.address, amount);
-        await TestCollateralizedErc20.connect(user).mint(amount);
-        await TestToken.connect(user).transfer(TestCollateralizedErc20.address, amount);
-        await TestToken.connect(user).approve(TestCollateralizedErc20.address, amount);
-        await TestCollateralizedErc20.connect(user).mint(amount);
+      beforeEach('minting', async () => {
+        await TestToken.connect(user).approve(TestCollateralizedERC20.address, amount);
+        await TestCollateralizedERC20.connect(user).mint(amount);
+        await TestToken.connect(user).transfer(TestCollateralizedERC20.address, amount);
+        await TestToken.connect(user).approve(TestCollateralizedERC20.address, amount);
+        await TestCollateralizedERC20.connect(user).mint(amount);
       });
 
-      it('increments recipient collateralizedErc20 balance', async function () {
-        expect(await TestCollateralizedErc20.balanceOf(user.address)).to.be.equal(amount.add(amountAfterPayback));
+      it('increments recipient collateralizedErc20 balance', async () => {
+        expect(await TestCollateralizedERC20.balanceOf(user.address)).to.be.equal(amount.add(amountAfterPayback));
       });
 
-      it('increments totalReserve', async function () {
-        expect(await TestCollateralizedErc20.totalReserve()).to.be.equal(amount.mul(3));
+      it('increments totalReserve', async () => {
+        expect(await TestCollateralizedERC20.totalReserve()).to.be.equal(amount.mul(3));
       });
 
-      it('emits Mint event', async function () {
-        const event = TestCollateralizedErc20.filters.Mint();
+      it('emits Mint event', async () => {
+        const event = TestCollateralizedERC20.filters.Mint();
         // TODO check ammounts on mint event
         expect(event).to.be.not.null;
       });
     });
 
-    describe('for non-clean rounding', function () {
+    describe('for non-clean rounding', () => {
       const amountAfterPaybackFloor = ethers.BigNumber.from(333);
 
-      beforeEach('minting', async function () {
-        await TestToken.connect(user).approve(TestCollateralizedErc20.address, amount);
-        await TestCollateralizedErc20.connect(user).mint(amount);
-        await TestToken.connect(user).transfer(TestCollateralizedErc20.address, amount.mul(2));
-        await TestToken.connect(user).approve(TestCollateralizedErc20.address, amount);
-        await TestCollateralizedErc20.connect(user).mint(amount);
+      beforeEach('minting', async () => {
+        await TestToken.connect(user).approve(TestCollateralizedERC20.address, amount);
+        await TestCollateralizedERC20.connect(user).mint(amount);
+        await TestToken.connect(user).transfer(TestCollateralizedERC20.address, amount.mul(2));
+        await TestToken.connect(user).approve(TestCollateralizedERC20.address, amount);
+        await TestCollateralizedERC20.connect(user).mint(amount);
       });
 
-      it('increments recipient collateralizedErc20 balance', async function () {
-        expect(await TestCollateralizedErc20.balanceOf(user.address)).to.be.equal(amount.add(amountAfterPaybackFloor));
+      it('increments recipient collateralizedErc20 balance', async () => {
+        expect(await TestCollateralizedERC20.balanceOf(user.address)).to.be.equal(amount.add(amountAfterPaybackFloor));
       });
 
-      it('increments totalReserve', async function () {
-        expect(await TestCollateralizedErc20.totalReserve()).to.be.equal(amount.mul(4));
+      it('increments totalReserve', async () => {
+        expect(await TestCollateralizedERC20.totalReserve()).to.be.equal(amount.mul(4));
       });
 
-      it('emits Mint event', async function () {
-        const event = TestCollateralizedErc20.filters.Mint();
+      it('emits Mint event', async () => {
+        const event = TestCollateralizedERC20.filters.Mint();
         // TODO check ammounts on mint event
         expect(event).to.be.not.null;
       });
@@ -145,135 +141,135 @@ describe('TestCollateralizedErc20', function () {
 
 
 
-  describe('redeem', function () {
+  describe('redeem', () => {
     const zero = ethers.BigNumber.from(0);
     const amount = ethers.BigNumber.from(1000);
     const amountAfterPayback = ethers.BigNumber.from(500);
 
-    describe('when redeeming with zero balance', function () {
+    describe('when redeeming with zero balance', () => {
       let balance: BigNumber;
 
-      beforeEach('redeem', async function () {
-        balance = await TestCollateralizedErc20.balanceOf(user.address);
+      beforeEach('redeem', async () => {
+        balance = await TestCollateralizedERC20.balanceOf(user.address);
       });
 
-      it('reverts', async function () {
-        await expect(TestCollateralizedErc20.connect(user).redeem(balance.add(1)))
+      it('reverts', async () => {
+        await expect(TestCollateralizedERC20.connect(user).redeem(balance.add(1)))
               .to.be
               .revertedWith('CollateralizedToken: no supply');
       });
     });
 
-    describe('when redeeming more than balance', function () {
+    describe('when redeeming more than balance', () => {
       let balance: BigNumber;
 
-      beforeEach('redeem', async function () {
-        await TestToken.connect(user).approve(TestCollateralizedErc20.address, amount);
-        await TestCollateralizedErc20.connect(user).mint(amount);
-        balance = await TestCollateralizedErc20.balanceOf(user.address);
+      beforeEach('redeem', async () => {
+        await TestToken.connect(user).approve(TestCollateralizedERC20.address, amount);
+        await TestCollateralizedERC20.connect(user).mint(amount);
+        balance = await TestCollateralizedERC20.balanceOf(user.address);
       });
 
-      it('reverts', async function () {
-        await expect(TestCollateralizedErc20.connect(user).redeem(balance.add(1)))
+      it('reverts', async () => {
+        await expect(TestCollateralizedERC20.connect(user).redeem(balance.add(1)))
                   .to.be
                   .revertedWith('ERC20: burn amount exceeds balance');
       });
     });
 
-    describe('for a single-mint pool', function () {
-      beforeEach('redeeming', async function () {
-        await TestToken.connect(user).approve(TestCollateralizedErc20.address, amount);
-        await TestCollateralizedErc20.connect(user).mint(amount);
-        await TestCollateralizedErc20.connect(user).redeem(amount);
+    describe('for a single-mint pool', () => {
+      beforeEach('redeeming', async () => {
+        await TestToken.connect(user).approve(TestCollateralizedERC20.address, amount);
+        await TestCollateralizedERC20.connect(user).mint(amount);
+        await TestCollateralizedERC20.connect(user).redeem(amount);
       });
 
-      it('decrements recipient collateralizedErc20 balance', async function () {
-        expect(await TestCollateralizedErc20.balanceOf(user.address)).to.be.equal(zero);
+      it('decrements recipient collateralizedErc20 balance', async () => {
+        expect(await TestCollateralizedERC20.balanceOf(user.address)).to.be.equal(zero);
       });
 
-      it('decrements totalReserve', async function () {
-        expect(await TestCollateralizedErc20.totalReserve()).to.be.equal(zero);
+      it('decrements totalReserve', async () => {
+        expect(await TestCollateralizedERC20.totalReserve()).to.be.equal(zero);
       });
 
-      it('emits Redeem event', async function () {
-        const event = TestCollateralizedErc20.filters.Redeem();
+      it('emits Redeem event', async () => {
+        const event = TestCollateralizedERC20.filters.Redeem();
         // TODO check ammounts on mint event
         expect(event).to.be.not.null;
       });
     });
 
-    describe('for a multi-mint pool', function () {
-      beforeEach('redeeming', async function () {
-        await TestToken.connect(user).approve(TestCollateralizedErc20.address, amount);
-        await TestCollateralizedErc20.connect(user).mint(amount);
-        await TestToken.connect(user).transfer(TestCollateralizedErc20.address, amount);
-        await TestToken.connect(user).approve(TestCollateralizedErc20.address, amount);
-        await TestCollateralizedErc20.connect(user).mint(amount);
-        await TestCollateralizedErc20.connect(user).redeem(amountAfterPayback);
+    describe('for a multi-mint pool', () => {
+      beforeEach('redeeming', async () => {
+        await TestToken.connect(user).approve(TestCollateralizedERC20.address, amount);
+        await TestCollateralizedERC20.connect(user).mint(amount);
+        await TestToken.connect(user).transfer(TestCollateralizedERC20.address, amount);
+        await TestToken.connect(user).approve(TestCollateralizedERC20.address, amount);
+        await TestCollateralizedERC20.connect(user).mint(amount);
+        await TestCollateralizedERC20.connect(user).redeem(amountAfterPayback);
       });
 
-      it('decrements recipient collateralizedErc20 balance', async function () {
-        expect(await TestCollateralizedErc20.balanceOf(user.address)).to.be.equal(amount);
+      it('decrements recipient collateralizedErc20 balance', async () => {
+        expect(await TestCollateralizedERC20.balanceOf(user.address)).to.be.equal(amount);
       });
 
-      it('decrements totalReserve', async function () {
-        expect(await TestCollateralizedErc20.totalReserve()).to.be.equal(amount.mul(2));
+      it('decrements totalReserve', async () => {
+        expect(await TestCollateralizedERC20.totalReserve()).to.be.equal(amount.mul(2));
       });
 
-      it('emits Redeem event', async function () {
-        const event = TestCollateralizedErc20.filters.Redeem();
+      it('emits Redeem event', async () => {
+        const event = TestCollateralizedERC20.filters.Redeem();
         // TODO check ammounts on mint event
         expect(event).to.be.not.null;
       });
     });
 
-    describe('for emptying multi-mint pool', function () {
-      beforeEach('redeeming', async function () {
-        await TestToken.connect(user).approve(TestCollateralizedErc20.address, amount);
-        await TestCollateralizedErc20.connect(user).mint(amount);
-        await TestToken.connect(user).transfer(TestCollateralizedErc20.address, amount);
-        await TestToken.connect(user).approve(TestCollateralizedErc20.address, amount);
-        await TestCollateralizedErc20.connect(user).mint(amount);
-        await TestCollateralizedErc20.connect(user).redeem(amountAfterPayback);
-        await TestCollateralizedErc20.connect(user).redeem(amount);
+    describe('for emptying multi-mint pool', () => {
+      beforeEach('redeeming', async () => {
+        await TestToken.connect(user).approve(TestCollateralizedERC20.address, amount);
+        await TestCollateralizedERC20.connect(user).mint(amount);
+        await TestToken.connect(user).transfer(TestCollateralizedERC20.address, amount);
+        await TestToken.connect(user).approve(TestCollateralizedERC20.address, amount);
+        await TestCollateralizedERC20.connect(user).mint(amount);
+        await TestCollateralizedERC20.connect(user).redeem(amountAfterPayback);
+        await TestCollateralizedERC20.connect(user).redeem(amount);
       });
 
-      it('decrements recipient collateralizedErc20 balance', async function () {
-        expect(await TestCollateralizedErc20.balanceOf(user.address)).to.be.equal(zero);
+      it('decrements recipient collateralizedErc20 balance', async () => {
+        expect(await TestCollateralizedERC20.balanceOf(user.address)).to.be.equal(zero);
       });
 
-      it('decrements totalReserve', async function () {
-        expect(await TestCollateralizedErc20.totalReserve()).to.be.equal(zero);
+      it('decrements totalReserve', async () => {
+        expect(await TestCollateralizedERC20.totalReserve()).to.be.equal(zero);
       });
 
-      it('emits Redeem event', async function () {
-        const event = TestCollateralizedErc20.filters.Redeem();
+      it('emits Redeem event', async () => {
+        const event = TestCollateralizedERC20.filters.Redeem();
         // TODO check ammounts on mint event
         expect(event).to.be.not.null;
       });
     });
 
-    describe('for emptying multi-mint non-clean rounding pool', function () {
-      beforeEach('redeeming', async function () {
-        await TestToken.connect(user).approve(TestCollateralizedErc20.address, amount);
-        await TestCollateralizedErc20.connect(user).mint(amount);
-        await TestToken.connect(user).transfer(TestCollateralizedErc20.address, amount.div(2));
-        await TestToken.connect(user).approve(TestCollateralizedErc20.address, amount);
-        await TestCollateralizedErc20.connect(user).mint(amount);
-        await TestCollateralizedErc20.connect(user).redeem(amount);
-        await TestCollateralizedErc20.connect(user).redeem(ethers.BigNumber.from(666));
+    describe('for emptying multi-mint non-clean rounding pool', () => {
+      beforeEach('redeeming', async () => {
+        await TestToken.connect(user).approve(TestCollateralizedERC20.address, amount);
+        await TestCollateralizedERC20.connect(user).mint(amount);
+        await TestToken.connect(user).transfer(TestCollateralizedERC20.address, amount.div(2));
+        await TestToken.connect(user).approve(TestCollateralizedERC20.address, amount);
+        await TestCollateralizedERC20.connect(user).mint(amount);
+        await TestCollateralizedERC20.connect(user).redeem(amount);
+        await TestCollateralizedERC20.connect(user).redeem(ethers.BigNumber.from(666));
       });
 
-      it('decrements recipient collateralizedErc20 balance', async function () {
-        expect(await TestCollateralizedErc20.balanceOf(user.address)).to.be.equal(zero);
+      it('decrements recipient collateralizedErc20 balance', async () => {
+        expect(await TestCollateralizedERC20.balanceOf(user.address)).to.be.equal(zero);
       });
 
-      it('decrements totalReserve', async function () {
-        expect(await TestCollateralizedErc20.totalReserve()).to.be.equal(zero);
+      it('decrements totalReserve', async () => {
+        expect(await TestCollateralizedERC20.totalReserve()).to.be.equal(zero);
       });
 
-      it('emits both Redeem events', async function () {
-        const event = TestCollateralizedErc20.filters.Redeem();
+      it('emits both Redeem events', async () => {
+        const event = TestCollateralizedERC20.filters.Redeem();
         // TODO check ammounts on mint event
         expect(event).to.be.not.null;
       });
@@ -281,136 +277,136 @@ describe('TestCollateralizedErc20', function () {
   });
 
 
-  describe('redeemUnderlying', function () {
+  describe('redeemUnderlying', () => {
     const zero = ethers.BigNumber.from(0);
     const amount = ethers.BigNumber.from(1000);
     const amountAfterPayback = ethers.BigNumber.from(500);
 
-    describe('when redeeming with zero balance', function () {
+    describe('when redeeming with zero balance', () => {
       let balance: BigNumber;
 
-      beforeEach('redeem', async function () {
-        balance = await TestCollateralizedErc20.balanceOfUnderlying(user.address);
+      beforeEach('redeem', async () => {
+        balance = await TestCollateralizedERC20.balanceOfUnderlying(user.address);
       });
 
-      it('reverts', async function () {
+      it('reverts', async () => {
 
-        await expect(TestCollateralizedErc20.connect(user).redeemUnderlying(balance.add(1)))
+        await expect(TestCollateralizedERC20.connect(user).redeemUnderlying(balance.add(1)))
               .to.be
               .revertedWith('CollateralizedToken: no reserve');
       });
     });
 
-    describe('when redeeming more than balance', function () {
+    describe('when redeeming more than balance', () => {
       let balance: BigNumber;
 
-      beforeEach('redeem', async function () {
-        await TestToken.connect(user).approve(TestCollateralizedErc20.address, amount);
-        await TestCollateralizedErc20.connect(user).mint(amount);
-        balance = await TestCollateralizedErc20.balanceOf(user.address);
+      beforeEach('redeem', async () => {
+        await TestToken.connect(user).approve(TestCollateralizedERC20.address, amount);
+        await TestCollateralizedERC20.connect(user).mint(amount);
+        balance = await TestCollateralizedERC20.balanceOf(user.address);
       });
 
-      it('reverts', async function () {
-        await expect(TestCollateralizedErc20.redeemUnderlying(balance.add(1)))
+      it('reverts', async () => {
+        await expect(TestCollateralizedERC20.redeemUnderlying(balance.add(1)))
               .to.be
               .revertedWith('ERC20: burn amount exceeds balance');
       });
     });
 
-    describe('for a single-mint pool', function () {
-      beforeEach('redeeming', async function () {
-        await TestToken.connect(user).approve(TestCollateralizedErc20.address, amount);
-        await TestCollateralizedErc20.connect(user).mint(amount);
-        await TestCollateralizedErc20.connect(user).redeemUnderlying(amount);
+    describe('for a single-mint pool', () => {
+      beforeEach('redeeming', async () => {
+        await TestToken.connect(user).approve(TestCollateralizedERC20.address, amount);
+        await TestCollateralizedERC20.connect(user).mint(amount);
+        await TestCollateralizedERC20.connect(user).redeemUnderlying(amount);
       });
 
-      it('decrements recipient collateralizedErc20 balance', async function () {
-        expect(await TestCollateralizedErc20.balanceOf(user.address)).to.be.equal(zero);
+      it('decrements recipient collateralizedErc20 balance', async () => {
+        expect(await TestCollateralizedERC20.balanceOf(user.address)).to.be.equal(zero);
       });
 
-      it('decrements totalReserve', async function () {
-        expect(await TestCollateralizedErc20.totalReserve()).to.be.equal(zero);
+      it('decrements totalReserve', async () => {
+        expect(await TestCollateralizedERC20.totalReserve()).to.be.equal(zero);
       });
 
-      it('emits Redeem event', async function () {
-        const event = TestCollateralizedErc20.filters.Redeem();
+      it('emits Redeem event', async () => {
+        const event = TestCollateralizedERC20.filters.Redeem();
         // TODO check ammounts on mint event
         expect(event).to.be.not.null;
       });
     });
 
-    describe('for a multi-mint pool', function () {
-      beforeEach('redeeming', async function () {
-        await TestToken.connect(user).approve(TestCollateralizedErc20.address, amount);
-        await TestCollateralizedErc20.connect(user).mint(amount);
-        await TestToken.connect(user).transfer(TestCollateralizedErc20.address, amount);
-        await TestToken.connect(user).approve(TestCollateralizedErc20.address, amount);
-        await TestCollateralizedErc20.connect(user).mint(amount);
-        await TestCollateralizedErc20.connect(user).redeemUnderlying(amount);
+    describe('for a multi-mint pool', () => {
+      beforeEach('redeeming', async () => {
+        await TestToken.connect(user).approve(TestCollateralizedERC20.address, amount);
+        await TestCollateralizedERC20.connect(user).mint(amount);
+        await TestToken.connect(user).transfer(TestCollateralizedERC20.address, amount);
+        await TestToken.connect(user).approve(TestCollateralizedERC20.address, amount);
+        await TestCollateralizedERC20.connect(user).mint(amount);
+        await TestCollateralizedERC20.connect(user).redeemUnderlying(amount);
       });
 
-      it('decrements recipient collateralizedErc20 balance', async function () {
-        expect(await TestCollateralizedErc20.balanceOf(user.address)).to.be.equal(amount);
+      it('decrements recipient collateralizedErc20 balance', async () => {
+        expect(await TestCollateralizedERC20.balanceOf(user.address)).to.be.equal(amount);
       });
 
-      it('decrements totalReserve', async function () {
-        expect(await TestCollateralizedErc20.totalReserve()).to.be.equal(amount.mul(2));
+      it('decrements totalReserve', async () => {
+        expect(await TestCollateralizedERC20.totalReserve()).to.be.equal(amount.mul(2));
       });
 
-      it('emits Redeem event', async function () {
-        const event = TestCollateralizedErc20.filters.Redeem();
+      it('emits Redeem event', async () => {
+        const event = TestCollateralizedERC20.filters.Redeem();
         // TODO check ammounts on mint event
         expect(event).to.be.not.null;
       });
     });
 
-    describe('for emptying multi-mint pool', function () {
-      beforeEach('redeeming', async function () {
-        await TestToken.connect(user).approve(TestCollateralizedErc20.address, amount);
-        await TestCollateralizedErc20.connect(user).mint(amount);
-        await TestToken.connect(user).transfer(TestCollateralizedErc20.address, amount);
-        await TestToken.connect(user).approve(TestCollateralizedErc20.address, amount);
-        await TestCollateralizedErc20.connect(user).mint(amount);
-        await TestCollateralizedErc20.connect(user).redeemUnderlying(amount);
-        await TestCollateralizedErc20.connect(user).redeemUnderlying(amount.mul(2));
+    describe('for emptying multi-mint pool', () => {
+      beforeEach('redeeming', async () => {
+        await TestToken.connect(user).approve(TestCollateralizedERC20.address, amount);
+        await TestCollateralizedERC20.connect(user).mint(amount);
+        await TestToken.connect(user).transfer(TestCollateralizedERC20.address, amount);
+        await TestToken.connect(user).approve(TestCollateralizedERC20.address, amount);
+        await TestCollateralizedERC20.connect(user).mint(amount);
+        await TestCollateralizedERC20.connect(user).redeemUnderlying(amount);
+        await TestCollateralizedERC20.connect(user).redeemUnderlying(amount.mul(2));
       });
 
-      it('decrements recipient collateralizedErc20 balance', async function () {
-        expect(await TestCollateralizedErc20.balanceOf(user.address)).to.be.equal(zero);
+      it('decrements recipient collateralizedErc20 balance', async () => {
+        expect(await TestCollateralizedERC20.balanceOf(user.address)).to.be.equal(zero);
       });
 
-      it('decrements totalReserve', async function () {
-        expect(await TestCollateralizedErc20.totalReserve()).to.be.equal(zero);
+      it('decrements totalReserve', async () => {
+        expect(await TestCollateralizedERC20.totalReserve()).to.be.equal(zero);
       });
 
-      it('emits Redeem event', async function () {
-        const event = TestCollateralizedErc20.filters.Redeem();
+      it('emits Redeem event', async () => {
+        const event = TestCollateralizedERC20.filters.Redeem();
         // TODO check ammounts on mint event
         expect(event).to.be.not.null;
       });
     });
 
-    describe('for emptying multi-mint non-clean rounding pool', function () {
-      beforeEach('redeeming', async function () {
-        await TestToken.connect(user).approve(TestCollateralizedErc20.address, amount);
-        await TestCollateralizedErc20.connect(user).mint(amount);
-        await TestToken.connect(user).transfer(TestCollateralizedErc20.address, amount.div(2));
-        await TestToken.connect(user).approve(TestCollateralizedErc20.address, amount);
-        await TestCollateralizedErc20.connect(user).mint(amount, {from: user.address});
-        await TestCollateralizedErc20.connect(user).redeemUnderlying(ethers.BigNumber.from(1500));
-        await TestCollateralizedErc20.connect(user).redeemUnderlying(amount);
+    describe('for emptying multi-mint non-clean rounding pool', () => {
+      beforeEach('redeeming', async () => {
+        await TestToken.connect(user).approve(TestCollateralizedERC20.address, amount);
+        await TestCollateralizedERC20.connect(user).mint(amount);
+        await TestToken.connect(user).transfer(TestCollateralizedERC20.address, amount.div(2));
+        await TestToken.connect(user).approve(TestCollateralizedERC20.address, amount);
+        await TestCollateralizedERC20.connect(user).mint(amount, {from: user.address});
+        await TestCollateralizedERC20.connect(user).redeemUnderlying(ethers.BigNumber.from(1500));
+        await TestCollateralizedERC20.connect(user).redeemUnderlying(amount);
       });
 
-      it('decrements recipient collateralizedErc20 balance', async function () {
-        expect(await TestCollateralizedErc20.balanceOf(user.address)).to.be.equal(zero);
+      it('decrements recipient collateralizedErc20 balance', async () => {
+        expect(await TestCollateralizedERC20.balanceOf(user.address)).to.be.equal(zero);
       });
 
-      it('decrements totalReserve', async function () {
-        expect(await TestCollateralizedErc20.totalReserve()).to.be.equal(zero);
+      it('decrements totalReserve', async () => {
+        expect(await TestCollateralizedERC20.totalReserve()).to.be.equal(zero);
       });
 
-      it('emits both Redeem events', async function () {
-        const event = TestCollateralizedErc20.filters.Redeem();
+      it('emits both Redeem events', async () => {
+        const event = TestCollateralizedERC20.filters.Redeem();
         // TODO check ammounts on mint event
         expect(event).to.be.not.null;
       });
@@ -418,18 +414,18 @@ describe('TestCollateralizedErc20', function () {
   });
 
 
-  describe('underlying', function () {
-    describe('when calling underlying', function () {
-      it('returns underlying token', async function () {
-          expect(await TestCollateralizedErc20.underlying()).to.be.equal(TestToken.address);
+  describe('underlying', () => {
+    describe('when calling underlying', () => {
+      it('returns underlying token', async () => {
+          expect(await TestCollateralizedERC20.underlying()).to.be.equal(TestToken.address);
         });
     });
   });
 
-  describe('isUnderlyingEther', function () {
-    describe('when calling isUnderlyingEther', function () {
-      it('returns false', async function () {
-        expect(await TestCollateralizedErc20.isUnderlyingEther()).to.be.equal(false);
+  describe('isUnderlyingEther', () => {
+    describe('when calling isUnderlyingEther', () => {
+      it('returns false', async () => {
+        expect(await TestCollateralizedERC20.isUnderlyingEther()).to.be.equal(false);
       });
     });
   });

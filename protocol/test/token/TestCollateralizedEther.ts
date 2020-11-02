@@ -20,7 +20,7 @@ describe("TestCollateralizedEther", () => {
 
     beforeEach(async () => {
         const TestCollateralizedEtherFactory = await ethers.getContractFactory("TestCollateralizedEther");
-        TestCollateralizedEther = await TestCollateralizedEtherFactory.deploy("Test Collateralized Ether", "tkETH");
+        TestCollateralizedEther = await TestCollateralizedEtherFactory.deploy("Collateralized Ether", "kETH");
         await TestCollateralizedEther.deployed();
     });
 

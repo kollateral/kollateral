@@ -20,15 +20,16 @@
 pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 
 abstract contract UnlimitedApprovalERC20 is ERC20 {
 
     function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
 
         _transfer(sender, recipient, amount);
-
+        // Check for and update remaining allowance
         if (allowance(sender, _msgSender()) != uint256(-1)) {
-            _approve(sender, _msgSender(), (allowance(sender, _msgSender()) - amount));
+            _approve(sender, _msgSender(), SafeMath.sub(allowance(sender, _msgSender()), amount, "UnlimitedApprovalERC20: transfer amount exceeds allowance"));
         }
 
         return true;

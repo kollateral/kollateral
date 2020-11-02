@@ -28,9 +28,7 @@ abstract contract CollateralizedERC20 is CollateralizedToken {
 
     function mint(uint256 tokenAmount) external returns (bool) {
         IERC20 token = IERC20(underlying());
-        require(
-            token.transferFrom(msg.sender, address(this), tokenAmount),
-                "CollateralizedERC20: token transferFrom failed");
+        require(token.transferFrom(msg.sender, address(this), tokenAmount), "CollateralizedERC20: token transferFrom failed");
         return mintInternal(tokenAmount);
     }
 
