@@ -55,7 +55,6 @@ abstract contract KToken is IInvocationHook, CollateralizedToken, Ownable, Pausa
     function invoke(address invokeTo, bytes calldata invokeData, uint256 underlyingAmount)
     external
     payable
-    nonReentrant
     whenNotPaused
     {
         require(invokeTo != address(this), "KToken: cannot invoke this contract");

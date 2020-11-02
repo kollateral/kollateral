@@ -30,6 +30,7 @@ describe('KEther', () => {
 
     let KEther: Contract;
     let TestInvokable: Contract;
+
     beforeEach(async () => {
         const KEtherFactory = await ethers.getContractFactory("KEther");
         KEther = await KEtherFactory.connect(owner).deploy();
@@ -45,28 +46,30 @@ describe('KEther', () => {
         await TestInvokable.deployed();
         // TODO: investigate why this was included (test re-entrancy or just fallback?)
         // https://github.com/kollateral/kollateral/blob/518286cc691de54e61fc8773eeeaaa3e732e5389/protocol/test/ktoken/KEther.test.js#L32
-        // let testInvokableTx = await user.sendTransaction({
-        //     value: noopInvokerBalance,
-        //     to: TestInvokable.address
-        // });
+        let testInvokableTx = await user.sendTransaction({
+            value: noopInvokerBalance,
+            to: TestInvokable.address
+        });
         await KEther.mint({ value: kEtherUnderlyingBalance });
     });
 
     describe('invoke', () => {
+
         describe('when borrowing the whole pool and successfully repaying', () => {
+
             const resultingPlatformReward = ethers.BigNumber.from(50);
             const resultingPoolReward = ethers.BigNumber.from(200);
-        });
 
-        beforeEach('invoking...', async () => {
-            let vaultStartingBalance = await vault.getBalance();
-            const invokeTo = TestInvokable.address;
-            const receipt = await KEther.invoke(invokeTo, [], kEtherUnderlyingBalance);
-            let underlying = await KEther.underlying();
-        });
+            beforeEach('invoking...', async () => {
+                let vaultStartingBalance = await vault.getBalance();
+                const invokeTo = TestInvokable.address;
+                const receipt = await KEther.invoke(invokeTo, [], kEtherUnderlyingBalance);
+                // let underlying = await KEther.underlying();
+            });
 
-        it('increments totalReserve', async () => {
-            expect(await KEther.totalReserve()).to.be.equal(kEtherUnderlyingBalanceWithReward);
+            it('increments totalReserve', async () => {
+                expect(await KEther.totalReserve()).to.be.equal(kEtherUnderlyingBalanceWithReward);
+            });
         });
     });
 });

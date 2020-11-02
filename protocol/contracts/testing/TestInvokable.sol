@@ -34,6 +34,8 @@ contract TestInvokable is KingmakerInvokable {
         bool isCurrentTokenEther);
     event SwapDump(bytes swapData);
 
+    fallback () external payable { }
+
     // To setup state for specific tests
     function invoke(address invokeAddress, bytes calldata invokeData) external payable {
         externalCall(invokeAddress, msg.value, invokeData);
@@ -89,5 +91,4 @@ contract TestInvokable is KingmakerInvokable {
             isCurrentTokenEther());
     }
 
-    fallback() external { }
 }
