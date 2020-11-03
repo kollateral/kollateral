@@ -55,6 +55,7 @@ abstract contract KToken is IInvocationHook, CollateralizedToken, Ownable, Pausa
     function invoke(address invokeTo, bytes calldata invokeData, uint256 underlyingAmount)
     external
     payable
+    nonReentrant
     whenNotPaused
     {
         require(invokeTo != address(this), "KToken: cannot invoke this contract");
@@ -154,5 +155,13 @@ abstract contract KToken is IInvocationHook, CollateralizedToken, Ownable, Pausa
 
     function setPlatformVaultAddress(address platformVaultAddress) external onlyOwner {
         _platformVaultAddress = platformVaultAddress;
+    }
+
+    function pause() external onlyOwner whenNotPaused {
+        _pause();
+    }
+
+    function unpause() external onlyOwner whenPaused {
+        _unpause();
     }
 }
