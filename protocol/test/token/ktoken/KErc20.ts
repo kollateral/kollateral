@@ -37,20 +37,20 @@ describe('KErc20', function () {
         TestInvokable = await TestInvokableFactory.connect(owner).deploy();
         await TestInvokable.deployed();
 
-        const KErc20Factory = await ethers.getContractFactory('KErc20');
-        kErc20 = await KErc20Factory.connect(owner).deploy();
-        await kErc20.deployed();
-
-        await kErc20.connect(owner.address).setPlatformReward(platformRewardBips);
-        await kErc20.connect(owner.address).setPoolReward(poolRewardBips);
-        await kErc20.connect(owner.address).setPlatformVaultAddress(vault.address);
-
         const TestTokenFactory = await ethers.getContractFactory('TestToken');
-        TestToken = await TestTokenFactory.connect(owner).deploy();
+        TestToken = await TestTokenFactory.connect(owner).deploy("Test Token", "TT");
         await TestToken.deployed();
 
+        const KErc20Factory = await ethers.getContractFactory('KErc20');
+        kErc20 = await KErc20Factory.connect(owner).deploy(TestToken.address, "kingMaker TT", "kTT");
+        await kErc20.deployed();
+
+        await kErc20.connect(owner).setPlatformReward(platformRewardBips);
+        await kErc20.connect(owner).setPoolReward(poolRewardBips);
+        await kErc20.connect(owner).setPlatformVaultAddress(vault.address);
+
         await TestToken.mint(noopInvokerBalance.toString());
-        await TestToken.transfer(this.invokable.address, noopInvokerBalance.toString());
+        await TestToken.transfer(TestInvokable.address, noopInvokerBalance.toString());
 
         await TestToken.mint(kErc20UnderlyingBalance.toString());
         await TestToken.approve(kErc20.address, kErc20UnderlyingBalance.toString());
@@ -64,7 +64,7 @@ describe('KErc20', function () {
 
             beforeEach('invoking', async function () {
                 this.vaultStartingBalance = await TestToken.balanceOf(vault.address);
-                const invokeTo = this.invokable.address;
+                const invokeTo = TestInvokable.address;
                 const receipt = await kErc20.invoke(invokeTo, [], kErc20UnderlyingBalance);
                 this.logs = receipt.logs;
                 this.txHash = receipt.tx;
@@ -82,7 +82,7 @@ describe('KErc20', function () {
             });
 
             it('emits Invocation event', async function () {
-                const event = kErc20.filters.Invokation();
+                const event = kErc20.filters.Invocation();
                 // TODO properly test event content
                 expect(event).to.be.not.null;
             });
@@ -105,7 +105,7 @@ describe('KErc20', function () {
             beforeEach('invoking', async function () {
                 this.vaultStartingBalance = await TestToken.balanceOf(vault.address);
                 const invokeData = encodeExecute(4, ["uint256"], [testPayableAmount.toString()]);
-                const invokeTo = this.invokable.address;
+                const invokeTo = TestInvokable.address;
                 const receipt = await kErc20.invoke(invokeTo, invokeData, kErc20UnderlyingBalance, {value: testPayableAmount});
                 this.logs = receipt.logs;
                 this.txHash = receipt.tx;
@@ -123,7 +123,7 @@ describe('KErc20', function () {
             });
 
             it('emits Invocation event', async function () {
-                const event = kErc20.filters.Invokation();
+                const event = kErc20.filters.Invocation();
                 // TODO properly test event content
                 expect(event).to.be.not.null;
             });
@@ -144,7 +144,7 @@ describe('KErc20', function () {
 
             it('reverts', async function () {
                 const invokeData = encodeExecute(1, ["uint256"], [tooMuch.toString()]);
-                const invokeTo = this.invokable.address;
+                const invokeTo = TestInvokable.address;
                 await expect(kErc20.invoke(invokeTo, invokeData, kErc20UnderlyingBalance))
                     .to.be.revertedWith("KToken: incorrect ending balance");
             });
@@ -155,7 +155,7 @@ describe('KErc20', function () {
 
             it('reverts', async function () {
                 const invokeData = encodeExecute(1, ["uint256"], [tooLittle.toString()]);
-                const invokeTo = this.invokable.address;
+                const invokeTo = TestInvokable.address;
                 await expect(kErc20.invoke(invokeTo, invokeData, kErc20UnderlyingBalance))
                     .to.be.revertedWith("KToken: incorrect ending balance");
             });
@@ -192,8 +192,8 @@ describe('KErc20', function () {
             });
 
             it('reverts', async function () {
-                const invokeTo = this.invokable.address;
-                const invokeData = await this.invokable.contract.methods.execute("0x").encodeABI();
+                const invokeTo = TestInvokable.address;
+                const invokeData = await TestInvokable.contract.methods.execute("0x").encodeABI();
                 await expect(kErc20.invoke(invokeTo, invokeData, kErc20UnderlyingBalance))
                     .to.be.revertedWith("Pausable: paused");
             });
@@ -206,7 +206,7 @@ describe('KErc20', function () {
         describe('when kErc20 invokes kErc20', function () {
             it('reverts', async function () {
                 const invokeData = await kErc20.contract.methods
-                    .invoke(this.invokable.address, "0x", kErc20UnderlyingBalance.toNumber().toString(10))
+                    .invoke(TestInvokable.address, "0x", kErc20UnderlyingBalance.toNumber().toString(10))
                     .encodeABI();
 
                 await expect(kErc20.invoke(kErc20.address, invokeData, kErc20UnderlyingBalance))
@@ -218,14 +218,14 @@ describe('KErc20', function () {
             it('reverts', async function () {
                 // (A) Invoker: invoke -> invokable fallback(), send whole kErc20 pool
                 const invokableRunInvokeData = await kErc20.contract.methods
-                    .invoke(this.invokable.address, "0x", kErc20UnderlyingBalance.toNumber().toString(10))
+                    .invoke(TestInvokable.address, "0x", kErc20UnderlyingBalance.toNumber().toString(10))
                     .encodeABI();
 
                 // (B) Invokable: invoke -> (A)
                 const invokeData = encodeExecute(3, ["address", "bytes"], [kErc20.address, invokableRunInvokeData]);
 
                 // (C) Invoker: invoke -> (B), send whole kErc20 pool
-                const invoke = kErc20.invoke(this.invokable.address, invokeData, kErc20UnderlyingBalance);
+                const invoke = kErc20.invoke(TestInvokable.address, invokeData, kErc20UnderlyingBalance);
 
                 await expect(invoke).to.be.revertedWith("ReentrancyGuard: reentrant call");
             });
@@ -235,7 +235,7 @@ describe('KErc20', function () {
             beforeEach('invoking', async function () {
                 const invokeTo = TestToken.address;
                 const invokeData = TestToken.contract.methods.approve(kErc20.address, ethers.BigNumber.from(1).toString()).encodeABI();
-                await this.invokable.invoke(invokeTo, invokeData);
+                await TestInvokable.invoke(invokeTo, invokeData);
             });
 
             it('reverts', async function () {
@@ -247,7 +247,7 @@ describe('KErc20', function () {
                     .encodeABI();
 
                 // (B) Invokable: invoke -> (A)
-                const invokeTo = this.invokable.address;
+                const invokeTo = TestInvokable.address;
                 const invokeData = encodeExecute(3, ["address", "bytes"], [invokableRunInvokeAddress, invokableRunInvokeData]);
 
                 // (C) Invoker: invoke -> (B), send whole kErc20 pool
@@ -261,11 +261,11 @@ describe('KErc20', function () {
             beforeEach('invoking', async function () {
                 let invokeTo = TestToken.address;
                 let invokeData = TestToken.contract.methods.approve(kErc20.address, ethers.BigNumber.from(1000).toString()).encodeABI();
-                await this.invokable.invoke(invokeTo, invokeData);
+                await TestInvokable.invoke(invokeTo, invokeData);
 
                 invokeTo = kErc20.address;
                 invokeData = kErc20.contract.methods.mint(ethers.BigNumber.from(1000).toString()).encodeABI();
-                await this.invokable.invoke(invokeTo, invokeData);
+                await TestInvokable.invoke(invokeTo, invokeData);
             });
 
             it('reverts', async function () {
@@ -276,7 +276,7 @@ describe('KErc20', function () {
                     .encodeABI();
 
                 // (B) Invokable: invoke -> (A)
-                const invokeTo = this.invokable.address;
+                const invokeTo = TestInvokable.address;
                 const invokeData = encodeExecute(3, ["address", "bytes"], [invokableRunInvokeAddress, invokableRunInvokeData]);
 
                 // (C) Invoker: invoke -> (B), send whole kErc20 pool
@@ -290,23 +290,23 @@ describe('KErc20', function () {
             beforeEach('invoking', async function () {
                 let invokeTo = TestToken.address;
                 let invokeData = TestToken.contract.methods.approve(kErc20.address, ethers.BigNumber.from(1000).toString()).encodeABI();
-                await this.invokable.invoke(invokeTo, invokeData);
+                await TestInvokable.invoke(invokeTo, invokeData);
 
                 invokeTo = kErc20.address;
                 invokeData = kErc20.contract.methods.mint(ethers.BigNumber.from(1000).toString()).encodeABI();
-                await this.invokable.invoke(invokeTo, invokeData);
+                await TestInvokable.invoke(invokeTo, invokeData);
             });
 
             it('reverts', async function () {
                 // (A) KEther: redeemUnderlying
-                const b = (await kErc20.balanceOfUnderlying(this.invokable.address)).toString();
+                const b = (await kErc20.balanceOfUnderlying(TestInvokable.address)).toString();
                 const invokableRunInvokeAddress = kErc20.address;
                 const invokableRunInvokeData = await kErc20.contract.methods
                     .redeemUnderlying(1)
                     .encodeABI();
 
                 // (B) Invokable: invoke -> (A)
-                const invokeTo = this.invokable.address;
+                const invokeTo = TestInvokable.address;
                 const invokeData = encodeExecute(3, ["address", "bytes"], [invokableRunInvokeAddress, invokableRunInvokeData]);
 
                 // (C) Invoker: invoke -> (B), send whole kErc20 pool

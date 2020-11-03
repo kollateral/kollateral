@@ -22,7 +22,7 @@ pragma solidity ^0.7.0;
 import "./KToken.sol";
 import "../CollateralizedERC20.sol";
 
-abstract contract KERC20 is KToken, CollateralizedERC20 {
+contract KErc20 is KToken, CollateralizedERC20 {
     constructor (address underlying, string memory name, string memory symbol)
     CollateralizedToken(underlying)
     ERC20(name, symbol)
