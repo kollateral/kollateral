@@ -48,6 +48,6 @@ abstract contract CollateralizedEther is CollateralizedToken, ExternalCaller {
     }
 
     fallback() external payable {
-        mintInternal(msg.value);
+        // mintInternal(msg.value);
     }
 }

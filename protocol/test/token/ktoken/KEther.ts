@@ -36,6 +36,8 @@ describe('KEther', () => {
         KEther = await KEtherFactory.connect(owner).deploy();
         await KEther.deployed();
 
+        console.log("KEther ", KEther.address);
+
         // call admin setters
         await KEther.setPlatformReward(platformRewardBips);
         await KEther.setPoolReward(poolRewardBips);
@@ -44,8 +46,9 @@ describe('KEther', () => {
         const TestInvokableFactory = await ethers.getContractFactory("TestInvokable");
         TestInvokable = await TestInvokableFactory.connect(owner).deploy();
         await TestInvokable.deployed();
-        // TODO: investigate why this was included (test re-entrancy or just fallback?)
-        // https://github.com/kollateral/kollateral/blob/518286cc691de54e61fc8773eeeaaa3e732e5389/protocol/test/ktoken/KEther.test.js#L32
+
+        console.log("TestInvokable ", TestInvokable.address);
+
         let testInvokableTx = await user.sendTransaction({
             value: noopInvokerBalance,
             to: TestInvokable.address
@@ -63,13 +66,12 @@ describe('KEther', () => {
             beforeEach('invoking...', async () => {
                 let vaultStartingBalance = await vault.getBalance();
                 const invokeTo = TestInvokable.address;
-                // TODO: understand why this triggers the reentrancy guard
-                // const receipt = await KEther.invoke(invokeTo, [], kEtherUnderlyingBalance);
-                // let underlying = await KEther.underlying();
+                await KEther.invoke(invokeTo, [], kEtherUnderlyingBalance);
+                await KEther.underlying();
             });
 
             it('increments totalReserve', async () => {
-                // expect(await KEther.totalReserve()).to.be.equal(kEtherUnderlyingBalanceWithReward);
+                expect(await KEther.totalReserve()).to.be.equal(kEtherUnderlyingBalanceWithReward);
             });
         });
     });
