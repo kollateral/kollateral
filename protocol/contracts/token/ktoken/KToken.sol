@@ -50,7 +50,7 @@ abstract contract KToken is IInvocationHook, CollateralizedToken, Ownable, Pausa
     /* Helper - store expected balance for currently executing transaction */
     uint256 internal _currentExpectedBalance;
 
-    constructor () { }
+    constructor() { }
 
     function invoke(address invokeTo, bytes calldata invokeData, uint256 underlyingAmount)
     external
@@ -122,7 +122,7 @@ abstract contract KToken is IInvocationHook, CollateralizedToken, Ownable, Pausa
         return _platformVaultAddress;
     }
 
-    function isKToken() external view returns (bool) {
+    function isKToken() external pure returns (bool) {
         return true;
     }
 
@@ -153,8 +153,8 @@ abstract contract KToken is IInvocationHook, CollateralizedToken, Ownable, Pausa
         _platformRewardBips = platformRewardBips;
     }
 
-    function setPlatformVaultAddress(address platformVaultAddress) external onlyOwner {
-        _platformVaultAddress = platformVaultAddress;
+    function setPlatformVaultAddress(address vaultAddress) external onlyOwner {
+        _platformVaultAddress = vaultAddress;
     }
 
     function pause() external onlyOwner whenNotPaused {

@@ -33,7 +33,7 @@ abstract contract CollateralizedToken is ExtendedMath, ReentrancyGuard, Unlimite
 
     address internal _underlying;
 
-    constructor(address underlying) internal {
+    constructor(address underlying) {
         _underlying = underlying;
     }
 

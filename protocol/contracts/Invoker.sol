@@ -53,7 +53,7 @@ contract Invoker is BalanceCarrier, IInvoker, Ownable {
     uint256 internal _schedulePoolReward;
     uint256 internal _schedulePlatformReward;
 
-    constructor () public BalanceCarrier(address(1)) { }
+    constructor () BalanceCarrier(address(1)) { }
 
     function invoke(address invokeTo, bytes calldata invokeData, address tokenAddress, uint256 tokenAmount)
     override
@@ -263,23 +263,23 @@ contract Invoker is BalanceCarrier, IInvoker, Ownable {
         _poolRewardBips = poolRewardBips;
     }
 
-    function setPoolRewardAddress(address tokenAddress, address poolRewardAddress) external onlyFresh onlyOwner {
-        _poolRewardAddresses[tokenAddress] = poolRewardAddress;
+    function setPoolRewardAddress(address tokenAddress, address rewardAddress) external onlyFresh onlyOwner {
+        _poolRewardAddresses[tokenAddress] = rewardAddress;
     }
 
     function setPlatformReward(uint256 platformRewardBips) external onlyFresh onlyOwner {
         _platformRewardBips = platformRewardBips;
     }
 
-    function setPlatformVaultAddress(address platformVaultAddress) external onlyFresh onlyOwner {
-        _platformVaultAddress = platformVaultAddress;
+    function setPlatformVaultAddress(address vaultAddress) external onlyFresh onlyOwner {
+        _platformVaultAddress = vaultAddress;
     }
 
     /*
      * ASSET HELPERS
      */
 
-    function payableReserveAdjustment() internal returns (uint256) {
+    function payableReserveAdjustment() internal view returns (uint256) {
         return _scheduleTokenAddress == address(1) ? _scheduleInvokeValue : 0;
     }
 
@@ -320,7 +320,7 @@ contract Invoker is BalanceCarrier, IInvoker, Ownable {
     }
 
     /* This contract should never have a token balance at rest. If so it is in error, then transfer the tokens to vault */
-    function removeStuckTokens(address tokenAddress, address to, uint256 amount)
+    function removeStuckTokens(address tokenAddress, uint256 amount)
     external
     onlyFresh
     onlyOwner

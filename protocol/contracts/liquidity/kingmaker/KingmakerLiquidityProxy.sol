@@ -35,7 +35,7 @@ contract KingmakerLiquidityProxy is BalanceCarrier, IInvokable, ILiquidityProxy,
     address internal _scheduleTokenAddress;
     uint256 internal _scheduleTokenAmount;
 
-    constructor () BalanceCarrier(address(1)) public { }
+    constructor () BalanceCarrier(address(1)) { }
 
     function registerPool(address tokenAddress, address kTokenAddress) external onlyOwner {
         _tokenAddressToKTokenAddress[tokenAddress] = kTokenAddress;

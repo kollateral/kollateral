@@ -23,7 +23,7 @@ import "../common/invoke/KingmakerInvokable.sol";
 
 contract TestInvokable is KingmakerInvokable {
 
-    constructor() public { }
+    constructor() { }
 
     event HelperDump(
         address sender,
@@ -33,8 +33,6 @@ contract TestInvokable is KingmakerInvokable {
         uint256 currentRepaymentAmount,
         bool isCurrentTokenEther);
     event SwapDump(bytes swapData);
-
-    fallback () external payable { }
 
     // To setup state for specific tests
     function invoke(address invokeAddress, bytes calldata invokeData) external payable {
@@ -91,4 +89,5 @@ contract TestInvokable is KingmakerInvokable {
             isCurrentTokenEther());
     }
 
+    fallback () external payable { }
 }

@@ -22,8 +22,8 @@ pragma solidity ^0.7.0;
 import "../token/UnlimitedApprovalERC20.sol";
 
 contract TestToken is UnlimitedApprovalERC20 {
+
     constructor (string memory name, string memory symbol)
-    public
     ERC20(name, symbol)
     { }
 

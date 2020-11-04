@@ -55,7 +55,7 @@ contract SoloLiquidityProxy is BalanceCarrier, ICallee, ILiquidityProxy, Ownable
     uint256 internal _scheduleTokenAmount;
 
 
-    constructor (address soloMarginAddress, address payable wethAddress) BalanceCarrier(address(1)) WETHHandler(wethAddress) public {
+    constructor (address soloMarginAddress, address payable wethAddress) BalanceCarrier(address(1)) WETHHandler(wethAddress) {
         _soloMarginAddress = soloMarginAddress;
     }
 

@@ -16,7 +16,7 @@
     limitations under the License.
 
 */
-
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -30,7 +30,7 @@ abstract contract KingmakerInvokable is BalanceCarrier, IInvokable {
 
     uint256 internal MAX_REWARD_BIPS = 100;
 
-    constructor () BalanceCarrier(address(1)) internal { }
+    constructor () BalanceCarrier(address(1)) { }
 
     function repay() internal repaymentSafeguard {
         require(

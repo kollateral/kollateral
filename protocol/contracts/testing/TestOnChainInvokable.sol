@@ -26,7 +26,8 @@ import "../common/invoke/KingmakerInvokable.sol";
  *  NOTICE: ONLY FOR ON-CHAIN TESTING - THIS CONTRACT IS VULNERABLE TO LOSS OF FUNDS
  */
 contract TestOnChainInvokable is KingmakerInvokable, Ownable {
-    constructor() public { }
+
+    constructor() { }
 
     event HelperDump(
         address sender,
@@ -52,7 +53,7 @@ contract TestOnChainInvokable is KingmakerInvokable, Ownable {
             isCurrentTokenEther());
     }
 
-    function withdraw(address tokenAddress, address to, uint256 amount) external onlyOwner returns (bool) {
+    function withdraw(address tokenAddress, uint256 amount) external onlyOwner returns (bool) {
         return transfer(tokenAddress, msg.sender, amount);
     }
 

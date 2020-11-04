@@ -39,15 +39,11 @@ abstract contract CollateralizedEther is CollateralizedToken, ExternalCaller {
         return true;
     }
 
-    function isUnderlyingEther() public override view returns (bool) {
+    function isUnderlyingEther() public override pure returns (bool) {
         return true;
     }
 
     function totalReserve() public override view returns (uint256) {
         return address(this).balance;
-    }
-
-    fallback() external payable {
-        // mintInternal(msg.value);
     }
 }

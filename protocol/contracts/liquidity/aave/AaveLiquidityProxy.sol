@@ -39,7 +39,7 @@ contract AaveLiquidityProxy is BalanceCarrier, ILiquidityProxy {
 
     address payable internal _scheduleInvokerAddress;
 
-    constructor (ILendingPoolAddressesProvider lendingPoolAddressProvider) BalanceCarrier(ETHER_TOKEN_ADDRESS) public {
+    constructor (ILendingPoolAddressesProvider lendingPoolAddressProvider) BalanceCarrier(ETHER_TOKEN_ADDRESS) {
         _lendingPoolAddressProvider = lendingPoolAddressProvider;
     }
 

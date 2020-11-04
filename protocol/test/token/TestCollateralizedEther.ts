@@ -265,10 +265,10 @@ describe("TestCollateralizedEther", () => {
             let redeemEvent: any;
             beforeEach('minting redeeming...', async () => {
                 await TestCollateralizedEther.connect(user).mint({ value: amount });
-                const alternativeMintTx = await user.sendTransaction({
+                await expect(user.sendTransaction({
                     to: TestCollateralizedEther.address,
                     value: amount
-                });
+                })).to.be.reverted;
                 await TestCollateralizedEther.connect(user).mint({ value: amount });
 
                 await TestCollateralizedEther.connect(user).redeemUnderlying(amount);
@@ -282,7 +282,7 @@ describe("TestCollateralizedEther", () => {
             });
 
             it('decrements totalReserve', async function () {
-                expect(await TestCollateralizedEther.totalReserve()).to.be.equal(amount.mul(2));
+                expect(await TestCollateralizedEther.totalReserve()).to.be.equal(amount);
             });
 
             it('emits Redeem event', async function () {
@@ -295,12 +295,11 @@ describe("TestCollateralizedEther", () => {
             let redeemEvent: any;
             beforeEach('minting redeeming...', async () => {
                 await TestCollateralizedEther.connect(user).mint({ value: amount });
-                const alternativeMintTx = await user.sendTransaction({
-                    to: TestCollateralizedEther.address,
-                    value: amount
-                });
+                await expect(user.sendTransaction({
+                     to: TestCollateralizedEther.address,
+                     value: amount
+                })).to.be.reverted;
                 await TestCollateralizedEther.connect(user).mint({ value: amount });
-                await TestCollateralizedEther.connect(user).redeemUnderlying(amount);
                 await TestCollateralizedEther.connect(user).redeemUnderlying(amount.mul(2));
 
                 TestCollateralizedEther.once('Redeem', (redeemer: any, tokenAmount: any, kTokenAmount: any, evt: any) => {
@@ -326,15 +325,15 @@ describe("TestCollateralizedEther", () => {
             let redeemEvent: any;
             beforeEach('minting redeeming...', async () => {
                 await TestCollateralizedEther.connect(user).mint({ value: amount });
-                const alternativeMintTx = await user.sendTransaction({
+                await expect(user.sendTransaction({
                     to: TestCollateralizedEther.address,
                     value: amount.div(2)
-                });
+                })).to.be.reverted;
                 await TestCollateralizedEther.connect(user).mint({ value: amount });
 
-                await TestCollateralizedEther.connect(user).redeemUnderlying(amount.mul(3).div(2));
-                await TestCollateralizedEther.connect(user).redeemUnderlying(amount);
-
+                await TestCollateralizedEther.connect(user).redeemUnderlying(amount.div(2));
+                await TestCollateralizedEther.connect(user).redeemUnderlying(amount.div(3));
+                await TestCollateralizedEther.connect(user).redeemUnderlying(amount.add(167));
                 TestCollateralizedEther.once('Redeem', (redeemer: any, tokenAmount: any, kTokenAmount: any, evt: any) => {
                     redeemEvent = evt;
                 });

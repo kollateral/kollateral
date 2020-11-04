@@ -36,7 +36,7 @@ abstract contract CollateralizedERC20 is CollateralizedToken {
         return IERC20(underlying()).transfer(to, amount);
     }
 
-    function isUnderlyingEther() public override view returns (bool) {
+    function isUnderlyingEther() public override pure returns (bool) {
         return false;
     }
 

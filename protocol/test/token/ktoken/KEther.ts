@@ -36,8 +36,6 @@ describe('KEther', () => {
         KEther = await KEtherFactory.connect(owner).deploy();
         await KEther.deployed();
 
-        console.log("KEther ", KEther.address);
-
         // call admin setters
         await KEther.setPlatformReward(platformRewardBips);
         await KEther.setPoolReward(poolRewardBips);
@@ -46,8 +44,6 @@ describe('KEther', () => {
         const TestInvokableFactory = await ethers.getContractFactory("TestInvokable");
         TestInvokable = await TestInvokableFactory.connect(owner).deploy();
         await TestInvokable.deployed();
-
-        console.log("TestInvokable ", TestInvokable.address);
 
         let testInvokableTx = await user.sendTransaction({
             value: noopInvokerBalance,

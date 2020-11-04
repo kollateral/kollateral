@@ -36,7 +36,7 @@ contract MockSoloMargin is ISoloMargin {
     address internal _scheduleAccountAddress;
     uint256 internal _scheduleAccountNumber;
 
-    constructor(uint256[] memory marketIds, address[] memory tokenAddresses) public {
+    constructor(uint256[] memory marketIds, address[] memory tokenAddresses) {
         for (uint256 i = 0; i < marketIds.length; i++) {
             _markets[marketIds[i]] = tokenAddresses[i];
         }
@@ -115,7 +115,7 @@ contract MockSoloMargin is ISoloMargin {
         return _markets[marketId];
     }
 
-    function repaymentFee(uint256 marketId) internal returns (uint256) {
+    function repaymentFee(uint256 marketId) internal pure returns (uint256) {
         return marketId < 2 ? 1 : 2;
     }
 

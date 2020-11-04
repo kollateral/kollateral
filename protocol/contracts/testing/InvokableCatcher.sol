@@ -20,7 +20,8 @@
 pragma solidity ^0.7.0;
 
 contract InvokableCatcher {
-    constructor() public { }
+
+    constructor() { }
 
     event InvokeCatch(address sender, bytes32 data);
 
