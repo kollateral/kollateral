@@ -269,6 +269,8 @@ describe("TestCollateralizedEther", () => {
                     to: TestCollateralizedEther.address,
                     value: amount
                 });
+                await TestCollateralizedEther.connect(user).mint({ value: amount });
+
                 await TestCollateralizedEther.connect(user).redeemUnderlying(amount);
                 TestCollateralizedEther.once('Redeem', (redeemer: any, tokenAmount: any, kTokenAmount: any, evt: any) => {
                     redeemEvent = evt;
@@ -280,7 +282,7 @@ describe("TestCollateralizedEther", () => {
             });
 
             it('decrements totalReserve', async function () {
-                expect(await TestCollateralizedEther.totalReserve()).to.be.equal(amount);
+                expect(await TestCollateralizedEther.totalReserve()).to.be.equal(amount.mul(2));
             });
 
             it('emits Redeem event', async function () {
@@ -326,11 +328,12 @@ describe("TestCollateralizedEther", () => {
                 await TestCollateralizedEther.connect(user).mint({ value: amount });
                 const alternativeMintTx = await user.sendTransaction({
                     to: TestCollateralizedEther.address,
-                    value: amount.add(555)
+                    value: amount.div(2)
                 });
+                await TestCollateralizedEther.connect(user).mint({ value: amount });
+
+                await TestCollateralizedEther.connect(user).redeemUnderlying(amount.mul(3).div(2));
                 await TestCollateralizedEther.connect(user).redeemUnderlying(amount);
-                const userBalance = await TestCollateralizedEther.balanceOf(user.address);
-                await TestCollateralizedEther.connect(user).redeemUnderlying(userBalance.div(2));
 
                 TestCollateralizedEther.once('Redeem', (redeemer: any, tokenAmount: any, kTokenAmount: any, evt: any) => {
                     redeemEvent = evt;
@@ -338,15 +341,11 @@ describe("TestCollateralizedEther", () => {
             });
 
             it('decrements user tkETH balance', async () => {
-                expect(await TestCollateralizedEther.balanceOf(user.address)).to.be.equal(
-                    amount.add(555).div(2).add(1)
-                )
+                expect(await TestCollateralizedEther.balanceOf(user.address)).to.be.equal(zero);
             });
 
             it('decrements totalReserve', async function () {
-                expect(await TestCollateralizedEther.totalReserve()).to.be.equal(
-                    amount.add(555).div(2).add(1)
-                );
+                expect(await TestCollateralizedEther.totalReserve()).to.be.equal(zero);
             });
 
             it('emits Redeem event', async function () {
