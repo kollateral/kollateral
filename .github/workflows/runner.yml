@@ -30,3 +30,6 @@ jobs:
       # Runs tests
       - name: Test
         run: yarn test
+        env:
+          KINGMAKER_PROJECT_ID: ${{ secrets.KINGMAKER_PROJECT_ID }}
+          KINGMAKER_PRIVATE_KEY: ${{ secrets.KINGMAKER_PRIVATE_KEY }}
