@@ -23,9 +23,9 @@ import "../token/CollateralizedERC20.sol";
 import "../token/CollateralizedToken.sol";
 
 contract TestCollateralizedERC20 is CollateralizedERC20 {
-
-    constructor (address underlying, string memory name, string memory symbol)
-    ERC20(name, symbol)
-    CollateralizedToken(underlying)
-    { }
+    constructor(
+        address underlying,
+        string memory name,
+        string memory symbol
+    ) ERC20(name, symbol) CollateralizedToken(underlying) {}
 }

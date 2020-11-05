@@ -22,7 +22,12 @@ pragma solidity ^0.7.0;
 import "./IInvocationHook.sol";
 
 interface IInvoker is IInvocationHook {
-    function invoke(address invokeTo, bytes calldata invokeData, address tokenAddress, uint256 tokenAmount) external payable;
+    function invoke(
+        address invokeTo,
+        bytes calldata invokeData,
+        address tokenAddress,
+        uint256 tokenAmount
+    ) external payable;
 
     function invokeCallback() external;
 

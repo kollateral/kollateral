@@ -35,7 +35,7 @@ contract KingmakerLiquidityProxy is BalanceCarrier, IInvokable, ILiquidityProxy,
     address internal _scheduleTokenAddress;
     uint256 internal _scheduleTokenAmount;
 
-    constructor () BalanceCarrier(address(1)) { }
+    constructor() BalanceCarrier(address(1)) {}
 
     function registerPool(address tokenAddress, address kTokenAddress) external onlyOwner {
         _tokenAddressToKTokenAddress[tokenAddress] = kTokenAddress;
@@ -45,11 +45,11 @@ contract KingmakerLiquidityProxy is BalanceCarrier, IInvokable, ILiquidityProxy,
         _tokenAddressToKTokenAddress[tokenAddress] = address(0);
     }
 
-    function getRepaymentAddress(address tokenAddress) external override view returns (address) {
+    function getRepaymentAddress(address tokenAddress) external view override returns (address) {
         return poolAddress(tokenAddress);
     }
 
-    function getTotalReserve(address tokenAddress) external override view returns (uint256) {
+    function getTotalReserve(address tokenAddress) external view override returns (uint256) {
         if (isRegistered(tokenAddress) && !isPaused(tokenAddress)) {
             CollateralizedToken pool = CollateralizedToken(poolAddress(tokenAddress));
             return pool.totalReserve();
@@ -57,7 +57,7 @@ contract KingmakerLiquidityProxy is BalanceCarrier, IInvokable, ILiquidityProxy,
         return 0;
     }
 
-    function getRepaymentAmount(address tokenAddress, uint256 tokenAmount) external override view returns (uint256) {
+    function getRepaymentAmount(address tokenAddress, uint256 tokenAmount) external view override returns (uint256) {
         KToken pool = KToken(poolAddress(tokenAddress));
         return pool.calculateRepaymentAmount(tokenAmount);
     }
@@ -75,12 +75,13 @@ contract KingmakerLiquidityProxy is BalanceCarrier, IInvokable, ILiquidityProxy,
         _scheduleTokenAmount = 0;
     }
 
-    function execute(bytes calldata data) external override payable {
+    function execute(bytes calldata data) external payable override {
         require(_scheduleInvokerAddress != address(0), "KingmakerLiquidityProxy: not scheduled");
 
         require(
             transfer(_scheduleTokenAddress, _scheduleInvokerAddress, _scheduleTokenAmount),
-            "KingmakerLiquidityProxy: transfer to invoker failed");
+            "KingmakerLiquidityProxy: transfer to invoker failed"
+        );
 
         IInvoker invoker = IInvoker(_scheduleInvokerAddress);
         invoker.invokeCallback();
@@ -98,5 +99,5 @@ contract KingmakerLiquidityProxy is BalanceCarrier, IInvokable, ILiquidityProxy,
         return Pausable(poolAddress(tokenAddress)).paused();
     }
 
-    fallback() external { }
+    fallback() external {}
 }

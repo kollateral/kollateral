@@ -50,14 +50,14 @@ library Math {
     /**
      * @dev Returns the largest of two numbers.
      */
-    function max(uint a, uint b) internal pure returns (uint) {
+    function max(uint256 a, uint256 b) internal pure returns (uint256) {
         return a >= b ? a : b;
     }
 
     /**
      * @dev Returns the smallest of two numbers.
      */
-    function min(uint a, uint b) internal pure returns (uint) {
+    function min(uint256 a, uint256 b) internal pure returns (uint256) {
         return a < b ? a : b;
     }
 
@@ -65,9 +65,9 @@ library Math {
      * @dev Returns the average of two numbers. The result is rounded towards
      * zero.
      */
-    function average(uint a, uint b) internal pure returns (uint) {
+    function average(uint256 a, uint256 b) internal pure returns (uint256) {
         // (a + b) / 2 can overflow, so we distribute
-        return (a / 2) + (b / 2) + ((a % 2 + b % 2) / 2);
+        return (a / 2) + (b / 2) + (((a % 2) + (b % 2)) / 2);
     }
 }
 
@@ -94,8 +94,8 @@ library SafeMath {
      * Requirements:
      * - Addition cannot overflow.
      */
-    function add(uint a, uint b) internal pure returns (uint) {
-        uint c = a + b;
+    function add(uint256 a, uint256 b) internal pure returns (uint256) {
+        uint256 c = a + b;
         require(c >= a, "SafeMath: addition overflow");
 
         return c;
@@ -110,7 +110,7 @@ library SafeMath {
      * Requirements:
      * - Subtraction cannot overflow.
      */
-    function sub(uint a, uint b) internal pure returns (uint) {
+    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
         return sub(a, b, "SafeMath: subtraction overflow");
     }
 
@@ -125,9 +125,13 @@ library SafeMath {
      *
      * _Available since v2.4.0._
      */
-    function sub(uint a, uint b, string memory errorMessage) internal pure returns (uint) {
+    function sub(
+        uint256 a,
+        uint256 b,
+        string memory errorMessage
+    ) internal pure returns (uint256) {
         require(b <= a, errorMessage);
-        uint c = a - b;
+        uint256 c = a - b;
 
         return c;
     }
@@ -141,7 +145,7 @@ library SafeMath {
      * Requirements:
      * - Multiplication cannot overflow.
      */
-    function mul(uint a, uint b) internal pure returns (uint) {
+    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
         // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
         // benefit is lost if 'b' is also tested.
         // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
@@ -149,7 +153,7 @@ library SafeMath {
             return 0;
         }
 
-        uint c = a * b;
+        uint256 c = a * b;
         require(c / a == b, "SafeMath: multiplication overflow");
 
         return c;
@@ -166,7 +170,7 @@ library SafeMath {
      * Requirements:
      * - The divisor cannot be zero.
      */
-    function div(uint a, uint b) internal pure returns (uint) {
+    function div(uint256 a, uint256 b) internal pure returns (uint256) {
         return div(a, b, "SafeMath: division by zero");
     }
 
@@ -183,10 +187,14 @@ library SafeMath {
      *
      * _Available since v2.4.0._
      */
-    function div(uint a, uint b, string memory errorMessage) internal pure returns (uint) {
+    function div(
+        uint256 a,
+        uint256 b,
+        string memory errorMessage
+    ) internal pure returns (uint256) {
         // Solidity only automatically asserts when dividing by 0
         require(b > 0, errorMessage);
-        uint c = a / b;
+        uint256 c = a / b;
         // assert(a == b * c + a % b); // There is no case in which this doesn't hold
 
         return c;
@@ -203,7 +211,7 @@ library SafeMath {
      * Requirements:
      * - The divisor cannot be zero.
      */
-    function mod(uint a, uint b) internal pure returns (uint) {
+    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
         return mod(a, b, "SafeMath: modulo by zero");
     }
 
@@ -220,7 +228,11 @@ library SafeMath {
      *
      * _Available since v2.4.0._
      */
-    function mod(uint a, uint b, string memory errorMessage) internal pure returns (uint) {
+    function mod(
+        uint256 a,
+        uint256 b,
+        string memory errorMessage
+    ) internal pure returns (uint256) {
         require(b != 0, errorMessage);
         return a % b;
     }
@@ -234,12 +246,12 @@ interface IERC20 {
     /**
      * @dev Returns the amount of tokens in existence.
      */
-    function totalSupply() external view returns (uint);
+    function totalSupply() external view returns (uint256);
 
     /**
      * @dev Returns the amount of tokens owned by `account`.
      */
-    function balanceOf(address account) external view returns (uint);
+    function balanceOf(address account) external view returns (uint256);
 
     /**
      * @dev Moves `amount` tokens from the caller's account to `recipient`.
@@ -248,7 +260,7 @@ interface IERC20 {
      *
      * Emits a {Transfer} event.
      */
-    function transfer(address recipient, uint amount) external returns (bool);
+    function transfer(address recipient, uint256 amount) external returns (bool);
 
     /**
      * @dev Returns the remaining number of tokens that `spender` will be
@@ -257,7 +269,7 @@ interface IERC20 {
      *
      * This value changes when {approve} or {transferFrom} are called.
      */
-    function allowance(address owner, address spender) external view returns (uint);
+    function allowance(address owner, address spender) external view returns (uint256);
 
     /**
      * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
@@ -273,7 +285,7 @@ interface IERC20 {
      *
      * Emits an {Approval} event.
      */
-    function approve(address spender, uint amount) external returns (bool);
+    function approve(address spender, uint256 amount) external returns (bool);
 
     /**
      * @dev Moves `amount` tokens from `sender` to `recipient` using the
@@ -284,7 +296,11 @@ interface IERC20 {
      *
      * Emits a {Transfer} event.
      */
-    function transferFrom(address sender, address recipient, uint amount) external returns (bool);
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) external returns (bool);
 
     /**
      * @dev Emitted when `value` tokens are moved from one account (`from`) to
@@ -292,13 +308,13 @@ interface IERC20 {
      *
      * Note that `value` may be zero.
      */
-    event Transfer(address indexed from, address indexed to, uint value);
+    event Transfer(address indexed from, address indexed to, uint256 value);
 
     /**
      * @dev Emitted when the allowance of a `spender` for an `owner` is set by
      * a call to {approve}. `value` is the new allowance.
      */
-    event Approval(address indexed owner, address indexed spender, uint value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
 /**
@@ -327,7 +343,9 @@ library Address {
         bytes32 codehash;
         bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
         // solhint-disable-next-line no-inline-assembly
-        assembly { codehash := extcodehash(account) }
+        assembly {
+            codehash := extcodehash(account)
+        }
         return (codehash != 0x0 && codehash != accountHash);
     }
 
@@ -355,11 +373,11 @@ library Address {
      * IMPORTANT: because control is transferred to `recipient`, care must be
      * taken to not create reentrancy vulnerabilities. Consider using
      * {ReentrancyGuard} or the
-     * https://solidity.readthedocs.io/en/v0.5.11/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].
+     * https://solidity.readthedocs.io/en/v0.5.11/security-considerations.html // solhint-disable-line
      *
      * _Available since v2.4.0._
      */
-    function sendValue(address payable recipient, uint amount) internal {
+    function sendValue(address payable recipient, uint256 amount) internal {
         require(address(this).balance >= amount, "Address: insufficient balance");
 
         // solhint-disable-next-line avoid-call-value
@@ -378,35 +396,60 @@ library Address {
  * which allows you to call the safe operations as `token.safeTransfer(...)`, etc.
  */
 library SafeERC20 {
-    using SafeMath for uint;
+    using SafeMath for uint256;
     using Address for address;
 
-    function safeTransfer(IERC20 token, address to, uint value) internal {
+    function safeTransfer(
+        IERC20 token,
+        address to,
+        uint256 value
+    ) internal {
         callOptionalReturn(token, abi.encodeWithSelector(token.transfer.selector, to, value));
     }
 
-    function safeTransferFrom(IERC20 token, address from, address to, uint value) internal {
+    function safeTransferFrom(
+        IERC20 token,
+        address from,
+        address to,
+        uint256 value
+    ) internal {
         callOptionalReturn(token, abi.encodeWithSelector(token.transferFrom.selector, from, to, value));
     }
 
-    function safeApprove(IERC20 token, address spender, uint value) internal {
+    function safeApprove(
+        IERC20 token,
+        address spender,
+        uint256 value
+    ) internal {
         // safeApprove should only be called when setting an initial allowance,
         // or when resetting it to zero. To increase and decrease it, use
         // 'safeIncreaseAllowance' and 'safeDecreaseAllowance'
         // solhint-disable-next-line max-line-length
-        require((value == 0) || (token.allowance(address(this), spender) == 0),
+        require(
+            (value == 0) || (token.allowance(address(this), spender) == 0),
             "SafeERC20: approve from non-zero to non-zero allowance"
         );
         callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, value));
     }
 
-    function safeIncreaseAllowance(IERC20 token, address spender, uint value) internal {
-        uint newAllowance = token.allowance(address(this), spender).add(value);
+    function safeIncreaseAllowance(
+        IERC20 token,
+        address spender,
+        uint256 value
+    ) internal {
+        uint256 newAllowance = token.allowance(address(this), spender).add(value);
         callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, newAllowance));
     }
 
-    function safeDecreaseAllowance(IERC20 token, address spender, uint value) internal {
-        uint newAllowance = token.allowance(address(this), spender).sub(value, "SafeERC20: decreased allowance below zero");
+    function safeDecreaseAllowance(
+        IERC20 token,
+        address spender,
+        uint256 value
+    ) internal {
+        uint256 newAllowance = token.allowance(address(this), spender).sub(
+            value,
+            "SafeERC20: decreased allowance below zero"
+        );
         callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, newAllowance));
     }
 
@@ -431,7 +474,8 @@ library SafeERC20 {
         (bool success, bytes memory returndata) = address(token).call(data);
         require(success, "SafeERC20: low-level call failed");
 
-        if (returndata.length > 0) { // Return data is optional
+        if (returndata.length > 0) {
+            // Return data is optional
             // solhint-disable-next-line max-line-length
             require(abi.decode(returndata, (bool)), "SafeERC20: ERC20 operation did not succeed");
         }
@@ -441,7 +485,7 @@ library SafeERC20 {
 contract IRewardDistributionRecipient {
     address rewardDistribution;
 
-    function notifyRewardAmount(uint reward) external;
+    function notifyRewardAmount(uint256 reward) external;
 
     modifier onlyRewardDistribution() {
         require(msg.sender == rewardDistribution, "Caller is not reward distribution");
@@ -450,7 +494,7 @@ contract IRewardDistributionRecipient {
 }
 
 contract LPTokenDelegate {
-    using SafeMath for uint;
+    using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     IERC20 public lp;
@@ -465,33 +509,35 @@ contract LPTokenDelegate {
     uint8 public decimals;
 
     /// @notice A record of each accounts delegate
-    mapping (address => address) public delegates;
+    mapping(address => address) public delegates;
 
     /// @notice A record of votes checkpoints for each account, by index
-    mapping (address => mapping (uint32 => Checkpoint)) public checkpoints;
+    mapping(address => mapping(uint32 => Checkpoint)) public checkpoints;
 
     /// @notice The number of checkpoints for each account
-    mapping (address => uint32) public numCheckpoints;
+    mapping(address => uint32) public numCheckpoints;
 
     /// @notice The EIP-712 typehash for the contract's domain
-    bytes32 public constant DOMAIN_TYPEHASH = keccak256("EIP712Domain(string name,uint chainId,address verifyingContract)");
+    bytes32 public constant DOMAIN_TYPEHASH = keccak256(
+        "EIP712Domain(string name,uint chainId,address verifyingContract)"
+    );
 
     /// @notice The EIP-712 typehash for the delegation struct used by the contract
     bytes32 public constant DELEGATION_TYPEHASH = keccak256("Delegation(address delegatee,uint nonce,uint expiry)");
 
     /// @notice A record of states for signing / validating signatures
-    mapping (address => uint) public nonces;
+    mapping(address => uint256) public nonces;
 
     /// @notice An event thats emitted when an account changes its delegate
     event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate);
 
     /// @notice An event thats emitted when a delegate account's vote balance changes
-    event DelegateVotesChanged(address indexed delegate, uint previousBalance, uint newBalance);
+    event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance);
 
     /// @notice A checkpoint for marking number of votes from a given block
     struct Checkpoint {
         uint32 fromBlock;
-        uint votes;
+        uint256 votes;
     }
 
     /**
@@ -511,8 +557,17 @@ contract LPTokenDelegate {
      * @param r Half of the ECDSA signature pair
      * @param s Half of the ECDSA signature pair
      */
-    function delegateBySig(address delegatee, uint nonce, uint expiry, uint8 v, bytes32 r, bytes32 s) public {
-        bytes32 domainSeparator = keccak256(abi.encode(DOMAIN_TYPEHASH, keccak256(bytes(name)), getChainId(), address(this)));
+    function delegateBySig(
+        address delegatee,
+        uint256 nonce,
+        uint256 expiry,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) public {
+        bytes32 domainSeparator = keccak256(
+            abi.encode(DOMAIN_TYPEHASH, keccak256(bytes(name)), getChainId(), address(this))
+        );
         bytes32 structHash = keccak256(abi.encode(DELEGATION_TYPEHASH, delegatee, nonce, expiry));
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
         address signatory = ecrecover(digest, v, r, s);
@@ -527,7 +582,7 @@ contract LPTokenDelegate {
      * @param account The address to get votes balance
      * @return The number of current votes for `account`
      */
-    function getCurrentVotes(address account) external view returns (uint) {
+    function getCurrentVotes(address account) external view returns (uint256) {
         uint32 nCheckpoints = numCheckpoints[account];
         return nCheckpoints > 0 ? checkpoints[account][nCheckpoints - 1].votes : 0;
     }
@@ -539,7 +594,7 @@ contract LPTokenDelegate {
      * @param blockNumber The block number to get the vote balance at
      * @return The number of votes the account had as of the given block
      */
-    function getPriorVotes(address account, uint blockNumber) public view returns (uint) {
+    function getPriorVotes(address account, uint256 blockNumber) public view returns (uint256) {
         require(blockNumber < block.number, "::getPriorVotes: not yet determined");
 
         uint32 nCheckpoints = numCheckpoints[account];
@@ -575,7 +630,7 @@ contract LPTokenDelegate {
 
     function _delegate(address delegator, address delegatee) internal {
         address currentDelegate = delegates[delegator];
-        uint delegatorBalance = _balances[delegator];
+        uint256 delegatorBalance = _balances[delegator];
         delegates[delegator] = delegatee;
 
         emit DelegateChanged(delegator, currentDelegate, delegatee);
@@ -583,25 +638,34 @@ contract LPTokenDelegate {
         _moveDelegates(currentDelegate, delegatee, delegatorBalance);
     }
 
-    function _moveDelegates(address srcRep, address dstRep, uint amount) internal {
+    function _moveDelegates(
+        address srcRep,
+        address dstRep,
+        uint256 amount
+    ) internal {
         if (srcRep != dstRep && amount > 0) {
             if (srcRep != address(0)) {
                 uint32 srcRepNum = numCheckpoints[srcRep];
-                uint srcRepOld = srcRepNum > 0 ? checkpoints[srcRep][srcRepNum - 1].votes : 0;
-                uint srcRepNew = srcRepOld.sub(amount, "::_moveVotes: vote amount underflows");
+                uint256 srcRepOld = srcRepNum > 0 ? checkpoints[srcRep][srcRepNum - 1].votes : 0;
+                uint256 srcRepNew = srcRepOld.sub(amount, "::_moveVotes: vote amount underflows");
                 _writeCheckpoint(srcRep, srcRepNum, srcRepOld, srcRepNew);
             }
 
             if (dstRep != address(0)) {
                 uint32 dstRepNum = numCheckpoints[dstRep];
-                uint dstRepOld = dstRepNum > 0 ? checkpoints[dstRep][dstRepNum - 1].votes : 0;
-                uint dstRepNew = dstRepOld.add(amount);
+                uint256 dstRepOld = dstRepNum > 0 ? checkpoints[dstRep][dstRepNum - 1].votes : 0;
+                uint256 dstRepNew = dstRepOld.add(amount);
                 _writeCheckpoint(dstRep, dstRepNum, dstRepOld, dstRepNew);
             }
         }
     }
 
-    function _writeCheckpoint(address delegatee, uint32 nCheckpoints, uint oldVotes, uint newVotes) internal {
+    function _writeCheckpoint(
+        address delegatee,
+        uint32 nCheckpoints,
+        uint256 oldVotes,
+        uint256 newVotes
+    ) internal {
         uint32 blockNumber = safe32(block.number, "::_writeCheckpoint: block number exceeds 32 bits");
 
         if (nCheckpoints > 0 && checkpoints[delegatee][nCheckpoints - 1].fromBlock == blockNumber) {
@@ -614,35 +678,37 @@ contract LPTokenDelegate {
         emit DelegateVotesChanged(delegatee, oldVotes, newVotes);
     }
 
-    function safe32(uint n, string memory errorMessage) internal pure returns (uint32) {
+    function safe32(uint256 n, string memory errorMessage) internal pure returns (uint32) {
         require(n < 2**32, errorMessage);
         return uint32(n);
     }
 
-    function getChainId() internal pure returns (uint) {
-        uint chainId;
-        assembly { chainId := chainid() }
+    function getChainId() internal pure returns (uint256) {
+        uint256 chainId;
+        assembly {
+            chainId := chainid()
+        }
         return chainId;
     }
 
-    uint private _totalSupply;
-    mapping(address => uint) private _balances;
+    uint256 private _totalSupply;
+    mapping(address => uint256) private _balances;
 
-    function totalSupply() public view returns (uint) {
+    function totalSupply() public view returns (uint256) {
         return _totalSupply;
     }
 
-    function balanceOf(address account) public view returns (uint) {
+    function balanceOf(address account) public view returns (uint256) {
         return _balances[account];
     }
 
-    function stake(uint amount) public {
+    function stake(uint256 amount) public {
         _totalSupply = _totalSupply.add(amount);
         _balances[msg.sender] = _balances[msg.sender].add(amount);
         lp.safeTransferFrom(msg.sender, address(this), amount);
     }
 
-    function withdraw(uint amount) public {
+    function withdraw(uint256 amount) public {
         _totalSupply = _totalSupply.sub(amount);
         _balances[msg.sender] = _balances[msg.sender].sub(amount);
         lp.safeTransfer(msg.sender, amount);
@@ -651,19 +717,19 @@ contract LPTokenDelegate {
 
 contract RewardDistributionVoter is LPTokenDelegate, IRewardDistributionRecipient {
     IERC20 public earn;
-    uint public constant DURATION = 7 days;
+    uint256 public constant DURATION = 7 days;
 
-    uint public periodFinish = 0;
-    uint public rewardRate = 0;
-    uint public lastUpdateTime;
-    uint public rewardPerTokenStored;
-    mapping(address => uint) public userRewardPerTokenPaid;
-    mapping(address => uint) public rewards;
+    uint256 public periodFinish = 0;
+    uint256 public rewardRate = 0;
+    uint256 public lastUpdateTime;
+    uint256 public rewardPerTokenStored;
+    mapping(address => uint256) public userRewardPerTokenPaid;
+    mapping(address => uint256) public rewards;
 
-    event RewardAdded(uint reward);
-    event Staked(address indexed user, uint amount);
-    event Withdrawn(address indexed user, uint amount);
-    event RewardPaid(address indexed user, uint reward);
+    event RewardAdded(uint256 reward);
+    event Staked(address indexed user, uint256 amount);
+    event Withdrawn(address indexed user, uint256 amount);
+    event RewardPaid(address indexed user, uint256 reward);
 
     modifier updateReward(address account) {
         rewardPerTokenStored = rewardPerToken();
@@ -691,40 +757,33 @@ contract RewardDistributionVoter is LPTokenDelegate, IRewardDistributionRecipien
         symbol = symbol_;
     }
 
-    function lastTimeRewardApplicable() public view returns (uint) {
+    function lastTimeRewardApplicable() public view returns (uint256) {
         return Math.min(block.timestamp, periodFinish);
     }
 
-    function rewardPerToken() public view returns (uint) {
+    function rewardPerToken() public view returns (uint256) {
         if (totalSupply() == 0) {
             return rewardPerTokenStored;
         }
         return
-        rewardPerTokenStored.add(
-            lastTimeRewardApplicable()
-            .sub(lastUpdateTime)
-            .mul(rewardRate)
-            .mul(1e18)
-            .div(totalSupply())
-        );
+            rewardPerTokenStored.add(
+                lastTimeRewardApplicable().sub(lastUpdateTime).mul(rewardRate).mul(1e18).div(totalSupply())
+            );
     }
 
-    function earned(address account) public view returns (uint) {
+    function earned(address account) public view returns (uint256) {
         return
-        balanceOf(account)
-        .mul(rewardPerToken().sub(userRewardPerTokenPaid[account]))
-        .div(1e18)
-        .add(rewards[account]);
+            balanceOf(account).mul(rewardPerToken().sub(userRewardPerTokenPaid[account])).div(1e18).add(rewards[account]);
     }
 
     // stake visibility is public as overriding LPTokenWrapper's stake() function
-    function stake(uint amount) public updateReward(msg.sender) {
+    function stake(uint256 amount) public updateReward(msg.sender) {
         require(amount > 0, "Cannot stake 0");
         super.stake(amount);
         emit Staked(msg.sender, amount);
     }
 
-    function withdraw(uint amount) public updateReward(msg.sender) {
+    function withdraw(uint256 amount) public updateReward(msg.sender) {
         require(amount > 0, "Cannot withdraw 0");
         super.withdraw(amount);
         emit Withdrawn(msg.sender, amount);
@@ -736,7 +795,7 @@ contract RewardDistributionVoter is LPTokenDelegate, IRewardDistributionRecipien
     }
 
     function getReward() public updateReward(msg.sender) {
-        uint reward = earned(msg.sender);
+        uint256 reward = earned(msg.sender);
         if (reward > 0) {
             rewards[msg.sender] = 0;
             earn.safeTransfer(msg.sender, reward);
@@ -744,17 +803,13 @@ contract RewardDistributionVoter is LPTokenDelegate, IRewardDistributionRecipien
         }
     }
 
-    function notifyRewardAmount(uint reward)
-    external
-    onlyRewardDistribution
-    updateReward(address(0))
-    {
+    function notifyRewardAmount(uint256 reward) external onlyRewardDistribution updateReward(address(0)) {
         earn.safeTransferFrom(msg.sender, address(this), reward);
         if (block.timestamp >= periodFinish) {
             rewardRate = reward.div(DURATION);
         } else {
-            uint remaining = periodFinish.sub(block.timestamp);
-            uint leftover = remaining.mul(rewardRate);
+            uint256 remaining = periodFinish.sub(block.timestamp);
+            uint256 leftover = remaining.mul(rewardRate);
             rewardRate = reward.add(leftover).div(DURATION);
         }
         lastUpdateTime = block.timestamp;

@@ -90,7 +90,11 @@ abstract contract CollateralizedToken is ExtendedMath, ReentrancyGuard, Unlimite
         return underlyingAmountToNativeAmountInternal(underlyingAmount, ceil, false);
     }
 
-    function underlyingAmountToNativeAmountInternal(uint256 underlyingAmount, bool ceil, bool subtractDeposit) internal view returns (uint256) {
+    function underlyingAmountToNativeAmountInternal(
+        uint256 underlyingAmount,
+        bool ceil,
+        bool subtractDeposit
+    ) internal view returns (uint256) {
         if (totalReserve() == 0) {
             return 0;
         }
@@ -102,9 +106,9 @@ abstract contract CollateralizedToken is ExtendedMath, ReentrancyGuard, Unlimite
         return divAndRound(underlyingAmount.mul(totalSupply()), adjustedTotalReserve, ceil);
     }
 
-    function isUnderlyingEther() public virtual view returns (bool);
+    function isUnderlyingEther() public view virtual returns (bool);
 
-    function totalReserve() public virtual view returns (uint256);
+    function totalReserve() public view virtual returns (uint256);
 
     function balanceOfUnderlying(address owner) public view returns (uint256) {
         return nativeAmountToUnderlyingAmount(balanceOf(owner));

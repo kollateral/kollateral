@@ -20,5 +20,10 @@
 pragma solidity ^0.7.0;
 
 interface ILendingPool {
-    function flashLoan(address _receiver, address _reserve, uint256 _amount, bytes memory _params) external;
+    function flashLoan(
+        address _receiver,
+        address _reserve,
+        uint256 _amount,
+        bytes memory _params
+    ) external;
 }

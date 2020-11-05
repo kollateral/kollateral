@@ -36,8 +36,8 @@ library SafeMath {
      * Requirements:
      * - Addition cannot overflow.
      */
-    function add(uint a, uint b) internal pure returns (uint) {
-        uint c = a + b;
+    function add(uint256 a, uint256 b) internal pure returns (uint256) {
+        uint256 c = a + b;
         require(c >= a, "SafeMath: addition overflow");
 
         return c;
@@ -51,8 +51,12 @@ library SafeMath {
      * Requirements:
      * - Addition cannot overflow.
      */
-    function add(uint a, uint b, string memory errorMessage) internal pure returns (uint) {
-        uint c = a + b;
+    function add(
+        uint256 a,
+        uint256 b,
+        string memory errorMessage
+    ) internal pure returns (uint256) {
+        uint256 c = a + b;
         require(c >= a, errorMessage);
 
         return c;
@@ -66,21 +70,25 @@ library SafeMath {
      * Requirements:
      * - Subtraction cannot underflow.
      */
-    function sub(uint a, uint b) internal pure returns (uint) {
+    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
         return sub(a, b, "::SafeMath: subtraction underflow");
     }
 
     /**
-     * @dev Returns the subtraction of two unsigned integers, reverting with custom message on underflow (when the result is negative).
+     * @dev Returns the subtraction of two unsigned integers, reverting on underflow (when the result is negative).
      *
      * Counterpart to Solidity's `-` operator.
      *
      * Requirements:
      * - Subtraction cannot underflow.
      */
-    function sub(uint a, uint b, string memory errorMessage) internal pure returns (uint) {
+    function sub(
+        uint256 a,
+        uint256 b,
+        string memory errorMessage
+    ) internal pure returns (uint256) {
         require(b <= a, errorMessage);
-        uint c = a - b;
+        uint256 c = a - b;
 
         return c;
     }
@@ -93,7 +101,7 @@ library SafeMath {
      * Requirements:
      * - Multiplication cannot overflow.
      */
-    function mul(uint a, uint b) internal pure returns (uint) {
+    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
         // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
         // benefit is lost if 'b' is also tested.
         // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
@@ -101,7 +109,7 @@ library SafeMath {
             return 0;
         }
 
-        uint c = a * b;
+        uint256 c = a * b;
         require(c / a == b, "SafeMath: multiplication overflow");
 
         return c;
@@ -115,7 +123,11 @@ library SafeMath {
      * Requirements:
      * - Multiplication cannot overflow.
      */
-    function mul(uint a, uint b, string memory errorMessage) internal pure returns (uint) {
+    function mul(
+        uint256 a,
+        uint256 b,
+        string memory errorMessage
+    ) internal pure returns (uint256) {
         // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
         // benefit is lost if 'b' is also tested.
         // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
@@ -123,7 +135,7 @@ library SafeMath {
             return 0;
         }
 
-        uint c = a * b;
+        uint256 c = a * b;
         require(c / a == b, errorMessage);
 
         return c;
@@ -140,7 +152,7 @@ library SafeMath {
      * Requirements:
      * - The divisor cannot be zero.
      */
-    function div(uint a, uint b) internal pure returns (uint) {
+    function div(uint256 a, uint256 b) internal pure returns (uint256) {
         return div(a, b, "SafeMath: division by zero");
     }
 
@@ -155,10 +167,14 @@ library SafeMath {
      * Requirements:
      * - The divisor cannot be zero.
      */
-    function div(uint a, uint b, string memory errorMessage) internal pure returns (uint) {
+    function div(
+        uint256 a,
+        uint256 b,
+        string memory errorMessage
+    ) internal pure returns (uint256) {
         // Solidity only automatically asserts when dividing by 0
         require(b > 0, errorMessage);
-        uint c = a / b;
+        uint256 c = a / b;
         // assert(a == b * c + a % b); // There is no case in which this doesn't hold
 
         return c;
@@ -175,7 +191,7 @@ library SafeMath {
      * Requirements:
      * - The divisor cannot be zero.
      */
-    function mod(uint a, uint b) internal pure returns (uint) {
+    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
         return mod(a, b, "SafeMath: modulo by zero");
     }
 
@@ -190,7 +206,11 @@ library SafeMath {
      * Requirements:
      * - The divisor cannot be zero.
      */
-    function mod(uint a, uint b, string memory errorMessage) internal pure returns (uint) {
+    function mod(
+        uint256 a,
+        uint256 b,
+        string memory errorMessage
+    ) internal pure returns (uint256) {
         require(b != 0, errorMessage);
         return a % b;
     }
@@ -198,51 +218,76 @@ library SafeMath {
 
 interface UniswapPair {
     function sync() external;
-    function transferFrom(address from, address to, uint value) external returns (bool);
-    function balanceOf(address account) external view returns (uint);
-    function approve(address spender, uint amount) external returns (bool);
-    function mint(address to) external returns (uint liquidity);
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 value
+    ) external returns (bool);
+
+    function balanceOf(address account) external view returns (uint256);
+
+    function approve(address spender, uint256 amount) external returns (bool);
+
+    function mint(address to) external returns (uint256 liquidity);
 }
 
 interface IBondingCurve {
-    function calculatePurchaseReturn(uint _supply,  uint _reserveBalance, uint32 _reserveRatio, uint _depositAmount) external view returns (uint);
+    function calculatePurchaseReturn(
+        uint256 _supply,
+        uint256 _reserveBalance,
+        uint32 _reserveRatio,
+        uint256 _depositAmount
+    ) external view returns (uint256);
 }
 
 interface WETH9 {
     function deposit() external payable;
-    function balanceOf(address account) external view returns (uint);
-    function transfer(address recipient, uint amount) external returns (bool);
-    function approve(address spender, uint amount) external returns (bool);
+
+    function balanceOf(address account) external view returns (uint256);
+
+    function transfer(address recipient, uint256 amount) external returns (bool);
+
+    function approve(address spender, uint256 amount) external returns (bool);
 }
 
 interface Uniswap {
     function factory() external pure returns (address);
+
     function addLiquidity(
         address tokenA,
         address tokenB,
-        uint amountADesired,
-        uint amountBDesired,
-        uint amountAMin,
-        uint amountBMin,
+        uint256 amountADesired,
+        uint256 amountBDesired,
+        uint256 amountAMin,
+        uint256 amountBMin,
         address to,
-        uint deadline
-    ) external returns (uint amountA, uint amountB, uint liquidity);
+        uint256 deadline
+    )
+        external
+        returns (
+            uint256 amountA,
+            uint256 amountB,
+            uint256 liquidity
+        );
+
     function removeLiquidity(
         address tokenA,
         address tokenB,
-        uint liquidity,
-        uint amountAMin,
-        uint amountBMin,
+        uint256 liquidity,
+        uint256 amountAMin,
+        uint256 amountBMin,
         address to,
-        uint deadline
-    ) external returns (uint amountA, uint amountB);
+        uint256 deadline
+    ) external returns (uint256 amountA, uint256 amountB);
+
     function swapExactTokensForTokens(
-        uint amountIn,
-        uint amountOutMin,
+        uint256 amountIn,
+        uint256 amountOutMin,
         address[] calldata path,
         address to,
-        uint deadline
-    ) external returns (uint[] memory amounts);
+        uint256 deadline
+    ) external returns (uint256[] memory amounts);
 }
 
 interface Factory {
@@ -250,11 +295,11 @@ interface Factory {
 }
 
 interface LBI {
-    function approve(address spender, uint amount) external returns (bool);
+    function approve(address spender, uint256 amount) external returns (bool);
 }
 
 interface RewardDistributionDelegate {
-    function notifyRewardAmount(uint reward) external;
+    function notifyRewardAmount(uint256 reward) external;
 }
 
 interface RewardDistributionFactory {
@@ -273,29 +318,31 @@ interface GovernanceFactory {
 }
 
 contract LiquidityToken {
-    using SafeMath for uint;
+    using SafeMath for uint256;
 
     /* BondingCurve */
 
-    uint public scale = 10**18;
-    uint public reserveBalance = 1*10**14;
+    uint256 public scale = 10**18;
+    uint256 public reserveBalance = 1 * 10**14;
     uint32 public constant RATIO = 500000;
 
-    WETH9 constant public WETH = WETH9(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
+    WETH9 public constant WETH = WETH9(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
 
-    function () external payable { mint(0); }
+    function() external payable {
+        mint(0);
+    }
 
-    mapping(address => uint) public bought;
-    mapping(address => uint) public price;
+    mapping(address => uint256) public bought;
+    mapping(address => uint256) public price;
 
-    function mint(uint min) public payable {
+    function mint(uint256 min) public payable {
         require(msg.value > 0, "::mint: msg.value = 0");
-        uint _weth = msg.value;
-        uint _bought = _continuousMint(_weth);
+        uint256 _weth = msg.value;
+        uint256 _bought = _continuousMint(_weth);
         require(_bought >= min, "::mint: slippage");
         WETH.deposit.value(_weth)();
         if (fee > 0) {
-            uint _fee = _weth.mul(fee).div(FEEBASE);
+            uint256 _fee = _weth.mul(fee).div(FEEBASE);
             WETH.transfer(governance, _fee);
             _weth = _weth.sub(_fee);
         }
@@ -308,7 +355,7 @@ contract LiquidityToken {
         _commit(msg.sender, 0);
     }
 
-    function _commit(address from, uint balance) internal {
+    function _commit(address from, uint256 balance) internal {
         if (balance < bought[from]) {
             bought[from] = 0;
             WETH.transfer(address(pool), price[from]);
@@ -324,18 +371,18 @@ contract LiquidityToken {
         WETH.transfer(msg.sender, price[msg.sender]);
     }
 
-    IBondingCurve constant public CURVE = IBondingCurve(0x16F6664c16beDE5d70818654dEfef11769D40983);
+    IBondingCurve public constant CURVE = IBondingCurve(0x16F6664c16beDE5d70818654dEfef11769D40983);
 
-    function _buy(uint _amount) internal returns (uint _bought) {
+    function _buy(uint256 _amount) internal returns (uint256 _bought) {
         _bought = _continuousMint(_amount);
     }
 
-    function calculateMint(uint _amount) public view returns (uint mintAmount) {
+    function calculateMint(uint256 _amount) public view returns (uint256 mintAmount) {
         return CURVE.calculatePurchaseReturn(totalSupply, reserveBalance, RATIO, _amount);
     }
 
-    function _continuousMint(uint _deposit) internal returns (uint) {
-        uint amount = calculateMint(_deposit);
+    function _continuousMint(uint256 _deposit) internal returns (uint256) {
+        uint256 amount = calculateMint(_deposit);
         reserveBalance = reserveBalance.add(_deposit);
         return amount;
     }
@@ -350,40 +397,46 @@ contract LiquidityToken {
     uint8 public constant decimals = 18;
 
     /// @notice Total number of tokens in circulation
-    uint public totalSupply = 0; // Initial 0
+    uint256 public totalSupply = 0; // Initial 0
 
     /// @notice the last block the tick was applied
-    uint public lastTick = 0;
+    uint256 public lastTick = 0;
 
     /// @notice the uniswap pool that will receive the rebase
     UniswapPair public pool;
     RewardDistributionDelegate public rewardDistribution;
-    RewardDistributionFactory public constant REWARDFACTORY = RewardDistributionFactory(0x323B2b67Ed1a745e5208ac18625ecef187a421D0);
+    RewardDistributionFactory public constant REWARDFACTORY = RewardDistributionFactory(
+        0x323B2b67Ed1a745e5208ac18625ecef187a421D0
+    );
     GovernanceFactory public constant GOVERNANCEFACTORY = GovernanceFactory(0x4179Ef5dC359A4f73D5A14aF264f759052325bc1);
 
     /// @notice Allowance amounts on behalf of others
-    mapping (address => mapping (address => uint)) internal allowances;
+    mapping(address => mapping(address => uint256)) internal allowances;
 
     /// @notice Official record of token balances for each account
-    mapping (address => uint) internal balances;
+    mapping(address => uint256) internal balances;
 
     /// @notice The EIP-712 typehash for the contract's domain
-    bytes32 public constant DOMAIN_TYPEHASH = keccak256("EIP712Domain(string name,uint chainId,address verifyingContract)");
+    bytes32 public constant DOMAIN_TYPEHASH = keccak256(
+        "EIP712Domain(string name,uint chainId,address verifyingContract)"
+    );
 
     /// @notice The EIP-712 typehash for the permit struct used by the contract
-    bytes32 public constant PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint value,uint nonce,uint deadline)");
+    bytes32 public constant PERMIT_TYPEHASH = keccak256(
+        "Permit(address owner,address spender,uint value,uint nonce,uint deadline)"
+    );
 
     /// @notice A record of states for signing / validating signatures
-    mapping (address => uint) public nonces;
+    mapping(address => uint256) public nonces;
 
     /// @notice The standard EIP-20 transfer event
-    event Transfer(address indexed from, address indexed to, uint amount);
+    event Transfer(address indexed from, address indexed to, uint256 amount);
 
     /// @notice Tick event
-    event Tick(uint block, uint minted);
+    event Tick(uint256 block, uint256 minted);
 
     /// @notice The standard EIP-20 approval event
-    event Approval(address indexed owner, address indexed spender, uint amount);
+    event Approval(address indexed owner, address indexed spender, uint256 amount);
 
     Uniswap public constant UNI = Uniswap(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
 
@@ -411,11 +464,12 @@ contract LiquidityToken {
         }
     }
 
-    mapping(address => uint) claimable;
+    mapping(address => uint256) claimable;
 
     function claim() external {
         claimFor(msg.sender);
     }
+
     function claimFor(address recipient) public {
         _updateFor(recipient, true);
         _transferTokens(address(this), recipient, claimable[recipient]);
@@ -439,7 +493,11 @@ contract LiquidityToken {
         }
     }
 
-    constructor(string memory name_, string memory symbol_, uint fee_) public {
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        uint256 fee_
+    ) public {
         require(fee <= 10000, "::(): fee > 100%");
         lastTick = block.number;
         name = name_;
@@ -448,8 +506,8 @@ contract LiquidityToken {
     }
 
     address public governance;
-    uint public fee;
-    uint public constant FEEBASE = 10000;
+    uint256 public fee;
+    uint256 public constant FEEBASE = 10000;
 
     function setup() external payable {
         require(msg.value > 0, "LBT:(): constructor requires ETH");
@@ -459,15 +517,26 @@ contract LiquidityToken {
         WETH.deposit.value(msg.value)();
 
         _mint(address(this), _continuousMint(msg.value), true);
-        uint _balance = WETH.balanceOf(address(this));
+        uint256 _balance = WETH.balanceOf(address(this));
         require(_balance == msg.value, "LBT:(): WETH9 error");
         WETH.approve(address(UNI), _balance);
         allowances[address(this)][address(UNI)] = balances[address(this)];
         require(allowances[address(this)][address(UNI)] == balances[address(this)], "LBT:(): address(this) error");
 
-        UNI.addLiquidity(address(this), address(WETH), balances[address(this)], WETH.balanceOf(address(this)), 0, 0, msg.sender, now.add(1800));
+        UNI.addLiquidity(
+            address(this),
+            address(WETH),
+            balances[address(this)],
+            WETH.balanceOf(address(this)),
+            0,
+            0,
+            msg.sender,
+            now.add(1800)
+        );
         pool = UniswapPair(Factory(UNI.factory()).getPair(address(this), address(WETH)));
-        rewardDistribution = RewardDistributionDelegate(REWARDFACTORY.deploy(address(pool), address(this), address(this), 18, "Liquidity Income Delegate", "LBD"));
+        rewardDistribution = RewardDistributionDelegate(
+            REWARDFACTORY.deploy(address(pool), address(this), address(this), 18, "Liquidity Income Delegate", "LBD")
+        );
         _mint(address(this), 1e18, true);
         allowances[address(this)][address(rewardDistribution)] = 1e18;
         rewardDistribution.notifyRewardAmount(1e18);
@@ -485,7 +554,11 @@ contract LiquidityToken {
     }
 
     // TEST HELPER FUNCTION :: DO NOT USE
-    function removeLiquidity(uint amountA, uint minA, uint minB) public {
+    function removeLiquidity(
+        uint256 amountA,
+        uint256 minA,
+        uint256 minB
+    ) public {
         tick(true);
         pool.transferFrom(msg.sender, address(this), amountA);
         pool.approve(address(UNI), amountA);
@@ -498,7 +571,7 @@ contract LiquidityToken {
     }
 
     // TEST HELPER FUNCTION :: DO NOT USE
-    function addLiquidity(uint amountA) public payable {
+    function addLiquidity(uint256 amountA) public payable {
         tick(true);
         WETH.deposit.value(msg.value)();
         WETH.transfer(address(pool), msg.value);
@@ -506,7 +579,11 @@ contract LiquidityToken {
         pool.mint(msg.sender);
     }
 
-    function _mint(address dst, uint amount, bool sync) internal {
+    function _mint(
+        address dst,
+        uint256 amount,
+        bool sync
+    ) internal {
         // mint the amount
         totalSupply = totalSupply.add(amount);
 
@@ -516,7 +593,11 @@ contract LiquidityToken {
         emit Transfer(address(0), dst, amount);
     }
 
-    function _burn(address dst, uint amount, bool sync) internal {
+    function _burn(
+        address dst,
+        uint256 amount,
+        bool sync
+    ) internal {
         require(dst != address(0), "::_burn: burn from the zero address");
 
         _updateFor(dst, sync);
@@ -526,18 +607,18 @@ contract LiquidityToken {
         emit Transfer(dst, address(0), amount);
     }
 
-    uint public LP = 9000;
-    uint public constant BASE = 10000;
-    uint public DURATION = 700000;
+    uint256 public LP = 9000;
+    uint256 public constant BASE = 10000;
+    uint256 public DURATION = 700000;
 
     address public timelock;
 
-    function setDuration(uint duration_) external {
+    function setDuration(uint256 duration_) external {
         require(msg.sender == governance, "::setDuration only governance");
         DURATION = duration_;
     }
 
-    function setRatio(uint lp_) external {
+    function setRatio(uint256 lp_) external {
         require(msg.sender == governance, "::setRatio only governance");
         LP = lp_;
     }
@@ -546,14 +627,14 @@ contract LiquidityToken {
      * @notice tick to increase holdings
      */
     function tick(bool sync) public {
-        uint _current = block.number;
-        uint _diff = _current.sub(lastTick);
+        uint256 _current = block.number;
+        uint256 _diff = _current.sub(lastTick);
 
         if (_diff > 0) {
             lastTick = _current;
 
             _diff = balances[address(pool)].mul(_diff).div(DURATION); // 1% every 7000 blocks
-            uint _minting = _diff.div(2);
+            uint256 _minting = _diff.div(2);
             if (_minting > 0) {
                 _transferTokens(address(pool), address(this), _minting);
 
@@ -563,7 +644,7 @@ contract LiquidityToken {
                 }
                 _mint(address(this), _minting, false);
                 // % of tokens that go to LPs
-                uint _lp = _diff.mul(LP).div(BASE);
+                uint256 _lp = _diff.mul(LP).div(BASE);
                 allowances[address(this)][address(rewardDistribution)] = _lp;
                 rewardDistribution.notifyRewardAmount(_lp);
 
@@ -578,7 +659,7 @@ contract LiquidityToken {
      * @param spender The address of the account spending the funds
      * @return The number of tokens approved
      */
-    function allowance(address account, address spender) external view returns (uint) {
+    function allowance(address account, address spender) external view returns (uint256) {
         return allowances[account][spender];
     }
 
@@ -590,7 +671,7 @@ contract LiquidityToken {
      * @param amount The number of tokens that are approved (2^256-1 means infinite)
      * @return Whether or not the approval succeeded
      */
-    function approve(address spender, uint amount) public returns (bool) {
+    function approve(address spender, uint256 amount) public returns (bool) {
         allowances[msg.sender][spender] = amount;
 
         emit Approval(msg.sender, spender, amount);
@@ -607,8 +688,18 @@ contract LiquidityToken {
      * @param r Half of the ECDSA signature pair
      * @param s Half of the ECDSA signature pair
      */
-    function permit(address owner, address spender, uint amount, uint deadline, uint8 v, bytes32 r, bytes32 s) external {
-        bytes32 domainSeparator = keccak256(abi.encode(DOMAIN_TYPEHASH, keccak256(bytes(name)), getChainId(), address(this)));
+    function permit(
+        address owner,
+        address spender,
+        uint256 amount,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external {
+        bytes32 domainSeparator = keccak256(
+            abi.encode(DOMAIN_TYPEHASH, keccak256(bytes(name)), getChainId(), address(this))
+        );
         bytes32 structHash = keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, amount, nonces[owner]++, deadline));
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
         address signatory = ecrecover(digest, v, r, s);
@@ -626,7 +717,7 @@ contract LiquidityToken {
      * @param account The address of the account to get the balance of
      * @return The number of tokens held
      */
-    function balanceOf(address account) external view returns (uint) {
+    function balanceOf(address account) external view returns (uint256) {
         return balances[account];
     }
 
@@ -636,7 +727,7 @@ contract LiquidityToken {
      * @param amount The number of tokens to transfer
      * @return Whether or not the transfer succeeded
      */
-    function transfer(address dst, uint amount) public returns (bool) {
+    function transfer(address dst, uint256 amount) public returns (bool) {
         _transferTokens(msg.sender, dst, amount);
         return true;
     }
@@ -648,12 +739,19 @@ contract LiquidityToken {
      * @param amount The number of tokens to transfer
      * @return Whether or not the transfer succeeded
      */
-    function transferFrom(address src, address dst, uint amount) external returns (bool) {
+    function transferFrom(
+        address src,
+        address dst,
+        uint256 amount
+    ) external returns (bool) {
         address spender = msg.sender;
-        uint spenderAllowance = allowances[src][spender];
+        uint256 spenderAllowance = allowances[src][spender];
 
-        if (spender != src && spenderAllowance != uint(-1)) {
-            uint newAllowance = spenderAllowance.sub(amount, "::transferFrom: transfer amount exceeds spender allowance");
+        if (spender != src && spenderAllowance != uint256(-1)) {
+            uint256 newAllowance = spenderAllowance.sub(
+                amount,
+                "::transferFrom: transfer amount exceeds spender allowance"
+            );
             allowances[src][spender] = newAllowance;
 
             emit Approval(src, spender, newAllowance);
@@ -663,7 +761,11 @@ contract LiquidityToken {
         return true;
     }
 
-    function _transferTokens(address src, address dst, uint amount) internal {
+    function _transferTokens(
+        address src,
+        address dst,
+        uint256 amount
+    ) internal {
         require(src != address(0), "::_transferTokens: cannot transfer from the zero address");
         require(dst != address(0), "::_transferTokens: cannot transfer to the zero address");
 
@@ -681,15 +783,21 @@ contract LiquidityToken {
         emit Transfer(src, dst, amount);
     }
 
-    function getChainId() internal pure returns (uint) {
-        uint chainId;
-        assembly { chainId := chainid() }
+    function getChainId() internal pure returns (uint256) {
+        uint256 chainId;
+        assembly {
+            chainId := chainid()
+        }
         return chainId;
     }
 }
 
 contract LiquidityTokenFactory {
-    function deploy(string calldata name, string calldata symbol, uint fee) external payable returns (address) {
+    function deploy(
+        string calldata name,
+        string calldata symbol,
+        uint256 fee
+    ) external payable returns (address) {
         LiquidityToken lbi = new LiquidityToken(name, symbol, fee);
         lbi.setup.value(msg.value)();
         return address(lbi);

@@ -30,7 +30,7 @@ abstract contract WETHHandler {
 
     function wrap(uint256 tokenAmount) internal {
         require(address(this).balance >= tokenAmount, "WETHHandler: not enough ether balance");
-        IWETH9(_wethAddress).deposit{ value: tokenAmount}();
+        IWETH9(_wethAddress).deposit{ value: tokenAmount }();
     }
 
     function unwrap(uint256 tokenAmount) internal {

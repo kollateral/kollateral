@@ -27,7 +27,7 @@ import "../common/utils/ExternalCaller.sol";
 abstract contract CollateralizedEther is CollateralizedToken, ExternalCaller {
     using SafeMath for uint256;
 
-    constructor() CollateralizedToken(address(1)) { }
+    constructor() CollateralizedToken(address(1)) {}
 
     function mint() external payable returns (bool) {
         return mintInternal(msg.value);
@@ -39,11 +39,11 @@ abstract contract CollateralizedEther is CollateralizedToken, ExternalCaller {
         return true;
     }
 
-    function isUnderlyingEther() public override pure returns (bool) {
+    function isUnderlyingEther() public pure override returns (bool) {
         return true;
     }
 
-    function totalReserve() public override view returns (uint256) {
+    function totalReserve() public view override returns (uint256) {
         return address(this).balance;
     }
 }

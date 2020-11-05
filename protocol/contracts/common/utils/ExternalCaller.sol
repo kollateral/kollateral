@@ -25,7 +25,11 @@ contract ExternalCaller {
         externalCall(_to, _value, "");
     }
 
-    function externalCall(address _to, uint256 _value, bytes memory _data) internal {
+    function externalCall(
+        address _to,
+        uint256 _value,
+        bytes memory _data
+    ) internal {
         (bool success, bytes memory returndata) = _to.call{ value: _value }(_data);
         require(success, string(returndata));
     }

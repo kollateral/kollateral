@@ -35,5 +35,9 @@ interface ICallee {
      * @param  accountInfo  The account from which the data is being sent
      * @param  data         Arbitrary data given by the sender
      */
-    function callFunction(address sender, Types.AccountInfo memory accountInfo, bytes memory data) external;
+    function callFunction(
+        address sender,
+        Types.AccountInfo memory accountInfo,
+        bytes memory data
+    ) external;
 }

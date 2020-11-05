@@ -30,12 +30,13 @@ abstract contract KingmakerInvokable is BalanceCarrier, IInvokable {
 
     uint256 internal MAX_REWARD_BIPS = 100;
 
-    constructor () BalanceCarrier(address(1)) { }
+    constructor() BalanceCarrier(address(1)) {}
 
     function repay() internal repaymentSafeguard {
         require(
             transfer(currentTokenAddress(), msg.sender, currentRepaymentAmount()),
-                "KingmakerInvokable: failed to repay");
+            "KingmakerInvokable: failed to repay"
+        );
     }
 
     function currentSender() internal view returns (address) {
@@ -59,8 +60,7 @@ abstract contract KingmakerInvokable is BalanceCarrier, IInvokable {
     }
 
     modifier repaymentSafeguard() {
-        uint256 effectiveReward = currentRepaymentAmount().sub(currentTokenAmount())
-        .mul(10000).div(currentTokenAmount());
+        uint256 effectiveReward = currentRepaymentAmount().sub(currentTokenAmount()).mul(10000).div(currentTokenAmount());
 
         require(effectiveReward <= MAX_REWARD_BIPS, "KingmakerInvokable: repayment reward too high");
         _;

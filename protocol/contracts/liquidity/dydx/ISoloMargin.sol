@@ -24,6 +24,8 @@ import "./Types.sol";
 
 interface ISoloMargin {
     function operate(Types.AccountInfo[] memory accounts, Types.ActionArgs[] memory actions) external;
+
     function getMarketIsClosing(uint256 marketId) external view returns (bool);
+
     function getMarketTokenAddress(uint256 marketId) external view returns (address);
 }

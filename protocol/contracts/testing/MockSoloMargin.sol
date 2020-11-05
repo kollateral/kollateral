@@ -56,7 +56,10 @@ contract MockSoloMargin is ISoloMargin {
         _scheduleMarketId = withdraw.primaryMarketId;
 
         require(withdraw.amount.sign == false, "MockSoloMargin: incorrect withdraw sign");
-        require(withdraw.amount.denomination == Types.AssetDenomination.Wei, "MockSoloMargin: incorrect withdraw denomination");
+        require(
+            withdraw.amount.denomination == Types.AssetDenomination.Wei,
+            "MockSoloMargin: incorrect withdraw denomination"
+        );
         require(withdraw.amount.ref == Types.AssetReference.Delta, "MockSoloMargin: incorrect withdraw reference");
 
         require(withdraw.actionType == Types.ActionType.Withdraw, "MockSoloMargin: incorrect withdraw action type");
@@ -76,7 +79,10 @@ contract MockSoloMargin is ISoloMargin {
         uint256 depositValue = withdraw.amount.value.add(repaymentFee(withdraw.primaryMarketId));
         require(deposit.amount.value == depositValue, "MockSoloMargin: incorrect deposit value");
         require(deposit.amount.sign == true, "MockSoloMargin: incorrect deposit sign");
-        require(deposit.amount.denomination == Types.AssetDenomination.Wei, "MockSoloMargin: incorrect deposit denomination");
+        require(
+            deposit.amount.denomination == Types.AssetDenomination.Wei,
+            "MockSoloMargin: incorrect deposit denomination"
+        );
         require(deposit.amount.ref == Types.AssetReference.Delta, "MockSoloMargin: incorrect deposit reference");
 
         require(deposit.actionType == Types.ActionType.Deposit, "MockSoloMargin: incorrect deposit action type");
@@ -87,15 +93,19 @@ contract MockSoloMargin is ISoloMargin {
 
         transfer(withdraw.primaryMarketId, msg.sender, withdraw.amount.value);
 
-        ICallee(msg.sender).callFunction(msg.sender, Types.AccountInfo({
-            owner: _scheduleAccountAddress,
-            number: _scheduleAccountNumber
-        }), "");
+        ICallee(msg.sender).callFunction(
+            msg.sender,
+            Types.AccountInfo({ owner: _scheduleAccountAddress, number: _scheduleAccountNumber }),
+            ""
+        );
 
         transferFrom(deposit.primaryMarketId, msg.sender, address(this), deposit.amount.value);
         uint256 balanceAfter = balanceOf(withdraw.primaryMarketId);
 
-        require(balanceAfter == balanceBefore.add(repaymentFee(withdraw.primaryMarketId)), "MockSoloMargin: Incorrect ending balance");
+        require(
+            balanceAfter == balanceBefore.add(repaymentFee(withdraw.primaryMarketId)),
+            "MockSoloMargin: Incorrect ending balance"
+        );
 
         _scheduledTokenAmount = 0;
         _scheduleMarketId = 0;
@@ -103,7 +113,7 @@ contract MockSoloMargin is ISoloMargin {
         _scheduleAccountNumber = 0;
     }
 
-    function getMarketIsClosing(uint256 marketId) public override view returns (bool) {
+    function getMarketIsClosing(uint256 marketId) public view override returns (bool) {
         return _isClosed;
     }
 
@@ -111,7 +121,7 @@ contract MockSoloMargin is ISoloMargin {
         _isClosed = closed;
     }
 
-    function getMarketTokenAddress(uint256 marketId) public override view returns (address) {
+    function getMarketTokenAddress(uint256 marketId) public view override returns (address) {
         return _markets[marketId];
     }
 
@@ -119,17 +129,26 @@ contract MockSoloMargin is ISoloMargin {
         return marketId < 2 ? 1 : 2;
     }
 
-    function transfer(uint256 marketId, address to, uint256 amount) internal returns (bool) {
+    function transfer(
+        uint256 marketId,
+        address to,
+        uint256 amount
+    ) internal returns (bool) {
         return IERC20(_markets[marketId]).transfer(to, amount);
     }
 
-    function transferFrom(uint256 marketId, address from, address to, uint256 amount) internal returns (bool) {
+    function transferFrom(
+        uint256 marketId,
+        address from,
+        address to,
+        uint256 amount
+    ) internal returns (bool) {
         return IERC20(_markets[marketId]).transferFrom(from, to, amount);
     }
 
     function balanceOf(uint256 marketId) internal view returns (uint256) {
-            return IERC20(_markets[marketId]).balanceOf(address(this));
+        return IERC20(_markets[marketId]).balanceOf(address(this));
     }
 
-    fallback() external { }
+    fallback() external {}
 }

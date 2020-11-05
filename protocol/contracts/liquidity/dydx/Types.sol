@@ -22,20 +22,20 @@ pragma solidity ^0.7.0;
 
 library Types {
     enum ActionType {
-        Deposit,   // supply tokens
-        Withdraw,  // borrow tokens
-        Transfer,  // transfer balance between accounts
-        Buy,       // buy an amount of some token (externally)
-        Sell,      // sell an amount of some token (externally)
-        Trade,     // trade tokens against another account
+        Deposit, // supply tokens
+        Withdraw, // borrow tokens
+        Transfer, // transfer balance between accounts
+        Buy, // buy an amount of some token (externally)
+        Sell, // sell an amount of some token (externally)
+        Trade, // trade tokens against another account
         Liquidate, // liquidate an undercollateralized or expiring account
-        Vaporize,  // use excess tokens to zero-out a completely negative account
-        Call       // send arbitrary data to an address
+        Vaporize, // use excess tokens to zero-out a completely negative account
+        Call // send arbitrary data to an address
     }
 
     enum AssetDenomination {
         Wei, // the amount is denominated in wei
-        Par  // the amount is denominated in par
+        Par // the amount is denominated in par
     }
 
     enum AssetReference {
@@ -67,7 +67,7 @@ library Types {
     }
 
     struct AccountInfo {
-        address owner;  // The address that owns the account
+        address owner; // The address that owns the account
         uint256 number; // A nonce that allows a single address to control many accounts
     }
 }

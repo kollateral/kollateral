@@ -22,6 +22,7 @@ pragma solidity ^0.7.0;
 abstract contract IWETH9 {
     mapping(address => uint256) public balanceOf;
 
-    function deposit() public virtual payable;
-    function withdraw(uint wad) public virtual;
+    function deposit() public payable virtual;
+
+    function withdraw(uint256 wad) public virtual;
 }

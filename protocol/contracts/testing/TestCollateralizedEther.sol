@@ -22,8 +22,5 @@ pragma solidity ^0.7.0;
 import "../token/CollateralizedEther.sol";
 
 contract TestCollateralizedEther is CollateralizedEther {
-
-    constructor(string memory name, string memory symbol)
-    ERC20(name, symbol)
-    { }
+    constructor(string memory name, string memory symbol) ERC20(name, symbol) {}
 }

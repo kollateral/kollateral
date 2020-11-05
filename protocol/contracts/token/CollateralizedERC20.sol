@@ -28,7 +28,10 @@ abstract contract CollateralizedERC20 is CollateralizedToken {
 
     function mint(uint256 tokenAmount) external returns (bool) {
         IERC20 token = IERC20(underlying());
-        require(token.transferFrom(msg.sender, address(this), tokenAmount), "CollateralizedERC20: token transferFrom failed");
+        require(
+            token.transferFrom(msg.sender, address(this), tokenAmount),
+            "CollateralizedERC20: token transferFrom failed"
+        );
         return mintInternal(tokenAmount);
     }
 
@@ -36,11 +39,11 @@ abstract contract CollateralizedERC20 is CollateralizedToken {
         return IERC20(underlying()).transfer(to, amount);
     }
 
-    function isUnderlyingEther() public override pure returns (bool) {
+    function isUnderlyingEther() public pure override returns (bool) {
         return false;
     }
 
-    function totalReserve() public override view returns (uint256) {
+    function totalReserve() public view override returns (uint256) {
         return IERC20(underlying()).balanceOf(address(this));
     }
 }

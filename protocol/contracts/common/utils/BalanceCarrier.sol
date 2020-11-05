@@ -25,11 +25,15 @@ import "./ExternalCaller.sol";
 abstract contract BalanceCarrier is ExternalCaller {
     address private _ethTokenAddress;
 
-    constructor (address ethTokenAddress) {
+    constructor(address ethTokenAddress) {
         _ethTokenAddress = ethTokenAddress;
     }
 
-    function transfer(address tokenAddress, address to, uint256 amount) internal returns (bool) {
+    function transfer(
+        address tokenAddress,
+        address to,
+        uint256 amount
+    ) internal returns (bool) {
         if (tokenAddress == _ethTokenAddress) {
             externalTransfer(to, amount);
             return true;
