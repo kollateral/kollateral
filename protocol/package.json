@@ -5,6 +5,7 @@
   "description": "Solidity smart contracts for the Kingmaker protocol",
   "scripts": {
     "clean": "rimraf artifacts cache typechain",
+    "lint": "yarn lint:sol",
     "lint:sol": "solhint -f table contracts/**/*.sol",
     "prettier:sol": "prettier --write contracts/**/*.sol",
     "build:sol": "yarn clean && yarn run compile",

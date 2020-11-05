@@ -1,0 +1,29 @@
+name: Runner
+
+# Run this workflow every time a new commit pushed to your repository
+on: push
+
+jobs:
+  # Set the job key. The key is displayed as the job name when a job name is not provided
+  cicd:
+    # Name the Job
+    name: CICD
+    # Set the type of machine to run on
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks out a copy of your repository on the ubuntu-latest machine
+      - name: Checkout
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '15'
+          check-latest: true
+
+      # Runs linters
+      - name: Lint
+      - runs: yarn lint
+
+      # Runs tests
+      - name: Test
+      - runs: yarn test
