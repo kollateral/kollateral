@@ -21,12 +21,12 @@ jobs:
         with:
           node-version: '15'
           check-latest: true
-        runs: yarn
+        run: yarn
 
       # Runs linters
       - name: Lint
-        runs: yarn lint
+        run: yarn lint
 
       # Runs tests
       - name: Test
-        runs: yarn test
+        run: yarn test
