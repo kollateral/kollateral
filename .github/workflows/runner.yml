@@ -12,15 +12,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checks out a copy of your repository on the ubuntu-latest machine
+      # Checks out a copy of your repository on the ubuntu-latest machine and sets up latest Node
       - uses: actions/checkout@v3
-
-      # Runs install
-      - name: Install
-        uses: actions/setup-node@v2
+      - uses: actions/setup-node@v2
         with:
           node-version: '15'
           check-latest: true
+
+      # Runs install
+      - name: Install
         run: yarn
 
       # Runs linters
