@@ -345,5 +345,5 @@ contract Invoker is BalanceCarrier, IInvoker, Ownable {
         _;
     }
 
-    fallback() external {}
+    fallback() external payable {}
 }

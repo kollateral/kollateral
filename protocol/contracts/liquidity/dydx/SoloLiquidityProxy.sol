@@ -230,5 +230,5 @@ contract SoloLiquidityProxy is BalanceCarrier, ICallee, ILiquidityProxy, Ownable
         return ISoloMargin(_soloMarginAddress).getMarketIsClosing(marketId);
     }
 
-    fallback() external {}
+    fallback() external payable {}
 }

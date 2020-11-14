@@ -12,6 +12,7 @@
     "build:sol:uml": "sol2uml contracts",
     "compile": "hardhat compile",
     "test": "hardhat test",
+    "test:liquidity": "hardhat test test/liquidity/SoloLiquidityProxy.ts",
     "deploy:dev": "hardhat run scripts/sample-script.js"
   },
   "license": "Apache-2.0",
