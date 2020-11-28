@@ -6,7 +6,7 @@
   <br>
 </h1>
 
-<h4 align="center">The flash-loan building block</h4>
+<h4 align="center">A Flash Liquidity Protocol</h4>
 
 <p align="center">
   <a href="https://discord.gg/gxFD9Kd">
