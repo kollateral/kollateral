@@ -24,7 +24,7 @@
 
 
 # Kingmaker
-The flash-loan building block
+A Flash Liquidity Protocol
 
 ## Disclaimer
 Though we make our best efforts to provide thorough test coverage, Kingmaker is as of yet unaudited. We appreciate your interest in building on Kingmaker, so please consider this alpha software and use at your own risk.
