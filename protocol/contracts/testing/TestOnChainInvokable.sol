@@ -1,7 +1,7 @@
 /*
 
     Copyright 2020 Kollateral LLC
-    Copyright 2020 ARM Finance LLC
+    Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -17,16 +17,16 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.1;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "../__oz__/access/Ownable.sol";
 import "../common/invoke/KingmakerInvokable.sol";
 
 /*
  *  NOTICE: ONLY FOR ON-CHAIN TESTING - THIS CONTRACT IS VULNERABLE TO LOSS OF FUNDS
  */
 contract TestOnChainInvokable is KingmakerInvokable, Ownable {
-    constructor() public { }
+    constructor() {}
 
     event HelperDump(
         address sender,
@@ -37,7 +37,7 @@ contract TestOnChainInvokable is KingmakerInvokable, Ownable {
         bool isCurrentTokenEther
     );
 
-    function execute(bytes calldata data) external override payable {
+    function execute(bytes calldata data) external payable override {
         emitHelper(data);
         repay();
     }
@@ -49,12 +49,13 @@ contract TestOnChainInvokable is KingmakerInvokable, Ownable {
             currentTokenAddress(),
             currentTokenAmount(),
             currentRepaymentAmount(),
-            isCurrentTokenEther());
+            isCurrentTokenEther()
+        );
     }
 
-    function withdraw(address tokenAddress, address to, uint256 amount) external onlyOwner returns (bool) {
+    function withdraw(address tokenAddress, uint256 amount) external onlyOwner returns (bool) {
         return transfer(tokenAddress, msg.sender, amount);
     }
 
-    fallback() external { }
+    fallback() external {}
 }

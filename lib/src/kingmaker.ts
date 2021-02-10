@@ -17,7 +17,7 @@ import { TransactionConfig } from "web3-core";
 import { AbiItem } from "web3-utils";
 
 // @ts-ignore
-import { TestToken, KToken, Invoker, Kerc20, KEther } from "../protocol/typechain";
+import { TestToken, KToken, Invoker, KErc20, KEther } from "../protocol/typechain";
 
 export class Kingmaker {
   public static MAX_UINT256: BigNumber = new BigNumber('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', 16);
@@ -27,7 +27,7 @@ export class Kingmaker {
   private _web3: Web3;
   private _invoker: Invoker;
   private _kEther: KEther;
-  private _kERC20s: Map<string, Kerc20>;
+  private _kErc20s: Map<string, KErc20>;
   private _kTokens: Map<string, KToken>;
   private _erc20Abi: AbiItem;
 
@@ -42,8 +42,8 @@ export class Kingmaker {
     const kEtherAbi = require('../protocol/artifacts/contracts/token/ktoken/KEther.sol/KEther.json').abi;
     this._kEther = new this._web3.eth.Contract(kEtherAbi, config.network.tokens.get(Token.ETH)!.kTokenAddress) as unknown as KEther;
 
-    const kERC20Abi = require('../protocol/artifacts/contracts/token/ktoken/KERC20.sol/KERC20.json').abi;
-    this._kERC20s = new Map<string, Kerc20>();
+    const kErc20Abi = require('../protocol/artifacts/contracts/token/ktoken/KErc20.sol/KErc20.json').abi;
+    this._kErc20s = new Map<string, KErc20>();
 
     const kTokenAbi = require('../protocol/artifacts/contracts/token/ktoken/KToken.sol/KToken.json').abi;
     this._kTokens = new Map<string, KToken>();
@@ -52,7 +52,7 @@ export class Kingmaker {
 
     config.network.tokens.forEach((config, token) => {
       if (token != Token.ETH) {
-        this._kERC20s.set(config.kTokenAddress, new this._web3.eth.Contract(kERC20Abi, config.kTokenAddress) as Kerc20);
+        this._kErc20s.set(config.kErc20Address, new this._web3.eth.Contract(kErc20Abi, config.kErc20Address) as KErc20);
       }
       this._kTokens.set(config.kTokenAddress, new this._web3.eth.Contract(kTokenAbi, config.kTokenAddress) as KToken);
     });

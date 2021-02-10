@@ -1,7 +1,7 @@
 /*
 
     Copyright 2020 Kollateral LLC
-    Copyright 2020 ARM Finance LLC
+    Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -17,13 +17,12 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.1;
 
 import "../common/invoke/KingmakerInvokable.sol";
 
 contract TestInvokable is KingmakerInvokable {
-
-    constructor() public { }
+    constructor() {}
 
     event HelperDump(
         address sender,
@@ -31,7 +30,8 @@ contract TestInvokable is KingmakerInvokable {
         address currentTokenAddress,
         uint256 currentTokenAmount,
         uint256 currentRepaymentAmount,
-        bool isCurrentTokenEther);
+        bool isCurrentTokenEther
+    );
     event SwapDump(bytes swapData);
 
     // To setup state for specific tests
@@ -39,7 +39,7 @@ contract TestInvokable is KingmakerInvokable {
         externalCall(invokeAddress, msg.value, invokeData);
     }
 
-    function execute(bytes calldata data) external override payable {
+    function execute(bytes calldata data) external payable override {
         emitHelper(data);
 
         if (data.length == 0) {
@@ -48,7 +48,7 @@ contract TestInvokable is KingmakerInvokable {
 
         (uint256 testType, bytes memory testData) = abi.decode(data, (uint256, bytes));
         if (testType == 1) {
-            (uint256 repaymentAmount) = abi.decode(testData, (uint256));
+            uint256 repaymentAmount = abi.decode(testData, (uint256));
             return executeRepayAmount(repaymentAmount);
         }
         if (testType == 3) {
@@ -56,7 +56,7 @@ contract TestInvokable is KingmakerInvokable {
             return executeInvoke(invokeAddress, invokeData);
         }
         if (testType == 4) {
-            (uint256 amount) = abi.decode(testData, (uint256));
+            uint256 amount = abi.decode(testData, (uint256));
             return executePayable(amount);
         }
     }
@@ -86,8 +86,9 @@ contract TestInvokable is KingmakerInvokable {
             currentTokenAddress(),
             currentTokenAmount(),
             currentRepaymentAmount(),
-            isCurrentTokenEther());
+            isCurrentTokenEther()
+        );
     }
 
-    fallback() external { }
+    fallback() external payable {}
 }

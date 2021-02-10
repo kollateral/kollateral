@@ -1,7 +1,7 @@
 /*
 
     Copyright 2020 Kollateral LLC
-    Copyright 2020 ARM Finance LLC
+    Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -17,13 +17,12 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.1;
 
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
-
-import "../common/utils/ExtendedMath.sol";
 import "./UnlimitedApprovalERC20.sol";
+import "../__oz__/math/SafeMath.sol";
+import "../__oz__/utils/ReentrancyGuard.sol";
+import "../common/utils/ExtendedMath.sol";
 
 abstract contract CollateralizedToken is ExtendedMath, ReentrancyGuard, UnlimitedApprovalERC20 {
     using SafeMath for uint256;
@@ -33,7 +32,7 @@ abstract contract CollateralizedToken is ExtendedMath, ReentrancyGuard, Unlimite
 
     address internal _underlying;
 
-    constructor(address underlying) internal {
+    constructor(address underlying) {
         _underlying = underlying;
     }
 
@@ -90,7 +89,11 @@ abstract contract CollateralizedToken is ExtendedMath, ReentrancyGuard, Unlimite
         return underlyingAmountToNativeAmountInternal(underlyingAmount, ceil, false);
     }
 
-    function underlyingAmountToNativeAmountInternal(uint256 underlyingAmount, bool ceil, bool subtractDeposit) internal view returns (uint256) {
+    function underlyingAmountToNativeAmountInternal(
+        uint256 underlyingAmount,
+        bool ceil,
+        bool subtractDeposit
+    ) internal view returns (uint256) {
         if (totalReserve() == 0) {
             return 0;
         }
@@ -102,9 +105,9 @@ abstract contract CollateralizedToken is ExtendedMath, ReentrancyGuard, Unlimite
         return divAndRound(underlyingAmount.mul(totalSupply()), adjustedTotalReserve, ceil);
     }
 
-    function isUnderlyingEther() public virtual view returns (bool);
+    function isUnderlyingEther() public view virtual returns (bool);
 
-    function totalReserve() public virtual view returns (uint256);
+    function totalReserve() public view virtual returns (uint256);
 
     function balanceOfUnderlying(address owner) public view returns (uint256) {
         return nativeAmountToUnderlyingAmount(balanceOf(owner));

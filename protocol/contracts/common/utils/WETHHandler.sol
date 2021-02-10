@@ -1,7 +1,7 @@
 /*
 
     Copyright 2020 Kollateral LLC
-    Copyright 2020 ARM Finance LLC
+    Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
     limitations under the License.
 
 */
-
-pragma solidity ^0.7.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.8.1;
 
 import "./IWETH9.sol";
 
@@ -30,7 +30,7 @@ abstract contract WETHHandler {
 
     function wrap(uint256 tokenAmount) internal {
         require(address(this).balance >= tokenAmount, "WETHHandler: not enough ether balance");
-        IWETH9(_wethAddress).deposit{ value: tokenAmount}();
+        IWETH9(_wethAddress).deposit{ value: tokenAmount }();
     }
 
     function unwrap(uint256 tokenAmount) internal {

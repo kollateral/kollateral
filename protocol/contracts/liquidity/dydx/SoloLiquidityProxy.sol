@@ -1,7 +1,7 @@
 /*
 
     Copyright 2020 Kollateral LLC
-    Copyright 2020 ARM Finance LLC
+    Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -17,17 +17,15 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.7.0;
-pragma experimental ABIEncoderV2;
-
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+pragma solidity ^0.8.1;
 
 import "./ICallee.sol";
 import "./ISoloMargin.sol";
 import "./Types.sol";
 import "../ILiquidityProxy.sol";
+import "../../__oz__/access/Ownable.sol";
+import "../../__oz__/math/SafeMath.sol";
+import "../../__oz__/token/ERC20/IERC20.sol";
 import "../../common/invoke/IInvoker.sol";
 import "../../common/utils/BalanceCarrier.sol";
 import "../../common/utils/WETHHandler.sol";
@@ -37,12 +35,13 @@ contract SoloLiquidityProxy is BalanceCarrier, ICallee, ILiquidityProxy, Ownable
 
     uint256 internal NULL_ACCOUNT_ID = 0;
     uint256 internal NULL_MARKET_ID = 0;
-    Types.AssetAmount internal NULL_AMOUNT = Types.AssetAmount({
-        sign: false,
-        denomination: Types.AssetDenomination.Wei,
-        ref: Types.AssetReference.Delta,
-        value: 0
-    });
+    Types.AssetAmount internal NULL_AMOUNT =
+        Types.AssetAmount({
+            sign: false,
+            denomination: Types.AssetDenomination.Wei,
+            ref: Types.AssetReference.Delta,
+            value: 0
+        });
     bytes internal NULL_DATA = "";
 
     address internal _soloMarginAddress;
@@ -54,8 +53,10 @@ contract SoloLiquidityProxy is BalanceCarrier, ICallee, ILiquidityProxy, Ownable
     address internal _scheduleTokenAddress;
     uint256 internal _scheduleTokenAmount;
 
-
-    constructor (address soloMarginAddress, address payable wethAddress) BalanceCarrier(address(1)) WETHHandler(wethAddress) public {
+    constructor(address soloMarginAddress, address payable wethAddress)
+        BalanceCarrier(address(1))
+        WETHHandler(wethAddress)
+    {
         _soloMarginAddress = soloMarginAddress;
     }
 
@@ -66,7 +67,7 @@ contract SoloLiquidityProxy is BalanceCarrier, ICallee, ILiquidityProxy, Ownable
         _tokenAddressToMarketId[tokenAddress] = marketId;
         _marketIdToTokenAddress[marketId] = tokenAddress;
         _tokenAddressRegistered[tokenAddress] = true;
-        IERC20(remapTokenAddress(tokenAddress)).approve(_soloMarginAddress, uint256(-1));
+        IERC20(remapTokenAddress(tokenAddress)).approve(_soloMarginAddress, type(uint256).max);
     }
 
     function deregisterPool(uint256 marketId) external onlyOwner {
@@ -78,11 +79,11 @@ contract SoloLiquidityProxy is BalanceCarrier, ICallee, ILiquidityProxy, Ownable
         IERC20(remapTokenAddress(tokenAddress)).approve(_soloMarginAddress, 0);
     }
 
-    function getRepaymentAddress(address tokenAddress) external override view returns (address) {
+    function getRepaymentAddress(address tokenAddress) external view override returns (address) {
         return address(this);
     }
 
-    function getTotalReserve(address tokenAddress) external override view returns (uint256) {
+    function getTotalReserve(address tokenAddress) external view override returns (uint256) {
         if (isRegistered(tokenAddress) && !isClosing(tokenAddress)) {
             return IERC20(remapTokenAddress(tokenAddress)).balanceOf(_soloMarginAddress);
         }
@@ -90,7 +91,7 @@ contract SoloLiquidityProxy is BalanceCarrier, ICallee, ILiquidityProxy, Ownable
         return 0;
     }
 
-    function getRepaymentAmount(address tokenAddress, uint256 tokenAmount) external override view returns (uint256) {
+    function getRepaymentAmount(address tokenAddress, uint256 tokenAmount) external view override returns (uint256) {
         return getRepaymentAmountInternal(tokenAddress, tokenAmount);
     }
 
@@ -100,7 +101,7 @@ contract SoloLiquidityProxy is BalanceCarrier, ICallee, ILiquidityProxy, Ownable
     }
 
     function borrow(address tokenAddress, uint256 tokenAmount) external override {
-        _scheduleInvokerAddress = msg.sender;
+        _scheduleInvokerAddress = payable(msg.sender);
         _scheduleTokenAddress = tokenAddress;
         _scheduleTokenAmount = tokenAmount;
 
@@ -114,12 +115,16 @@ contract SoloLiquidityProxy is BalanceCarrier, ICallee, ILiquidityProxy, Ownable
 
         solo.operate(accountInfos, operations);
 
-        _scheduleInvokerAddress = address(0);
+        _scheduleInvokerAddress = payable(address(0));
         _scheduleTokenAddress = address(0);
         _scheduleTokenAmount = 0;
     }
 
-    function callFunction(address sender, Types.AccountInfo memory accountInfo, bytes memory data) public override {
+    function callFunction(
+        address sender,
+        Types.AccountInfo memory accountInfo,
+        bytes memory data
+    ) public override {
         require(_scheduleInvokerAddress != address(0), "SoloLiquidityProxy: not scheduled");
 
         if (_scheduleTokenAddress == address(1)) {
@@ -128,7 +133,8 @@ contract SoloLiquidityProxy is BalanceCarrier, ICallee, ILiquidityProxy, Ownable
 
         require(
             transfer(_scheduleTokenAddress, _scheduleInvokerAddress, _scheduleTokenAmount),
-            "SoloLiquidityProxy: transfer to invoker failed");
+            "SoloLiquidityProxy: transfer to invoker failed"
+        );
 
         IInvoker invoker = IInvoker(_scheduleInvokerAddress);
         invoker.invokeCallback();
@@ -139,71 +145,67 @@ contract SoloLiquidityProxy is BalanceCarrier, ICallee, ILiquidityProxy, Ownable
     }
 
     function getAccountInfo() internal view returns (Types.AccountInfo memory) {
-        return Types.AccountInfo({
-            owner: address(this),
-            number: 1
-        });
+        return Types.AccountInfo({ owner: address(this), number: 1 });
     }
 
     function getWithdrawAction(address tokenAddress, uint256 tokenAmount)
-    internal
-    view
-    returns (Types.ActionArgs memory)
+        internal
+        view
+        returns (Types.ActionArgs memory)
     {
-        return Types.ActionArgs({
-            actionType: Types.ActionType.Withdraw,
-            accountId: 0,
-            amount: Types.AssetAmount({
-                sign: false,
-                denomination: Types.AssetDenomination.Wei,
-                ref: Types.AssetReference.Delta,
-                value: tokenAmount
-            }),
-            primaryMarketId: marketIdFromTokenAddress(tokenAddress),
-            secondaryMarketId: NULL_MARKET_ID,
-            otherAddress: address(this),
-            otherAccountId: NULL_ACCOUNT_ID,
-            data: NULL_DATA
-        });
+        return
+            Types.ActionArgs({
+                actionType: Types.ActionType.Withdraw,
+                accountId: 0,
+                amount: Types.AssetAmount({
+                    sign: false,
+                    denomination: Types.AssetDenomination.Wei,
+                    ref: Types.AssetReference.Delta,
+                    value: tokenAmount
+                }),
+                primaryMarketId: marketIdFromTokenAddress(tokenAddress),
+                secondaryMarketId: NULL_MARKET_ID,
+                otherAddress: address(this),
+                otherAccountId: NULL_ACCOUNT_ID,
+                data: NULL_DATA
+            });
     }
 
     function getDepositAction(address tokenAddress, uint256 repaymentAmount)
-    internal
-    view
-    returns (Types.ActionArgs memory)
+        internal
+        view
+        returns (Types.ActionArgs memory)
     {
-        return Types.ActionArgs({
-            actionType: Types.ActionType.Deposit,
-            accountId: 0,
-            amount: Types.AssetAmount({
-                sign: true,
-                denomination: Types.AssetDenomination.Wei,
-                ref: Types.AssetReference.Delta,
-                value: repaymentAmount
-            }),
-            primaryMarketId: marketIdFromTokenAddress(tokenAddress),
-            secondaryMarketId: NULL_MARKET_ID,
-            otherAddress: address(this),
-            otherAccountId: NULL_ACCOUNT_ID,
-            data: NULL_DATA
-        });
+        return
+            Types.ActionArgs({
+                actionType: Types.ActionType.Deposit,
+                accountId: 0,
+                amount: Types.AssetAmount({
+                    sign: true,
+                    denomination: Types.AssetDenomination.Wei,
+                    ref: Types.AssetReference.Delta,
+                    value: repaymentAmount
+                }),
+                primaryMarketId: marketIdFromTokenAddress(tokenAddress),
+                secondaryMarketId: NULL_MARKET_ID,
+                otherAddress: address(this),
+                otherAccountId: NULL_ACCOUNT_ID,
+                data: NULL_DATA
+            });
     }
 
-    function getCallAction()
-    internal
-    view
-    returns (Types.ActionArgs memory)
-    {
-        return Types.ActionArgs({
-            actionType: Types.ActionType.Call,
-            accountId: 0,
-            amount: NULL_AMOUNT,
-            primaryMarketId: NULL_MARKET_ID,
-            secondaryMarketId: NULL_MARKET_ID,
-            otherAddress: address(this),
-            otherAccountId: NULL_ACCOUNT_ID,
-            data: NULL_DATA
-        });
+    function getCallAction() internal view returns (Types.ActionArgs memory) {
+        return
+            Types.ActionArgs({
+                actionType: Types.ActionType.Call,
+                accountId: 0,
+                amount: NULL_AMOUNT,
+                primaryMarketId: NULL_MARKET_ID,
+                secondaryMarketId: NULL_MARKET_ID,
+                otherAddress: address(this),
+                otherAccountId: NULL_ACCOUNT_ID,
+                data: NULL_DATA
+            });
     }
 
     function isRegistered(address tokenAddress) internal view returns (bool) {
@@ -227,5 +229,5 @@ contract SoloLiquidityProxy is BalanceCarrier, ICallee, ILiquidityProxy, Ownable
         return ISoloMargin(_soloMarginAddress).getMarketIsClosing(marketId);
     }
 
-    fallback() external { }
+    fallback() external payable {}
 }

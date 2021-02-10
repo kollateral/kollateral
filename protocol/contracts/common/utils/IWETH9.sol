@@ -1,7 +1,7 @@
 /*
 
     Copyright 2020 Kollateral LLC
-    Copyright 2020 ARM Finance LLC
+    Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
     limitations under the License.
 
 */
-
-pragma solidity ^0.7.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.8.1;
 
 abstract contract IWETH9 {
     mapping(address => uint256) public balanceOf;
 
-    function deposit() public virtual payable;
-    function withdraw(uint wad) public virtual;
+    function deposit() public payable virtual;
+
+    function withdraw(uint256 wad) public virtual;
 }

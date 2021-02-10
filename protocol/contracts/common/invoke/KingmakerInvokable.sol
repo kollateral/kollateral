@@ -1,7 +1,7 @@
 /*
 
     Copyright 2020 Kollateral LLC
-    Copyright 2020 ARM Finance LLC
+    Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,26 +16,26 @@
     limitations under the License.
 
 */
-
-pragma solidity ^0.7.0;
-
-import "@openzeppelin/contracts/math/SafeMath.sol";
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.8.1;
 
 import "./IInvokable.sol";
 import "./IInvocationHook.sol";
 import "../utils/BalanceCarrier.sol";
+import "../../__oz__/math/SafeMath.sol";
 
 abstract contract KingmakerInvokable is BalanceCarrier, IInvokable {
     using SafeMath for uint256;
 
     uint256 internal MAX_REWARD_BIPS = 100;
 
-    constructor () BalanceCarrier(address(1)) internal { }
+    constructor() BalanceCarrier(address(1)) {}
 
     function repay() internal repaymentSafeguard {
         require(
             transfer(currentTokenAddress(), msg.sender, currentRepaymentAmount()),
-                "KingmakerInvokable: failed to repay");
+            "KingmakerInvokable: failed to repay"
+        );
     }
 
     function currentSender() internal view returns (address) {
@@ -59,8 +59,7 @@ abstract contract KingmakerInvokable is BalanceCarrier, IInvokable {
     }
 
     modifier repaymentSafeguard() {
-        uint256 effectiveReward = currentRepaymentAmount().sub(currentTokenAmount())
-        .mul(10000).div(currentTokenAmount());
+        uint256 effectiveReward = currentRepaymentAmount().sub(currentTokenAmount()).mul(10000).div(currentTokenAmount());
 
         require(effectiveReward <= MAX_REWARD_BIPS, "KingmakerInvokable: repayment reward too high");
         _;

@@ -1,7 +1,7 @@
 /*
 
     Copyright 2020 Kollateral LLC
-    Copyright 2020 ARM Finance LLC
+    Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -17,11 +17,10 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.7.0;
-
-import "@openzeppelin/contracts/math/SafeMath.sol";
+pragma solidity ^0.8.1;
 
 import "./CollateralizedToken.sol";
+import "../__oz__/math/SafeMath.sol";
 
 abstract contract CollateralizedERC20 is CollateralizedToken {
     using SafeMath for uint256;
@@ -30,7 +29,8 @@ abstract contract CollateralizedERC20 is CollateralizedToken {
         IERC20 token = IERC20(underlying());
         require(
             token.transferFrom(msg.sender, address(this), tokenAmount),
-                "CollateralizedERC20: token transferFrom failed");
+            "CollateralizedERC20: token transferFrom failed"
+        );
         return mintInternal(tokenAmount);
     }
 
@@ -38,11 +38,11 @@ abstract contract CollateralizedERC20 is CollateralizedToken {
         return IERC20(underlying()).transfer(to, amount);
     }
 
-    function isUnderlyingEther() public override view returns (bool) {
+    function isUnderlyingEther() public pure override returns (bool) {
         return false;
     }
 
-    function totalReserve() public override view returns (uint256) {
+    function totalReserve() public view override returns (uint256) {
         return IERC20(underlying()).balanceOf(address(this));
     }
 }

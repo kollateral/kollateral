@@ -1,7 +1,7 @@
 /*
 
     Copyright 2020 Kollateral LLC
-    Copyright 2020 ARM Finance LLC
+    Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
     limitations under the License.
 
 */
-
-pragma solidity ^0.7.0;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.8.1;
 
 contract ExternalCaller {
     function externalTransfer(address _to, uint256 _value) internal {
@@ -25,7 +25,11 @@ contract ExternalCaller {
         externalCall(_to, _value, "");
     }
 
-    function externalCall(address _to, uint256 _value, bytes memory _data) internal {
+    function externalCall(
+        address _to,
+        uint256 _value,
+        bytes memory _data
+    ) internal {
         (bool success, bytes memory returndata) = _to.call{ value: _value }(_data);
         require(success, string(returndata));
     }

@@ -3,27 +3,28 @@
   "version": "2.1.0",
   "license": "Apache-2.0",
   "scripts": {
-    "clean": "rimraf node_modules .docz",
-    "dev": "yarn clean:dev && docz dev",
+    "clean": "rimraf .docz",
     "clean:dev": "docz clean",
+    "cleanse": "rimraf node_modules",
+    "dev": "npm run clean:dev && docz dev",
     "build": "docz build",
     "serve": "docz serve",
     "deploy": "node scripts/deployToS3.js"
   },
   "dependencies": {
     "docz": "^2.3.1",
-    "gatsby": "^2.24.80",
+    "gatsby": "^2.32.3",
     "gatsby-theme-docz": "^2.3.1",
     "prop-types": "^15.7.2",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-helmet-async": "^1.0.7",
-    "styled-components": "^5.2.0"
+    "styled-components": "^5.2.1"
   },
   "devDependencies": {
-    "deploy-aws-s3-cloudfront": "^3.2.4",
+    "deploy-aws-s3-cloudfront": "^3.3.0",
     "dotenv": "^8.2.0",
-    "eslint": "^7.11.0",
+    "eslint": "^7.19.0",
     "eslint-plugin-mdx": "^1.8.2",
     "rimraf": "^3.0.2",
     "shelljs": "^0.8.4"

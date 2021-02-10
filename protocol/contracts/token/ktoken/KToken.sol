@@ -1,7 +1,7 @@
 /*
 
     Copyright 2020 Kollateral LLC
-    Copyright 2020 ARM Finance LLC
+    Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.1;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Pausable.sol";
 import "../CollateralizedToken.sol";
+import "../../__oz__/access/Ownable.sol";
+import "../../__oz__/math/SafeMath.sol";
+import "../../__oz__/utils/Pausable.sol";
 import "../../common/invoke/IInvocationHook.sol";
 import "../../common/invoke/IInvokable.sol";
 
@@ -50,14 +50,13 @@ abstract contract KToken is IInvocationHook, CollateralizedToken, Ownable, Pausa
     /* Helper - store expected balance for currently executing transaction */
     uint256 internal _currentExpectedBalance;
 
-    constructor () { }
+    constructor() {}
 
-    function invoke(address invokeTo, bytes calldata invokeData, uint256 underlyingAmount)
-    external
-    payable
-    nonReentrant
-    whenNotPaused
-    {
+    function invoke(
+        address invokeTo,
+        bytes calldata invokeData,
+        uint256 underlyingAmount
+    ) external payable nonReentrant whenNotPaused {
         require(invokeTo != address(this), "KToken: cannot invoke this contract");
 
         /* Record starting and expected ending balance */
@@ -88,7 +87,11 @@ abstract contract KToken is IInvocationHook, CollateralizedToken, Ownable, Pausa
         return 0;
     }
 
-    function setInvocationState(address currentSender, uint256 currentTokenAmount, uint256 currentExpectedBalance) internal {
+    function setInvocationState(
+        address currentSender,
+        uint256 currentTokenAmount,
+        uint256 currentExpectedBalance
+    ) internal {
         _currentSender = currentSender;
         _currentTokenAmount = currentTokenAmount;
         _currentExpectedBalance = currentExpectedBalance;
@@ -122,24 +125,24 @@ abstract contract KToken is IInvocationHook, CollateralizedToken, Ownable, Pausa
         return _platformVaultAddress;
     }
 
-    function isKToken() external view returns (bool) {
+    function isKToken() external pure returns (bool) {
         return true;
     }
 
     /* Helper hook for invoked transaction */
-    function currentSender() external override view returns (address) {
+    function currentSender() external view override returns (address) {
         return _currentSender;
     }
 
-    function currentTokenAddress() external override view returns (address) {
+    function currentTokenAddress() external view override returns (address) {
         return _underlying;
     }
 
-    function currentTokenAmount() external override view returns (uint256) {
+    function currentTokenAmount() external view override returns (uint256) {
         return _currentTokenAmount;
     }
 
-    function currentRepaymentAmount() external override view returns (uint256) {
+    function currentRepaymentAmount() external view override returns (uint256) {
         return _currentExpectedBalance.sub(totalReserve());
     }
 
@@ -153,7 +156,15 @@ abstract contract KToken is IInvocationHook, CollateralizedToken, Ownable, Pausa
         _platformRewardBips = platformRewardBips;
     }
 
-    function setPlatformVaultAddress(address platformVaultAddress) external onlyOwner {
-        _platformVaultAddress = platformVaultAddress;
+    function setPlatformVaultAddress(address vaultAddress) external onlyOwner {
+        _platformVaultAddress = vaultAddress;
+    }
+
+    function pause() external onlyOwner whenNotPaused {
+        _pause();
+    }
+
+    function unpause() external onlyOwner whenPaused {
+        _unpause();
     }
 }

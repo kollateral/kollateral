@@ -1,7 +1,7 @@
 /*
 
     Copyright 2020 Kollateral LLC
-    Copyright 2020 ARM Finance LLC
+    Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -17,16 +17,15 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.7.0;
-
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+pragma solidity ^0.8.1;
 
 import "./ILendingPool.sol";
 import "./ILendingPoolAddressesProvider.sol";
 import "./ILendingPoolCore.sol";
 import "./ILendingPoolParametersProvider.sol";
 import "../ILiquidityProxy.sol";
+import "../../__oz__/math/SafeMath.sol";
+import "../../__oz__/token/ERC20/IERC20.sol";
 import "../../common/invoke/IInvoker.sol";
 import "../../common/utils/BalanceCarrier.sol";
 
@@ -39,15 +38,15 @@ contract AaveLiquidityProxy is BalanceCarrier, ILiquidityProxy {
 
     address payable internal _scheduleInvokerAddress;
 
-    constructor (ILendingPoolAddressesProvider lendingPoolAddressProvider) BalanceCarrier(ETHER_TOKEN_ADDRESS) public {
+    constructor(ILendingPoolAddressesProvider lendingPoolAddressProvider) BalanceCarrier(ETHER_TOKEN_ADDRESS) {
         _lendingPoolAddressProvider = lendingPoolAddressProvider;
     }
 
-    function getRepaymentAddress(address tokenAddress) external override view returns (address) {
+    function getRepaymentAddress(address tokenAddress) external view override returns (address) {
         return _lendingPoolAddressProvider.getLendingPoolCore();
     }
 
-    function getTotalReserve(address tokenAddress) external override view returns (uint256) {
+    function getTotalReserve(address tokenAddress) external view override returns (uint256) {
         address core = _lendingPoolAddressProvider.getLendingPoolCore();
 
         if (isRegistered(tokenAddress)) {
@@ -57,25 +56,30 @@ contract AaveLiquidityProxy is BalanceCarrier, ILiquidityProxy {
         return 0;
     }
 
-    function getRepaymentAmount(address tokenAddress, uint256 tokenAmount) external override view returns (uint256) {
+    function getRepaymentAmount(address tokenAddress, uint256 tokenAmount) external view override returns (uint256) {
         ILendingPoolParametersProvider params =
             ILendingPoolParametersProvider(_lendingPoolAddressProvider.getLendingPoolParametersProvider());
-        (uint256 totalFeeBips, uint256 _) = params.getFlashLoanFeesInBips();
+        (uint256 totalFeeBips, uint256 _void) = params.getFlashLoanFeesInBips();
 
         uint256 amountFee = tokenAmount.mul(totalFeeBips).div(10000);
         return tokenAmount.add(amountFee);
     }
 
     function borrow(address tokenAddress, uint256 tokenAmount) external override {
-        _scheduleInvokerAddress = msg.sender;
+        _scheduleInvokerAddress = payable(msg.sender);
 
         ILendingPool lendingPool = ILendingPool(_lendingPoolAddressProvider.getLendingPool());
         lendingPool.flashLoan(address(this), remapTokenAddress(tokenAddress), tokenAmount, "");
 
-        _scheduleInvokerAddress = address(0);
+        _scheduleInvokerAddress = payable(address(0));
     }
 
-    function executeOperation(address _reserve, uint256 _amount, uint256 _fee, bytes calldata _params) external {
+    function executeOperation(
+        address _reserve,
+        uint256 _amount,
+        uint256 _fee,
+        bytes calldata _params
+    ) external {
         require(_scheduleInvokerAddress != address(0), "AaveLiquidityProxy: not scheduled");
 
         require(transfer(_reserve, _scheduleInvokerAddress, _amount), "AaveLiquidityProxy: transfer to invoker failed");
@@ -93,5 +97,5 @@ contract AaveLiquidityProxy is BalanceCarrier, ILiquidityProxy {
         return tokenAddress == address(1) ? ETHER_TOKEN_ADDRESS : tokenAddress;
     }
 
-    fallback() external { }
+    fallback() external {}
 }

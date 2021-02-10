@@ -1,7 +1,7 @@
 /*
 
     Copyright 2020 Kollateral LLC
-    Copyright 2020 ARM Finance LLC
+    Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -17,17 +17,16 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.7.0;
-
-import "@openzeppelin/contracts/math/SafeMath.sol";
+pragma solidity ^0.8.1;
 
 import "./CollateralizedToken.sol";
+import "../__oz__/math/SafeMath.sol";
 import "../common/utils/ExternalCaller.sol";
 
 abstract contract CollateralizedEther is CollateralizedToken, ExternalCaller {
     using SafeMath for uint256;
 
-    constructor() CollateralizedToken(address(1)) { }
+    constructor() CollateralizedToken(address(1)) {}
 
     function mint() external payable returns (bool) {
         return mintInternal(msg.value);
@@ -39,13 +38,11 @@ abstract contract CollateralizedEther is CollateralizedToken, ExternalCaller {
         return true;
     }
 
-    function isUnderlyingEther() public override view returns (bool) {
+    function isUnderlyingEther() public pure override returns (bool) {
         return true;
     }
 
-    function totalReserve() public override view returns (uint256) {
+    function totalReserve() public view override returns (uint256) {
         return address(this).balance;
     }
-
-    fallback() external { }
 }

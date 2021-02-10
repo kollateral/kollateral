@@ -1,6 +1,7 @@
 /*
 
     Copyright 2020 Kollateral LLC.
+    Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,11 +17,10 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.1;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
-
+import "./__oz__/access/Ownable.sol";
+import "./__oz__/math/SafeMath.sol";
 import "./common/utils/BalanceCarrier.sol";
 import "./common/invoke/IInvokable.sol";
 import "./common/invoke/IInvoker.sol";
@@ -53,14 +53,14 @@ contract Invoker is BalanceCarrier, IInvoker, Ownable {
     uint256 internal _schedulePoolReward;
     uint256 internal _schedulePlatformReward;
 
-    constructor () public BalanceCarrier(address(1)) { }
+    constructor() BalanceCarrier(address(1)) {}
 
-    function invoke(address invokeTo, bytes calldata invokeData, address tokenAddress, uint256 tokenAmount)
-    override
-    external
-    payable
-    onlyFresh
-    {
+    function invoke(
+        address invokeTo,
+        bytes calldata invokeData,
+        address tokenAddress,
+        uint256 tokenAmount
+    ) external payable override onlyFresh {
         require(isTokenAddressRegistered(tokenAddress), "Invoker: no liquidity for token");
         require(invokeTo != address(this), "Invoker: cannot invoke this contract");
 
@@ -101,17 +101,26 @@ contract Invoker is BalanceCarrier, IInvoker, Ownable {
 
         for (uint256 i = 0; i < _scheduleRepayAmounts.length; i++) {
             address repaymentAddress = ILiquidityProxy(liquidityProxy(i)).getRepaymentAddress(_scheduleTokenAddress);
-            require(transfer(_scheduleTokenAddress, repaymentAddress, _scheduleRepayAmounts[i]),  "Invoker: pool repayment transfer failed");
+            require(
+                transfer(_scheduleTokenAddress, repaymentAddress, _scheduleRepayAmounts[i]),
+                "Invoker: pool repayment transfer failed"
+            );
         }
     }
 
     function disburseReward() internal {
         uint256 modifiedPoolReward = _poolRewardAddresses[_scheduleTokenAddress] == address(0) ? 0 : _schedulePoolReward;
         if (modifiedPoolReward > 0) {
-            require(transfer(_scheduleTokenAddress, _poolRewardAddresses[_scheduleTokenAddress], modifiedPoolReward),  "Invoker: pool reward transfer failed");
+            require(
+                transfer(_scheduleTokenAddress, _poolRewardAddresses[_scheduleTokenAddress], modifiedPoolReward),
+                "Invoker: pool reward transfer failed"
+            );
         }
         if (_schedulePlatformReward > 0) {
-            require(transfer(_scheduleTokenAddress, _platformVaultAddress, _schedulePlatformReward),  "Invoker: platform reward transfer failed");
+            require(
+                transfer(_scheduleTokenAddress, _platformVaultAddress, _schedulePlatformReward),
+                "Invoker: platform reward transfer failed"
+            );
         }
         emit Reward(modifiedPoolReward, _schedulePlatformReward, _scheduleTokenAddress);
     }
@@ -139,7 +148,7 @@ contract Invoker is BalanceCarrier, IInvoker, Ownable {
         uint256 tokenAmountLeft = tokenAmount;
         for (uint256 i = 0; i < liquidityProxiesForToken(); i++) {
             ILiquidityProxy proxy = ILiquidityProxy(liquidityProxy(i));
-            uint totalReserve = proxy.getTotalReserve(tokenAddress);
+            uint256 totalReserve = proxy.getTotalReserve(tokenAddress);
             if (totalReserve == 0) {
                 continue;
             }
@@ -188,19 +197,19 @@ contract Invoker is BalanceCarrier, IInvoker, Ownable {
      * INVOKABLE HELPERS
      */
 
-    function currentSender() external override view returns (address) {
+    function currentSender() external view override returns (address) {
         return _scheduleInvokeSender;
     }
 
-    function currentTokenAddress() external override view returns (address) {
+    function currentTokenAddress() external view override returns (address) {
         return _scheduleTokenAddress;
     }
 
-    function currentTokenAmount() external override view returns (uint256) {
+    function currentTokenAmount() external view override returns (uint256) {
         return _scheduleTokenAmount;
     }
 
-    function currentRepaymentAmount() external override view returns (uint256) {
+    function currentRepaymentAmount() external view override returns (uint256) {
         return _scheduleRepayAmount;
     }
 
@@ -212,7 +221,7 @@ contract Invoker is BalanceCarrier, IInvoker, Ownable {
 
         for (uint256 i = 0; i < _liquidityProxies[tokenAddress].length; i++) {
             ILiquidityProxy proxy = ILiquidityProxy(_liquidityProxies[tokenAddress][i]);
-            uint totalReserve = proxy.getTotalReserve(tokenAddress);
+            uint256 totalReserve = proxy.getTotalReserve(tokenAddress);
             if (tokenAmountLeft <= totalReserve) {
                 uint256 proxyRepayAmount = proxy.getRepaymentAmount(tokenAddress, tokenAmountLeft);
                 repaymentAmount = repaymentAmount.add(proxyRepayAmount);
@@ -226,9 +235,7 @@ contract Invoker is BalanceCarrier, IInvoker, Ownable {
         }
         require(tokenAmountLeft == 0, "Invoker: not enough liquidity");
 
-        return repaymentAmount
-            .add(calculatePoolReward(tokenAmount))
-            .add(calculatePlatformReward(tokenAmount));
+        return repaymentAmount.add(calculatePoolReward(tokenAmount)).add(calculatePlatformReward(tokenAmount));
     }
 
     /*
@@ -243,19 +250,19 @@ contract Invoker is BalanceCarrier, IInvoker, Ownable {
         return tokenAmount.mul(_platformRewardBips).div(10000);
     }
 
-    function poolReward() external override view returns (uint256) {
+    function poolReward() external view override returns (uint256) {
         return _poolRewardBips;
     }
 
-    function poolRewardAddress(address tokenAddress) external override view returns (address) {
+    function poolRewardAddress(address tokenAddress) external view override returns (address) {
         return _poolRewardAddresses[tokenAddress];
     }
 
-    function platformReward() external override view returns (uint256) {
+    function platformReward() external view override returns (uint256) {
         return _platformRewardBips;
     }
 
-    function platformVaultAddress() external override view returns (address) {
+    function platformVaultAddress() external view override returns (address) {
         return _platformVaultAddress;
     }
 
@@ -263,23 +270,23 @@ contract Invoker is BalanceCarrier, IInvoker, Ownable {
         _poolRewardBips = poolRewardBips;
     }
 
-    function setPoolRewardAddress(address tokenAddress, address poolRewardAddress) external onlyFresh onlyOwner {
-        _poolRewardAddresses[tokenAddress] = poolRewardAddress;
+    function setPoolRewardAddress(address tokenAddress, address rewardAddress) external onlyFresh onlyOwner {
+        _poolRewardAddresses[tokenAddress] = rewardAddress;
     }
 
     function setPlatformReward(uint256 platformRewardBips) external onlyFresh onlyOwner {
         _platformRewardBips = platformRewardBips;
     }
 
-    function setPlatformVaultAddress(address platformVaultAddress) external onlyFresh onlyOwner {
-        _platformVaultAddress = platformVaultAddress;
+    function setPlatformVaultAddress(address vaultAddress) external onlyFresh onlyOwner {
+        _platformVaultAddress = vaultAddress;
     }
 
     /*
      * ASSET HELPERS
      */
 
-    function payableReserveAdjustment() internal returns (uint256) {
+    function payableReserveAdjustment() internal view returns (uint256) {
         return _scheduleTokenAddress == address(1) ? _scheduleInvokeValue : 0;
     }
 
@@ -295,7 +302,7 @@ contract Invoker is BalanceCarrier, IInvoker, Ownable {
         return _liquidityProxies[tokenAddress];
     }
 
-    function isTokenAddressRegistered(address tokenAddress) public override view returns (bool) {
+    function isTokenAddressRegistered(address tokenAddress) public view override returns (bool) {
         return _liquidityProxies[tokenAddress].length > 0;
     }
 
@@ -307,7 +314,7 @@ contract Invoker is BalanceCarrier, IInvoker, Ownable {
         return _liquidityProxies[_scheduleTokenAddress].length;
     }
 
-    function totalLiquidity(address tokenAddress) external override view returns (uint256) {
+    function totalLiquidity(address tokenAddress) external view override returns (uint256) {
         if (isTokenAddressRegistered(tokenAddress)) {
             uint256 total = 0;
             for (uint256 i = 0; i < _liquidityProxies[tokenAddress].length; i++) {
@@ -320,12 +327,7 @@ contract Invoker is BalanceCarrier, IInvoker, Ownable {
     }
 
     /* This contract should never have a token balance at rest. If so it is in error, then transfer the tokens to vault */
-    function removeStuckTokens(address tokenAddress, address to, uint256 amount)
-    external
-    onlyFresh
-    onlyOwner
-    returns (bool)
-    {
+    function removeStuckTokens(address tokenAddress, uint256 amount) external onlyFresh onlyOwner returns (bool) {
         return transfer(tokenAddress, _platformVaultAddress, amount);
     }
 
@@ -343,5 +345,5 @@ contract Invoker is BalanceCarrier, IInvoker, Ownable {
         _;
     }
 
-    fallback() external { }
+    fallback() external payable {}
 }

@@ -1,0 +1,40 @@
+name: Runner
+
+# Run this workflow every time a new commit pushed to your repository
+on: push
+
+jobs:
+  # Set the job key. The key is displayed as the job name when a job name is not provided
+  ci:
+    # Name the Job
+    name: CI
+    # Set the type of machine to run on
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks out a copy of your repository on the ubuntu-latest machine and sets up latest Node
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '15'
+          check-latest: true
+
+      # Installs dependencies
+      - name: Install
+        run: npm i
+
+      # Runs install in 'protocol' workspace
+      - name: Install (protocol)
+        run: cd protocol && npm i
+
+      # Runs linters
+      - name: Lint
+        run: npm run lint
+
+      # Runs tests
+      - name: Test
+        run: npm run test
+        env:
+          ALCHEMY_PROJECT_ID: ${{ secrets.ALCHEMY_PROJECT_ID }}
+          KINGMAKER_DEPLOYER_PK: ${{ secrets.KINGMAKER_DEPLOYER_PK }}
+          KINGMAKER_DEPLOYER_ADDR: ${{ secrets.KINGMAKER_DEPLOYER_ADDR }}

@@ -1,7 +1,7 @@
 /*
 
     Copyright 2020 Kollateral LLC
-    Copyright 2020 ARM Finance LLC
+    Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,16 +16,20 @@
     limitations under the License.
 
 */
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.8.1;
 
-pragma solidity ^0.7.0;
-
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "../../__oz__/math/SafeMath.sol";
 
 contract ExtendedMath {
     using SafeMath for uint256;
 
     // divide a/b then optionally floor or ceiling
-    function divAndRound(uint256 a, uint256 b, bool ceiling) internal pure returns (uint256) {
+    function divAndRound(
+        uint256 a,
+        uint256 b,
+        bool ceiling
+    ) internal pure returns (uint256) {
         uint256 floor = a.div(b);
         return (ceiling && a.mod(b) != 0) ? floor.add(1) : floor;
     }

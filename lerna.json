@@ -1,11 +1,10 @@
 {
   "packages": [
-    "kingmaker",
     "docs",
     "lib",
     "protocol"
   ],
-  "npmClient": "yarn",
-  "useWorkspaces": true,
+  "npmClient": "npm",
+  "useWorkspaces": false,
   "version": "independent"
 }

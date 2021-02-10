@@ -1,7 +1,7 @@
 /*
 
     Copyright 2020 Kollateral LLC
-    Copyright 2020 ARM Finance LLC
+    Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,20 +16,24 @@
     limitations under the License.
 
 */
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.8.1;
 
-pragma solidity ^0.7.0;
-
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./ExternalCaller.sol";
+import "../../__oz__/token/ERC20/IERC20.sol";
 
 abstract contract BalanceCarrier is ExternalCaller {
     address private _ethTokenAddress;
 
-    constructor (address ethTokenAddress) {
+    constructor(address ethTokenAddress) {
         _ethTokenAddress = ethTokenAddress;
     }
 
-    function transfer(address tokenAddress, address to, uint256 amount) internal returns (bool) {
+    function transfer(
+        address tokenAddress,
+        address to,
+        uint256 amount
+    ) internal returns (bool) {
         if (tokenAddress == _ethTokenAddress) {
             externalTransfer(to, amount);
             return true;
