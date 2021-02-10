@@ -1,7 +1,7 @@
 /*
 
     Copyright 2020 Kollateral LLC
-    Copyright 2020 ARM Finance LLC
+    Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -17,16 +17,15 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.7.0;
-
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+pragma solidity ^0.8.1;
 
 import "./ILendingPool.sol";
 import "./ILendingPoolAddressesProvider.sol";
 import "./ILendingPoolCore.sol";
 import "./ILendingPoolParametersProvider.sol";
 import "../ILiquidityProxy.sol";
+import "../../__oz__/math/SafeMath.sol";
+import "../../__oz__/token/ERC20/IERC20.sol";
 import "../../common/invoke/IInvoker.sol";
 import "../../common/utils/BalanceCarrier.sol";
 
@@ -61,19 +60,19 @@ contract AaveLiquidityProxy is BalanceCarrier, ILiquidityProxy {
         ILendingPoolParametersProvider params = ILendingPoolParametersProvider(
             _lendingPoolAddressProvider.getLendingPoolParametersProvider()
         );
-        (uint256 totalFeeBips, uint256 _) = params.getFlashLoanFeesInBips();
+        (uint256 totalFeeBips, uint256 _void) = params.getFlashLoanFeesInBips();
 
         uint256 amountFee = tokenAmount.mul(totalFeeBips).div(10000);
         return tokenAmount.add(amountFee);
     }
 
     function borrow(address tokenAddress, uint256 tokenAmount) external override {
-        _scheduleInvokerAddress = msg.sender;
+        _scheduleInvokerAddress = payable(msg.sender);
 
         ILendingPool lendingPool = ILendingPool(_lendingPoolAddressProvider.getLendingPool());
         lendingPool.flashLoan(address(this), remapTokenAddress(tokenAddress), tokenAmount, "");
 
-        _scheduleInvokerAddress = address(0);
+        _scheduleInvokerAddress = payable(address(0));
     }
 
     function executeOperation(

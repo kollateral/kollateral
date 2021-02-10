@@ -1,7 +1,7 @@
 /*
 
     Copyright 2020 Kollateral LLC
-    Copyright 2020 ARM Finance LLC
+    Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.1;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "../__oz__/token/ERC20/ERC20.sol";
+import "../__oz__/math/SafeMath.sol";
 
 abstract contract UnlimitedApprovalERC20 is ERC20 {
     function transferFrom(
@@ -30,7 +30,7 @@ abstract contract UnlimitedApprovalERC20 is ERC20 {
     ) public override returns (bool) {
         _transfer(sender, recipient, amount);
         // Check for and update remaining allowance
-        if (allowance(sender, _msgSender()) != uint256(-1)) {
+        if (allowance(sender, _msgSender()) != type(uint).max) {
             _approve(
                 sender,
                 _msgSender(),

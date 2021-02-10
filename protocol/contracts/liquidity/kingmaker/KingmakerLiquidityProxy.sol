@@ -1,7 +1,7 @@
 /*
 
     Copyright 2020 Kollateral LLC
-    Copyright 2020 ARM Finance LLC
+    Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -17,12 +17,11 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.7.0;
-
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Pausable.sol";
+pragma solidity ^0.8.1;
 
 import "../ILiquidityProxy.sol";
+import "../../__oz__/utils/Pausable.sol";
+import "../../__oz__/access/Ownable.sol";
 import "../../common/invoke/IInvoker.sol";
 import "../../common/utils/BalanceCarrier.sol";
 import "../../token/CollateralizedToken.sol";
@@ -63,14 +62,14 @@ contract KingmakerLiquidityProxy is BalanceCarrier, IInvokable, ILiquidityProxy,
     }
 
     function borrow(address tokenAddress, uint256 tokenAmount) external override {
-        _scheduleInvokerAddress = msg.sender;
+        _scheduleInvokerAddress = payable(msg.sender);
         _scheduleTokenAddress = tokenAddress;
         _scheduleTokenAmount = tokenAmount;
 
         KToken pool = KToken(poolAddress(tokenAddress));
         pool.invoke(address(this), "", tokenAmount);
 
-        _scheduleInvokerAddress = address(0);
+        _scheduleInvokerAddress = payable(address(0));
         _scheduleTokenAddress = address(0);
         _scheduleTokenAmount = 0;
     }

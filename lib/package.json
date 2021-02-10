@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rimraf dist protocol",
     "cleanse": "rimraf node_modules",
-    "build": "yarn clean && yarn compile",
+    "build": "npm run clean && yarn compile",
     "compile": "tsc -p src",
     "generate": "ts-node ./scripts/generateTypings.ts"
   },

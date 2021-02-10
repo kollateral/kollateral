@@ -1,7 +1,7 @@
 /*
 
     Copyright 2020 Kollateral LLC
-    Copyright 2020 ARM Finance LLC
+    Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -17,17 +17,15 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.7.0;
-pragma experimental ABIEncoderV2;
-
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+pragma solidity ^0.8.1;
 
 import "./ICallee.sol";
 import "./ISoloMargin.sol";
 import "./Types.sol";
 import "../ILiquidityProxy.sol";
+import "../../__oz__/access/Ownable.sol";
+import "../../__oz__/math/SafeMath.sol";
+import "../../__oz__/token/ERC20/IERC20.sol";
 import "../../common/invoke/IInvoker.sol";
 import "../../common/utils/BalanceCarrier.sol";
 import "../../common/utils/WETHHandler.sol";
@@ -68,7 +66,7 @@ contract SoloLiquidityProxy is BalanceCarrier, ICallee, ILiquidityProxy, Ownable
         _tokenAddressToMarketId[tokenAddress] = marketId;
         _marketIdToTokenAddress[marketId] = tokenAddress;
         _tokenAddressRegistered[tokenAddress] = true;
-        IERC20(remapTokenAddress(tokenAddress)).approve(_soloMarginAddress, uint256(-1));
+        IERC20(remapTokenAddress(tokenAddress)).approve(_soloMarginAddress, type(uint).max);
     }
 
     function deregisterPool(uint256 marketId) external onlyOwner {
@@ -102,7 +100,7 @@ contract SoloLiquidityProxy is BalanceCarrier, ICallee, ILiquidityProxy, Ownable
     }
 
     function borrow(address tokenAddress, uint256 tokenAmount) external override {
-        _scheduleInvokerAddress = msg.sender;
+        _scheduleInvokerAddress = payable(msg.sender);
         _scheduleTokenAddress = tokenAddress;
         _scheduleTokenAmount = tokenAmount;
 
@@ -116,7 +114,7 @@ contract SoloLiquidityProxy is BalanceCarrier, ICallee, ILiquidityProxy, Ownable
 
         solo.operate(accountInfos, operations);
 
-        _scheduleInvokerAddress = address(0);
+        _scheduleInvokerAddress = payable(address(0));
         _scheduleTokenAddress = address(0);
         _scheduleTokenAmount = 0;
     }

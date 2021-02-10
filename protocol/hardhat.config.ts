@@ -66,7 +66,7 @@ const config: HardhatUserConfig = {
                 settings: {}
             },
             {
-                version: "0.7.0",
+                version: "0.8.1",
                 settings: {}
             }
         ]

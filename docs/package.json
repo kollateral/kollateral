@@ -6,7 +6,7 @@
     "clean": "rimraf .docz",
     "clean:dev": "docz clean",
     "cleanse": "rimraf node_modules",
-    "dev": "yarn clean:dev && docz dev",
+    "dev": "npm run clean:dev && docz dev",
     "build": "docz build",
     "serve": "docz serve",
     "deploy": "node scripts/deployToS3.js"
