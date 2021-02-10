@@ -1,0 +1,43 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://help.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/" # Location of package manifests
+    schedule:
+      interval: "weekly"
+      # Check for npm updates on Sundays
+      day: "sunday"
+      # Check for npm updates at 9am UTC
+      time: "09:00"
+      # Use European Central Time (UTC +01:00)
+      timezone: "Europe/Rome"
+    open-pull-requests-limit: 2
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      separator: "/"
+    assignees:
+      - "SHA-2048"
+    reviewers:
+      - "lepidotteri"
+
+  - package-ecosystem: "github-actions"
+    # Workflow files stored in the
+    # default location of `.github/workflows`
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      # Check for npm updates on Sundays
+      day: "sunday"
+      # Check for npm updates at 9am UTC
+      time: "09:00"
+      # Use European Central Time (UTC +01:00)
+      timezone: "Europe/Rome"
+    assignees:
+      - "lepidotteri"
+    reviewers:
+      - "lepidotteri"
