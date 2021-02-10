@@ -30,7 +30,7 @@ abstract contract UnlimitedApprovalERC20 is ERC20 {
     ) public override returns (bool) {
         _transfer(sender, recipient, amount);
         // Check for and update remaining allowance
-        if (allowance(sender, _msgSender()) != type(uint).max) {
+        if (allowance(sender, _msgSender()) != type(uint256).max) {
             _approve(
                 sender,
                 _msgSender(),

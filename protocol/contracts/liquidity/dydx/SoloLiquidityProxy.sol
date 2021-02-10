@@ -35,12 +35,13 @@ contract SoloLiquidityProxy is BalanceCarrier, ICallee, ILiquidityProxy, Ownable
 
     uint256 internal NULL_ACCOUNT_ID = 0;
     uint256 internal NULL_MARKET_ID = 0;
-    Types.AssetAmount internal NULL_AMOUNT = Types.AssetAmount({
-        sign: false,
-        denomination: Types.AssetDenomination.Wei,
-        ref: Types.AssetReference.Delta,
-        value: 0
-    });
+    Types.AssetAmount internal NULL_AMOUNT =
+        Types.AssetAmount({
+            sign: false,
+            denomination: Types.AssetDenomination.Wei,
+            ref: Types.AssetReference.Delta,
+            value: 0
+        });
     bytes internal NULL_DATA = "";
 
     address internal _soloMarginAddress;
@@ -66,7 +67,7 @@ contract SoloLiquidityProxy is BalanceCarrier, ICallee, ILiquidityProxy, Ownable
         _tokenAddressToMarketId[tokenAddress] = marketId;
         _marketIdToTokenAddress[marketId] = tokenAddress;
         _tokenAddressRegistered[tokenAddress] = true;
-        IERC20(remapTokenAddress(tokenAddress)).approve(_soloMarginAddress, type(uint).max);
+        IERC20(remapTokenAddress(tokenAddress)).approve(_soloMarginAddress, type(uint256).max);
     }
 
     function deregisterPool(uint256 marketId) external onlyOwner {

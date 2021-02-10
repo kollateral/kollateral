@@ -57,9 +57,8 @@ contract AaveLiquidityProxy is BalanceCarrier, ILiquidityProxy {
     }
 
     function getRepaymentAmount(address tokenAddress, uint256 tokenAmount) external view override returns (uint256) {
-        ILendingPoolParametersProvider params = ILendingPoolParametersProvider(
-            _lendingPoolAddressProvider.getLendingPoolParametersProvider()
-        );
+        ILendingPoolParametersProvider params =
+            ILendingPoolParametersProvider(_lendingPoolAddressProvider.getLendingPoolParametersProvider());
         (uint256 totalFeeBips, uint256 _void) = params.getFlashLoanFeesInBips();
 
         uint256 amountFee = tokenAmount.mul(totalFeeBips).div(10000);
