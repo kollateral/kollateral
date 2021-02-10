@@ -5,7 +5,7 @@ on: push
 
 jobs:
   # Set the job key. The key is displayed as the job name when a job name is not provided
-  cicd:
+  ci:
     # Name the Job
     name: CI
     # Set the type of machine to run on
@@ -19,17 +19,22 @@ jobs:
           node-version: '15'
           check-latest: true
 
-      # Runs install
+      # Installs dependencies
       - name: Install
-        run: yarn
+        run: npm i
+
+      # Runs install in 'protocol' workspace
+      - name: Install (protocol)
+        run: cd protocol && npm i
 
       # Runs linters
       - name: Lint
-        run: yarn lint
+        run: npm run lint
 
       # Runs tests
       - name: Test
-        run: yarn test
+        run: npm run test
         env:
-          KINGMAKER_PROJECT_ID: ${{ secrets.KINGMAKER_PROJECT_ID }}
-          KINGMAKER_PRIVATE_KEY: ${{ secrets.KINGMAKER_PRIVATE_KEY }}
+          KINGMAKER_PROJECT_ID: ${{ secrets.ALCHEMY_PROJECT_ID }}
+          KINGMAKER_DEPLOYER_PK: ${{ secrets.KINGMAKER_DEPLOYER_PK }}
+          KINGMAKER_DEPLOYER_ADDR: ${{ secrets.KINGMAKER_DEPLOYER_ADDR }}
