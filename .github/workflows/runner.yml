@@ -35,6 +35,6 @@ jobs:
       - name: Test
         run: npm run test
         env:
-          KINGMAKER_PROJECT_ID: ${{ secrets.ALCHEMY_PROJECT_ID }}
+          ALCHEMY_PROJECT_ID: ${{ secrets.ALCHEMY_PROJECT_ID }}
           KINGMAKER_DEPLOYER_PK: ${{ secrets.KINGMAKER_DEPLOYER_PK }}
           KINGMAKER_DEPLOYER_ADDR: ${{ secrets.KINGMAKER_DEPLOYER_ADDR }}
