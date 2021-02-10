@@ -1,8 +1,8 @@
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
 // import "hardhat-typechain";
-import { extendEnvironment, HardhatUserConfig } from "hardhat/config";
 
+import { extendEnvironment, HardhatUserConfig } from "hardhat/config";
 
 import chalk from "chalk";
 
@@ -20,14 +20,18 @@ function printWarning(envVar: string) {
     );
 }
 
-const projectId = getEnv("KINGMAKER_PROJECT_ID") || '0xDEAD';
-const privateKey = getEnv("KINGMAKER_PRIVATE_KEY") || '0xDEAD';
+const projectId = getEnv("ALCHEMY_PROJECT_ID") || '0xDEAD';
+const deployerPK = getEnv("KINGMAKER_DEPLOYER_PK") || '0xDEAD';
+const deployerAddr = getEnv("KINGMAKER_DEPLOYER_ADDR") || '0xDEAD';
 
 if (projectId === undefined || projectId === "0xDEAD") {
-    printWarning('KINGMAKER_PROJECT_ID');
+    printWarning('ALCHEMY_PROJECT_ID');
 }
-if (privateKey === undefined || privateKey === "0xDEAD") {
-    printWarning('KINGMAKER_PRIVATE_KEY');
+if (deployerPK === undefined || deployerPK === "0xDEAD") {
+    printWarning('KINGMAKER_DEPLOYER_PK');
+}
+if (deployerAddr === undefined || deployerAddr === "0xDEAD") {
+    printWarning('KINGMAKER_DEPLOYER_ADDR');
 }
 
 const config: HardhatUserConfig = {
@@ -40,29 +44,30 @@ const config: HardhatUserConfig = {
         },
         rinkeby: {
             url: "https://eth-rinkeby.alchemyapi.io/v2/" + projectId,
-            accounts: [ privateKey ]
+            accounts: [ deployerPK ]
         },
         ropsten: {
             url: "https://eth-ropsten.alchemyapi.io/v2/" + projectId,
-            accounts: [ privateKey ]
+            accounts: [ deployerPK ]
         },
         kovan: {
             url: "https://eth-kovan.alchemyapi.io/v2/" + projectId,
-            accounts: [ privateKey ]
+            accounts: [ deployerPK ]
         },
         mainnet: {
             url: "https://eth-mainnet.alchemyapi.io/v2/" + projectId,
-            accounts: [ privateKey ]
+            accounts: [ deployerPK ]
         }
     },
     solidity: {
         compilers: [
             {
-                version: "0.5.15"
+                version: "0.5.15",
+                settings: {}
             },
             {
                 version: "0.7.0",
-                settings: { }
+                settings: {}
             }
         ]
     },
