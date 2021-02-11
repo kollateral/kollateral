@@ -22,13 +22,13 @@ pragma solidity ^0.8.1;
 import "../token/UnlimitedApprovalERC20.sol";
 
 contract TestToken is UnlimitedApprovalERC20 {
-    constructor(string memory name, string memory symbol) ERC20(name, symbol) {}
+	constructor(string memory name, string memory symbol) ERC20(name, symbol) {}
 
-    /**
-     * Allows anyone to arbitrarily mint themselves tokens for testing.
-     */
-    function mint(uint256 amount) public returns (bool) {
-        _mint(msg.sender, amount);
-        return true;
-    }
+	/**
+	 * Allows anyone to arbitrarily mint themselves tokens for testing.
+	 */
+	function mint(uint256 amount) public returns (bool) {
+		_mint(msg.sender, amount);
+		return true;
+	}
 }

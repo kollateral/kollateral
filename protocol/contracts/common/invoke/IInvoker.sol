@@ -22,24 +22,24 @@ pragma solidity ^0.8.1;
 import "./IInvocationHook.sol";
 
 interface IInvoker is IInvocationHook {
-    function invoke(
-        address invokeTo,
-        bytes calldata invokeData,
-        address tokenAddress,
-        uint256 tokenAmount
-    ) external payable;
+	function invoke(
+		address invokeTo,
+		bytes calldata invokeData,
+		address tokenAddress,
+		uint256 tokenAmount
+	) external payable;
 
-    function invokeCallback() external;
+	function invokeCallback() external;
 
-    function poolReward() external view returns (uint256);
+	function poolReward() external view returns (uint256);
 
-    function poolRewardAddress(address tokenAddress) external view returns (address);
+	function poolRewardAddress(address tokenAddress) external view returns (address);
 
-    function platformReward() external view returns (uint256);
+	function platformReward() external view returns (uint256);
 
-    function platformVaultAddress() external view returns (address);
+	function platformVaultAddress() external view returns (address);
 
-    function isTokenAddressRegistered(address tokenAddress) external view returns (bool);
+	function isTokenAddressRegistered(address tokenAddress) external view returns (bool);
 
-    function totalLiquidity(address tokenAddress) external view returns (uint256);
+	function totalLiquidity(address tokenAddress) external view returns (uint256);
 }

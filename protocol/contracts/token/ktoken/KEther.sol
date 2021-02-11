@@ -24,12 +24,12 @@ import "../CollateralizedEther.sol";
 import "../../__oz__/math/SafeMath.sol";
 
 contract KEther is KToken, CollateralizedEther {
-    constructor() CollateralizedEther() ERC20("Kingmaker", "KING") {}
+	constructor() CollateralizedEther() ERC20("Kingmaker", "KING") {}
 
-    function payableReserveAdjustment() internal override returns (uint256) {
-        return msg.value;
-    }
+	function payableReserveAdjustment() internal override returns (uint256) {
+		return msg.value;
+	}
 
-    // TODO: define role that receive/fallback default functions can play within the protocol inner workings
-    receive() external payable {}
+	// TODO: define role that receive/fallback default functions can play within the protocol inner workings
+	receive() external payable {}
 }

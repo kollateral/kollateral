@@ -26,36 +26,36 @@ import "../common/invoke/KingmakerInvokable.sol";
  *  NOTICE: ONLY FOR ON-CHAIN TESTING - THIS CONTRACT IS VULNERABLE TO LOSS OF FUNDS
  */
 contract TestOnChainInvokable is KingmakerInvokable, Ownable {
-    constructor() {}
+	constructor() {}
 
-    event HelperDump(
-        address sender,
-        bytes32 dataHash,
-        address currentTokenAddress,
-        uint256 currentTokenAmount,
-        uint256 currentRepaymentAmount,
-        bool isCurrentTokenEther
-    );
+	event HelperDump(
+		address sender,
+		bytes32 dataHash,
+		address currentTokenAddress,
+		uint256 currentTokenAmount,
+		uint256 currentRepaymentAmount,
+		bool isCurrentTokenEther
+	);
 
-    function execute(bytes calldata data) external payable override {
-        emitHelper(data);
-        repay();
-    }
+	function execute(bytes calldata data) external payable override {
+		emitHelper(data);
+		repay();
+	}
 
-    function emitHelper(bytes memory data) internal {
-        emit HelperDump(
-            currentSender(),
-            keccak256(data),
-            currentTokenAddress(),
-            currentTokenAmount(),
-            currentRepaymentAmount(),
-            isCurrentTokenEther()
-        );
-    }
+	function emitHelper(bytes memory data) internal {
+		emit HelperDump(
+			currentSender(),
+			keccak256(data),
+			currentTokenAddress(),
+			currentTokenAmount(),
+			currentRepaymentAmount(),
+			isCurrentTokenEther()
+		);
+	}
 
-    function withdraw(address tokenAddress, uint256 amount) external onlyOwner returns (bool) {
-        return transfer(tokenAddress, msg.sender, amount);
-    }
+	function withdraw(address tokenAddress, uint256 amount) external onlyOwner returns (bool) {
+		return transfer(tokenAddress, msg.sender, amount);
+	}
 
-    fallback() external {}
+	fallback() external {}
 }

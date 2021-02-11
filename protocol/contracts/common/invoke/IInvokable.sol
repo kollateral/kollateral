@@ -20,5 +20,5 @@
 pragma solidity ^0.8.1;
 
 interface IInvokable {
-    function execute(bytes calldata data) external payable;
+	function execute(bytes calldata data) external payable;
 }

@@ -20,5 +20,5 @@
 pragma solidity ^0.8.1;
 
 interface ILendingPoolCore {
-    function getReserveIsActive(address _reserve) external view returns (bool);
+	function getReserveIsActive(address _reserve) external view returns (bool);
 }

@@ -20,11 +20,11 @@
 pragma solidity ^0.8.1;
 
 interface ILiquidityProxy {
-    function getTotalReserve(address tokenAddress) external view returns (uint256);
+	function getTotalReserve(address tokenAddress) external view returns (uint256);
 
-    function getRepaymentAddress(address tokenAddress) external view returns (address);
+	function getRepaymentAddress(address tokenAddress) external view returns (address);
 
-    function getRepaymentAmount(address tokenAddress, uint256 tokenAmount) external view returns (uint256);
+	function getRepaymentAmount(address tokenAddress, uint256 tokenAmount) external view returns (uint256);
 
-    function borrow(address tokenAddress, uint256 tokenAmount) external;
+	function borrow(address tokenAddress, uint256 tokenAmount) external;
 }

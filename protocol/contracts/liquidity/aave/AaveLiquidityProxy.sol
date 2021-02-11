@@ -30,72 +30,72 @@ import "../../common/invoke/IInvoker.sol";
 import "../../common/utils/BalanceCarrier.sol";
 
 contract AaveLiquidityProxy is BalanceCarrier, ILiquidityProxy {
-    using SafeMath for uint256;
+	using SafeMath for uint256;
 
-    address internal ETHER_TOKEN_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+	address internal ETHER_TOKEN_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    ILendingPoolAddressesProvider internal _lendingPoolAddressProvider;
+	ILendingPoolAddressesProvider internal _lendingPoolAddressProvider;
 
-    address payable internal _scheduleInvokerAddress;
+	address payable internal _scheduleInvokerAddress;
 
-    constructor(ILendingPoolAddressesProvider lendingPoolAddressProvider) BalanceCarrier(ETHER_TOKEN_ADDRESS) {
-        _lendingPoolAddressProvider = lendingPoolAddressProvider;
-    }
+	constructor(ILendingPoolAddressesProvider lendingPoolAddressProvider) BalanceCarrier(ETHER_TOKEN_ADDRESS) {
+		_lendingPoolAddressProvider = lendingPoolAddressProvider;
+	}
 
-    function getRepaymentAddress(address tokenAddress) external view override returns (address) {
-        return _lendingPoolAddressProvider.getLendingPoolCore();
-    }
+	function getRepaymentAddress(address tokenAddress) external view override returns (address) {
+		return _lendingPoolAddressProvider.getLendingPoolCore();
+	}
 
-    function getTotalReserve(address tokenAddress) external view override returns (uint256) {
-        address core = _lendingPoolAddressProvider.getLendingPoolCore();
+	function getTotalReserve(address tokenAddress) external view override returns (uint256) {
+		address core = _lendingPoolAddressProvider.getLendingPoolCore();
 
-        if (isRegistered(tokenAddress)) {
-            return tokenAddress == address(1) ? core.balance : IERC20(tokenAddress).balanceOf(core);
-        }
+		if (isRegistered(tokenAddress)) {
+			return tokenAddress == address(1) ? core.balance : IERC20(tokenAddress).balanceOf(core);
+		}
 
-        return 0;
-    }
+		return 0;
+	}
 
-    function getRepaymentAmount(address tokenAddress, uint256 tokenAmount) external view override returns (uint256) {
-        ILendingPoolParametersProvider params =
-            ILendingPoolParametersProvider(_lendingPoolAddressProvider.getLendingPoolParametersProvider());
-        (uint256 totalFeeBips, uint256 _void) = params.getFlashLoanFeesInBips();
+	function getRepaymentAmount(address tokenAddress, uint256 tokenAmount) external view override returns (uint256) {
+		ILendingPoolParametersProvider params =
+			ILendingPoolParametersProvider(_lendingPoolAddressProvider.getLendingPoolParametersProvider());
+		(uint256 totalFeeBips, uint256 _void) = params.getFlashLoanFeesInBips();
 
-        uint256 amountFee = tokenAmount.mul(totalFeeBips).div(10000);
-        return tokenAmount.add(amountFee);
-    }
+		uint256 amountFee = tokenAmount.mul(totalFeeBips).div(10000);
+		return tokenAmount.add(amountFee);
+	}
 
-    function borrow(address tokenAddress, uint256 tokenAmount) external override {
-        _scheduleInvokerAddress = payable(msg.sender);
+	function borrow(address tokenAddress, uint256 tokenAmount) external override {
+		_scheduleInvokerAddress = payable(msg.sender);
 
-        ILendingPool lendingPool = ILendingPool(_lendingPoolAddressProvider.getLendingPool());
-        lendingPool.flashLoan(address(this), remapTokenAddress(tokenAddress), tokenAmount, "");
+		ILendingPool lendingPool = ILendingPool(_lendingPoolAddressProvider.getLendingPool());
+		lendingPool.flashLoan(address(this), remapTokenAddress(tokenAddress), tokenAmount, "");
 
-        _scheduleInvokerAddress = payable(address(0));
-    }
+		_scheduleInvokerAddress = payable(address(0));
+	}
 
-    function executeOperation(
-        address _reserve,
-        uint256 _amount,
-        uint256 _fee,
-        bytes calldata _params
-    ) external {
-        require(_scheduleInvokerAddress != address(0), "AaveLiquidityProxy: not scheduled");
+	function executeOperation(
+		address _reserve,
+		uint256 _amount,
+		uint256 _fee,
+		bytes calldata _params
+	) external {
+		require(_scheduleInvokerAddress != address(0), "AaveLiquidityProxy: not scheduled");
 
-        require(transfer(_reserve, _scheduleInvokerAddress, _amount), "AaveLiquidityProxy: transfer to invoker failed");
+		require(transfer(_reserve, _scheduleInvokerAddress, _amount), "AaveLiquidityProxy: transfer to invoker failed");
 
-        IInvoker invoker = IInvoker(_scheduleInvokerAddress);
-        invoker.invokeCallback();
-    }
+		IInvoker invoker = IInvoker(_scheduleInvokerAddress);
+		invoker.invokeCallback();
+	}
 
-    function isRegistered(address tokenAddress) internal view returns (bool) {
-        ILendingPoolCore core = ILendingPoolCore(_lendingPoolAddressProvider.getLendingPoolCore());
-        return core.getReserveIsActive(remapTokenAddress(tokenAddress));
-    }
+	function isRegistered(address tokenAddress) internal view returns (bool) {
+		ILendingPoolCore core = ILendingPoolCore(_lendingPoolAddressProvider.getLendingPoolCore());
+		return core.getReserveIsActive(remapTokenAddress(tokenAddress));
+	}
 
-    function remapTokenAddress(address tokenAddress) internal view returns (address) {
-        return tokenAddress == address(1) ? ETHER_TOKEN_ADDRESS : tokenAddress;
-    }
+	function remapTokenAddress(address tokenAddress) internal view returns (address) {
+		return tokenAddress == address(1) ? ETHER_TOKEN_ADDRESS : tokenAddress;
+	}
 
-    fallback() external {}
+	fallback() external {}
 }

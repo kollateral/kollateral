@@ -27,144 +27,144 @@ import "../../common/invoke/IInvocationHook.sol";
 import "../../common/invoke/IInvokable.sol";
 
 abstract contract KToken is IInvocationHook, CollateralizedToken, Ownable, Pausable {
-    using SafeMath for uint256;
+	using SafeMath for uint256;
 
-    event Invocation(address invokeTo, uint256 invokeValue, bytes32 invokeDataHash, uint256 underlyingAmount);
-    event Reward(uint256 poolReward, uint256 platformReward, address tokenAddress);
+	event Invocation(address invokeTo, uint256 invokeValue, bytes32 invokeDataHash, uint256 underlyingAmount);
+	event Reward(uint256 poolReward, uint256 platformReward, address tokenAddress);
 
-    /* Reward (in bips) distributed to pool per transaction */
-    uint256 internal _poolRewardBips;
+	/* Reward (in bips) distributed to pool per transaction */
+	uint256 internal _poolRewardBips;
 
-    /* Reward (in bips) distributed to platform per transaction */
-    uint256 internal _platformRewardBips;
+	/* Reward (in bips) distributed to platform per transaction */
+	uint256 internal _platformRewardBips;
 
-    /* Address that collects the platform reward disbursements */
-    address internal _platformVaultAddress;
+	/* Address that collects the platform reward disbursements */
+	address internal _platformVaultAddress;
 
-    /* Helper - store called token amount for retrieval */
-    address internal _currentSender;
+	/* Helper - store called token amount for retrieval */
+	address internal _currentSender;
 
-    /* Helper - store called token amount for retrieval */
-    uint256 internal _currentTokenAmount;
+	/* Helper - store called token amount for retrieval */
+	uint256 internal _currentTokenAmount;
 
-    /* Helper - store expected balance for currently executing transaction */
-    uint256 internal _currentExpectedBalance;
+	/* Helper - store expected balance for currently executing transaction */
+	uint256 internal _currentExpectedBalance;
 
-    constructor() {}
+	constructor() {}
 
-    function invoke(
-        address invokeTo,
-        bytes calldata invokeData,
-        uint256 underlyingAmount
-    ) external payable nonReentrant whenNotPaused {
-        require(invokeTo != address(this), "KToken: cannot invoke this contract");
+	function invoke(
+		address invokeTo,
+		bytes calldata invokeData,
+		uint256 underlyingAmount
+	) external payable nonReentrant whenNotPaused {
+		require(invokeTo != address(this), "KToken: cannot invoke this contract");
 
-        /* Record starting and expected ending balance */
-        uint256 startingBalance = totalReserve().sub(payableReserveAdjustment());
-        setInvocationState(msg.sender, underlyingAmount, calculateExpectedBalance(startingBalance, underlyingAmount));
+		/* Record starting and expected ending balance */
+		uint256 startingBalance = totalReserve().sub(payableReserveAdjustment());
+		setInvocationState(msg.sender, underlyingAmount, calculateExpectedBalance(startingBalance, underlyingAmount));
 
-        /* Transfer invocation amount of underlying token to caller's invocation address */
-        require(transferUnderlying(invokeTo, underlyingAmount), "KToken: unable to transfer invocation amount");
+		/* Transfer invocation amount of underlying token to caller's invocation address */
+		require(transferUnderlying(invokeTo, underlyingAmount), "KToken: unable to transfer invocation amount");
 
-        /* Invoke caller's function */
-        IInvokable(invokeTo).execute{ value: msg.value }(invokeData);
-        emit Invocation(invokeTo, msg.value, keccak256(invokeData), underlyingAmount);
+		/* Invoke caller's function */
+		IInvokable(invokeTo).execute{ value: msg.value }(invokeData);
+		emit Invocation(invokeTo, msg.value, keccak256(invokeData), underlyingAmount);
 
-        /* Verify tokens were returned with correct reward */
-        require(totalReserve() == _currentExpectedBalance, "KToken: incorrect ending balance");
+		/* Verify tokens were returned with correct reward */
+		require(totalReserve() == _currentExpectedBalance, "KToken: incorrect ending balance");
 
-        /* Extract platform reward */
-        uint256 platformReward = calculatePlatformReward(underlyingAmount);
+		/* Extract platform reward */
+		uint256 platformReward = calculatePlatformReward(underlyingAmount);
 
-        require(transferUnderlying(_platformVaultAddress, platformReward), "KToken: unable to transfer platform reward");
-        emit Reward(calculatePoolReward(underlyingAmount), platformReward, underlying());
+		require(transferUnderlying(_platformVaultAddress, platformReward), "KToken: unable to transfer platform reward");
+		emit Reward(calculatePoolReward(underlyingAmount), platformReward, underlying());
 
-        /* Reset data for gas refund */
-        setInvocationState(address(0), 0, 0);
-    }
+		/* Reset data for gas refund */
+		setInvocationState(address(0), 0, 0);
+	}
 
-    function payableReserveAdjustment() internal virtual returns (uint256) {
-        return 0;
-    }
+	function payableReserveAdjustment() internal virtual returns (uint256) {
+		return 0;
+	}
 
-    function setInvocationState(
-        address currentSender,
-        uint256 currentTokenAmount,
-        uint256 currentExpectedBalance
-    ) internal {
-        _currentSender = currentSender;
-        _currentTokenAmount = currentTokenAmount;
-        _currentExpectedBalance = currentExpectedBalance;
-    }
+	function setInvocationState(
+		address currentSender,
+		uint256 currentTokenAmount,
+		uint256 currentExpectedBalance
+	) internal {
+		_currentSender = currentSender;
+		_currentTokenAmount = currentTokenAmount;
+		_currentExpectedBalance = currentExpectedBalance;
+	}
 
-    function calculatePoolReward(uint256 tokenAmount) internal view returns (uint256) {
-        return tokenAmount.mul(_poolRewardBips).div(10000);
-    }
+	function calculatePoolReward(uint256 tokenAmount) internal view returns (uint256) {
+		return tokenAmount.mul(_poolRewardBips).div(10000);
+	}
 
-    function calculatePlatformReward(uint256 tokenAmount) internal view returns (uint256) {
-        return tokenAmount.mul(_platformRewardBips).div(10000);
-    }
+	function calculatePlatformReward(uint256 tokenAmount) internal view returns (uint256) {
+		return tokenAmount.mul(_platformRewardBips).div(10000);
+	}
 
-    function calculateExpectedBalance(uint256 startingBalance, uint256 tokenAmount) internal view returns (uint256) {
-        return startingBalance.add(calculatePoolReward(tokenAmount)).add(calculatePlatformReward(tokenAmount));
-    }
+	function calculateExpectedBalance(uint256 startingBalance, uint256 tokenAmount) internal view returns (uint256) {
+		return startingBalance.add(calculatePoolReward(tokenAmount)).add(calculatePlatformReward(tokenAmount));
+	}
 
-    function calculateRepaymentAmount(uint256 tokenAmount) external view returns (uint256) {
-        return tokenAmount.add(calculatePoolReward(tokenAmount)).add(calculatePlatformReward(tokenAmount));
-    }
+	function calculateRepaymentAmount(uint256 tokenAmount) external view returns (uint256) {
+		return tokenAmount.add(calculatePoolReward(tokenAmount)).add(calculatePlatformReward(tokenAmount));
+	}
 
-    function poolReward() external view returns (uint256) {
-        return _poolRewardBips;
-    }
+	function poolReward() external view returns (uint256) {
+		return _poolRewardBips;
+	}
 
-    function platformReward() external view returns (uint256) {
-        return _platformRewardBips;
-    }
+	function platformReward() external view returns (uint256) {
+		return _platformRewardBips;
+	}
 
-    function platformVaultAddress() external view returns (address) {
-        return _platformVaultAddress;
-    }
+	function platformVaultAddress() external view returns (address) {
+		return _platformVaultAddress;
+	}
 
-    function isKToken() external pure returns (bool) {
-        return true;
-    }
+	function isKToken() external pure returns (bool) {
+		return true;
+	}
 
-    /* Helper hook for invoked transaction */
-    function currentSender() external view override returns (address) {
-        return _currentSender;
-    }
+	/* Helper hook for invoked transaction */
+	function currentSender() external view override returns (address) {
+		return _currentSender;
+	}
 
-    function currentTokenAddress() external view override returns (address) {
-        return _underlying;
-    }
+	function currentTokenAddress() external view override returns (address) {
+		return _underlying;
+	}
 
-    function currentTokenAmount() external view override returns (uint256) {
-        return _currentTokenAmount;
-    }
+	function currentTokenAmount() external view override returns (uint256) {
+		return _currentTokenAmount;
+	}
 
-    function currentRepaymentAmount() external view override returns (uint256) {
-        return _currentExpectedBalance.sub(totalReserve());
-    }
+	function currentRepaymentAmount() external view override returns (uint256) {
+		return _currentExpectedBalance.sub(totalReserve());
+	}
 
-    /* ADMIN FUNCTIONS */
+	/* ADMIN FUNCTIONS */
 
-    function setPoolReward(uint256 poolRewardBips) external onlyOwner {
-        _poolRewardBips = poolRewardBips;
-    }
+	function setPoolReward(uint256 poolRewardBips) external onlyOwner {
+		_poolRewardBips = poolRewardBips;
+	}
 
-    function setPlatformReward(uint256 platformRewardBips) external onlyOwner {
-        _platformRewardBips = platformRewardBips;
-    }
+	function setPlatformReward(uint256 platformRewardBips) external onlyOwner {
+		_platformRewardBips = platformRewardBips;
+	}
 
-    function setPlatformVaultAddress(address vaultAddress) external onlyOwner {
-        _platformVaultAddress = vaultAddress;
-    }
+	function setPlatformVaultAddress(address vaultAddress) external onlyOwner {
+		_platformVaultAddress = vaultAddress;
+	}
 
-    function pause() external onlyOwner whenNotPaused {
-        _pause();
-    }
+	function pause() external onlyOwner whenNotPaused {
+		_pause();
+	}
 
-    function unpause() external onlyOwner whenPaused {
-        _unpause();
-    }
+	function unpause() external onlyOwner whenPaused {
+		_unpause();
+	}
 }

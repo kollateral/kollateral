@@ -22,73 +22,73 @@ pragma solidity ^0.8.1;
 import "../common/invoke/KingmakerInvokable.sol";
 
 contract TestInvokable is KingmakerInvokable {
-    constructor() {}
+	constructor() {}
 
-    event HelperDump(
-        address sender,
-        bytes32 dataHash,
-        address currentTokenAddress,
-        uint256 currentTokenAmount,
-        uint256 currentRepaymentAmount,
-        bool isCurrentTokenEther
-    );
-    event SwapDump(bytes swapData);
+	event HelperDump(
+		address sender,
+		bytes32 dataHash,
+		address currentTokenAddress,
+		uint256 currentTokenAmount,
+		uint256 currentRepaymentAmount,
+		bool isCurrentTokenEther
+	);
+	event SwapDump(bytes swapData);
 
-    // To setup state for specific tests
-    function invoke(address invokeAddress, bytes calldata invokeData) external payable {
-        externalCall(invokeAddress, msg.value, invokeData);
-    }
+	// To setup state for specific tests
+	function invoke(address invokeAddress, bytes calldata invokeData) external payable {
+		externalCall(invokeAddress, msg.value, invokeData);
+	}
 
-    function execute(bytes calldata data) external payable override {
-        emitHelper(data);
+	function execute(bytes calldata data) external payable override {
+		emitHelper(data);
 
-        if (data.length == 0) {
-            return executeNoop();
-        }
+		if (data.length == 0) {
+			return executeNoop();
+		}
 
-        (uint256 testType, bytes memory testData) = abi.decode(data, (uint256, bytes));
-        if (testType == 1) {
-            uint256 repaymentAmount = abi.decode(testData, (uint256));
-            return executeRepayAmount(repaymentAmount);
-        }
-        if (testType == 3) {
-            (address invokeAddress, bytes memory invokeData) = abi.decode(testData, (address, bytes));
-            return executeInvoke(invokeAddress, invokeData);
-        }
-        if (testType == 4) {
-            uint256 amount = abi.decode(testData, (uint256));
-            return executePayable(amount);
-        }
-    }
+		(uint256 testType, bytes memory testData) = abi.decode(data, (uint256, bytes));
+		if (testType == 1) {
+			uint256 repaymentAmount = abi.decode(testData, (uint256));
+			return executeRepayAmount(repaymentAmount);
+		}
+		if (testType == 3) {
+			(address invokeAddress, bytes memory invokeData) = abi.decode(testData, (address, bytes));
+			return executeInvoke(invokeAddress, invokeData);
+		}
+		if (testType == 4) {
+			uint256 amount = abi.decode(testData, (uint256));
+			return executePayable(amount);
+		}
+	}
 
-    function executeNoop() internal {
-        repay();
-    }
+	function executeNoop() internal {
+		repay();
+	}
 
-    function executeRepayAmount(uint256 amount) internal {
-        transfer(currentTokenAddress(), msg.sender, amount);
-    }
+	function executeRepayAmount(uint256 amount) internal {
+		transfer(currentTokenAddress(), msg.sender, amount);
+	}
 
-    function executeInvoke(address invokeAddress, bytes memory invokeData) internal {
-        externalCall(invokeAddress, msg.value, invokeData);
-        repay();
-    }
+	function executeInvoke(address invokeAddress, bytes memory invokeData) internal {
+		externalCall(invokeAddress, msg.value, invokeData);
+		repay();
+	}
 
-    function executePayable(uint256 amount) internal {
-        require(msg.value == amount, "TestInvokable: did not forward value");
-        repay();
-    }
+	function executePayable(uint256 amount) internal {
+		require(msg.value == amount, "TestInvokable: did not forward value");
+		repay();
+	}
 
-    function emitHelper(bytes memory data) internal {
-        emit HelperDump(
-            currentSender(),
-            keccak256(data),
-            currentTokenAddress(),
-            currentTokenAmount(),
-            currentRepaymentAmount(),
-            isCurrentTokenEther()
-        );
-    }
+	function emitHelper(bytes memory data) internal {
+		emit HelperDump(
+			currentSender(),
+			keccak256(data),
+			currentTokenAddress(),
+			currentTokenAmount(),
+			currentRepaymentAmount(),
+			isCurrentTokenEther()
+		);
+	}
 
-    fallback() external payable {}
+	fallback() external payable {}
 }

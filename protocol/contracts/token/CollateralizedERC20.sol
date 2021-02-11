@@ -23,26 +23,26 @@ import "./CollateralizedToken.sol";
 import "../__oz__/math/SafeMath.sol";
 
 abstract contract CollateralizedERC20 is CollateralizedToken {
-    using SafeMath for uint256;
+	using SafeMath for uint256;
 
-    function mint(uint256 tokenAmount) external returns (bool) {
-        IERC20 token = IERC20(underlying());
-        require(
-            token.transferFrom(msg.sender, address(this), tokenAmount),
-            "CollateralizedERC20: token transferFrom failed"
-        );
-        return mintInternal(tokenAmount);
-    }
+	function mint(uint256 tokenAmount) external returns (bool) {
+		IERC20 token = IERC20(underlying());
+		require(
+			token.transferFrom(msg.sender, address(this), tokenAmount),
+			"CollateralizedERC20: token transferFrom failed"
+		);
+		return mintInternal(tokenAmount);
+	}
 
-    function transferUnderlying(address to, uint256 amount) internal override returns (bool) {
-        return IERC20(underlying()).transfer(to, amount);
-    }
+	function transferUnderlying(address to, uint256 amount) internal override returns (bool) {
+		return IERC20(underlying()).transfer(to, amount);
+	}
 
-    function isUnderlyingEther() public pure override returns (bool) {
-        return false;
-    }
+	function isUnderlyingEther() public pure override returns (bool) {
+		return false;
+	}
 
-    function totalReserve() public view override returns (uint256) {
-        return IERC20(underlying()).balanceOf(address(this));
-    }
+	function totalReserve() public view override returns (uint256) {
+		return IERC20(underlying()).balanceOf(address(this));
+	}
 }
