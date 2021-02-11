@@ -4,7 +4,7 @@
 	"private": false,
 	"description": "Solidity smart contracts for the Kingmaker protocol",
 	"scripts": {
-		"postinstall": "npx ts-node ./.setup.ts",
+		"postinstall": "npx ts-node ./setup.ts",
 		"clean": "hardhat clean && rimraf artifacts cache typechain",
 		"cleanse": "npm run clean && rimraf node_modules",
 		"lint": "npm run lint:ts && npm run lint:sol",

@@ -23,11 +23,11 @@ jobs:
       - name: Install
         run: npm i
 
-        # Installs dependencies
+      # Installs dependencies
       - name: Install (protocol)
         run: cd protocol && npm i
 
-      # Linters
+      # Runs linters
       - name: Lint
         run: npm run lint
 
