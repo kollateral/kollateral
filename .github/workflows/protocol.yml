@@ -3,6 +3,10 @@ name: Kingmaker Protocol Runner
 # Run this workflow every time a new commit pushed to your repository
 on: push
 
+defaults:
+    run:
+        working-directory: protocol
+
 jobs:
   # Set the job key. The key is displayed as the job name when a job name is not provided
   ci:
@@ -22,10 +26,6 @@ jobs:
       # Installs dependencies
       - name: Install
         run: npm i
-
-      # Installs dependencies
-      - name: Install (protocol)
-        run: cd protocol && npm i
 
       # Runs linters
       - name: Lint
