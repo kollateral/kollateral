@@ -1,0 +1,19 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  },
+  "solidity.linter": "solhint",
+  "solidity.enableLocalNodeCompiler": false,
+  "solidity.compileUsingRemoteVersion": "latest",
+  "solidity.packageDefaultDependenciesContractsDirectory": "",
+  "solidity.enabledAsYouTypeCompilationErrorCheck": true,
+  "solidity.validationDelay": 1100,
+  "solidity.packageDefaultDependenciesDirectory": "node_modules",
+  "mochaExplorer.env": {
+    "HARDHAT_CONFIG": "hardhat.config.ts",
+    "HARDHAT_COMPILE": "true"
+  },
+  "mochaExplorer.require": ["ts-node/register/transpile-only"]
+}

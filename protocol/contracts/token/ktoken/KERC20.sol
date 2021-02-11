@@ -23,12 +23,12 @@ import "./KToken.sol";
 import "../CollateralizedERC20.sol";
 
 contract KERC20 is KToken, CollateralizedERC20 {
-    constructor(
-        address underlying,
-        string memory name,
-        string memory symbol
-    ) CollateralizedToken(underlying) ERC20(name, symbol) {}
+	constructor(
+		address underlying,
+		string memory name,
+		string memory symbol
+	) CollateralizedToken(underlying) ERC20(name, symbol) {}
 
-    // TODO: define role that receive/fallback default functions can play within the protocol inner workings
-    receive() external payable {}
+	// TODO: define role that receive/fallback default functions can play within the protocol inner workings
+	receive() external payable {}
 }

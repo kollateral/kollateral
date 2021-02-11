@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for contracts\testing\MockSoloMargin.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../index.html">all files</a> / <a href="index.html">contracts/testing/</a> MockSoloMargin.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>47/47</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">50% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>20/40</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">90% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>9/10</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">100% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>47/47</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line high'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">45×</span>
+<span class="cline-any cline-yes">45×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">45×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">13×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">15×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">18×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">18×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/*
+&nbsp;
+    Copyright 2020 Kollateral LLC
+    Copyright 2020-2021 ARM Finance LLC
+&nbsp;
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+&nbsp;
+    http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+&nbsp;
+*/
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.8.1;
+&nbsp;
+import "../__oz__/token/ERC20/IERC20.sol";
+import "../__oz__/math/SafeMath.sol";
+import "../liquidity/dydx/ISoloMargin.sol";
+import "../liquidity/dydx/ICallee.sol";
+&nbsp;
+contract MockSoloMargin is ISoloMargin {
+	using SafeMath for uint256;
+&nbsp;
+	mapping(uint256 =&gt; address) internal _markets;
+	bool internal _isClosed;
+&nbsp;
+	uint256 internal _scheduledTokenAmount;
+	uint256 internal _scheduleMarketId;
+	address internal _scheduleAccountAddress;
+	uint256 internal _scheduleAccountNumber;
+&nbsp;
+	constructor(uint256[] memory marketIds, address[] memory tokenAddresses) {
+		for (uint256 i = 0; i &lt; marketIds.length; i++) {
+			_markets[marketIds[i]] = tokenAddresses[i];
+		}
+		_isClosed = false;
+	}
+&nbsp;
+	function operate(Types.AccountInfo[] memory accounts, Types.ActionArgs[] memory actions) public override {
+		/* data */
+		<span class="missing-if-branch" title="else path not taken" >E</span>require(accounts.length == 1, "MockSoloMargin: incorrect accounts length");
+		<span class="missing-if-branch" title="else path not taken" >E</span>require(actions.length == 3, "MockSoloMargin: incorrect actions length");
+		_scheduleAccountAddress = accounts[0].owner;
+		_scheduleAccountNumber = accounts[0].number;
+&nbsp;
+		/* withdraw */
+		Types.ActionArgs memory withdraw = actions[0];
+		_scheduledTokenAmount = withdraw.amount.value;
+		_scheduleMarketId = withdraw.primaryMarketId;
+&nbsp;
+		<span class="missing-if-branch" title="else path not taken" >E</span>require(withdraw.amount.sign == false, "MockSoloMargin: incorrect withdraw sign");
+		<span class="missing-if-branch" title="else path not taken" >E</span>require(
+			withdraw.amount.denomination == Types.AssetDenomination.Wei,
+			"MockSoloMargin: incorrect withdraw denomination"
+		);
+		<span class="missing-if-branch" title="else path not taken" >E</span>require(withdraw.amount.ref == Types.AssetReference.Delta, "MockSoloMargin: incorrect withdraw reference");
+&nbsp;
+		<span class="missing-if-branch" title="else path not taken" >E</span>require(withdraw.actionType == Types.ActionType.Withdraw, "MockSoloMargin: incorrect withdraw action type");
+		<span class="missing-if-branch" title="else path not taken" >E</span>require(withdraw.accountId == 0, "MockSoloMargin: must use first account");
+		<span class="missing-if-branch" title="else path not taken" >E</span>require(withdraw.otherAddress == msg.sender, "MockSoloMargin: not sending to proxy");
+&nbsp;
+		/* call */
+		Types.ActionArgs memory call = actions[1];
+		<span class="missing-if-branch" title="else path not taken" >E</span>require(call.actionType == Types.ActionType.Call, "MockSoloMargin: incorrect call action type");
+		<span class="missing-if-branch" title="else path not taken" >E</span>require(call.accountId == 0, "MockSoloMargin: must use first account");
+		<span class="missing-if-branch" title="else path not taken" >E</span>require(call.otherAddress == msg.sender, "MockSoloMargin: not invoking proxy");
+&nbsp;
+		/* deposit */
+		Types.ActionArgs memory deposit = actions[2];
+		<span class="missing-if-branch" title="else path not taken" >E</span>require(_scheduleMarketId == deposit.primaryMarketId, "MockSoloMargin: marketId mismatch");
+&nbsp;
+		uint256 depositValue = withdraw.amount.value.add(repaymentFee(withdraw.primaryMarketId));
+		<span class="missing-if-branch" title="else path not taken" >E</span>require(deposit.amount.value == depositValue, "MockSoloMargin: incorrect deposit value");
+		<span class="missing-if-branch" title="else path not taken" >E</span>require(deposit.amount.sign == true, "MockSoloMargin: incorrect deposit sign");
+		<span class="missing-if-branch" title="else path not taken" >E</span>require(
+			deposit.amount.denomination == Types.AssetDenomination.Wei,
+			"MockSoloMargin: incorrect deposit denomination"
+		);
+		<span class="missing-if-branch" title="else path not taken" >E</span>require(deposit.amount.ref == Types.AssetReference.Delta, "MockSoloMargin: incorrect deposit reference");
+&nbsp;
+		<span class="missing-if-branch" title="else path not taken" >E</span>require(deposit.actionType == Types.ActionType.Deposit, "MockSoloMargin: incorrect deposit action type");
+		<span class="missing-if-branch" title="else path not taken" >E</span>require(deposit.accountId == 0, "MockSoloMargin: must use first account");
+		<span class="missing-if-branch" title="else path not taken" >E</span>require(deposit.otherAddress == msg.sender, "MockSoloMargin: not sending to proxy");
+&nbsp;
+		uint256 balanceBefore = balanceOf(withdraw.primaryMarketId);
+&nbsp;
+		transfer(withdraw.primaryMarketId, msg.sender, withdraw.amount.value);
+&nbsp;
+		ICallee(msg.sender).callFunction(
+			msg.sender,
+			Types.AccountInfo({ owner: _scheduleAccountAddress, number: _scheduleAccountNumber }),
+			""
+		);
+&nbsp;
+		transferFrom(deposit.primaryMarketId, msg.sender, address(this), deposit.amount.value);
+		uint256 balanceAfter = balanceOf(withdraw.primaryMarketId);
+&nbsp;
+		<span class="missing-if-branch" title="else path not taken" >E</span>require(
+			balanceAfter == balanceBefore.add(repaymentFee(withdraw.primaryMarketId)),
+			"MockSoloMargin: Incorrect ending balance"
+		);
+&nbsp;
+		_scheduledTokenAmount = 0;
+		_scheduleMarketId = 0;
+		_scheduleAccountAddress = address(0);
+		_scheduleAccountNumber = 0;
+	}
+&nbsp;
+	function getMarketIsClosing(uint256 marketId) public view override returns (bool) {
+		return _isClosed;
+	}
+&nbsp;
+	function setClosed(bool closed) external {
+		_isClosed = closed;
+	}
+&nbsp;
+	function getMarketTokenAddress(uint256 marketId) public view override returns (address) {
+		return _markets[marketId];
+	}
+&nbsp;
+	function repaymentFee(uint256 marketId) internal pure returns (uint256) {
+		return marketId &lt; 2 ? 1 : 2;
+	}
+&nbsp;
+	function transfer(
+		uint256 marketId,
+		address to,
+		uint256 amount
+	) internal returns (bool) {
+		return IERC20(_markets[marketId]).transfer(to, amount);
+	}
+&nbsp;
+	function transferFrom(
+		uint256 marketId,
+		address from,
+		address to,
+		uint256 amount
+	) internal returns (bool) {
+		return IERC20(_markets[marketId]).transferFrom(from, to, amount);
+	}
+&nbsp;
+	function balanceOf(uint256 marketId) internal view returns (uint256) {
+		return IERC20(_markets[marketId]).balanceOf(address(this));
+	}
+&nbsp;
+<span class="fstat-no" title="function not covered" >	fallback() external {}</span>
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Thu Feb 11 2021 12:57:41 GMT+0100 (Ora standard dell’Europa centrale)
+</div>
+</div>
+<script src="../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../sorter.js"></script>
+</body>
+</html>

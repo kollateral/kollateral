@@ -20,11 +20,11 @@
 pragma solidity ^0.8.1;
 
 interface IInvocationHook {
-    function currentSender() external view returns (address);
+	function currentSender() external view returns (address);
 
-    function currentTokenAddress() external view returns (address);
+	function currentTokenAddress() external view returns (address);
 
-    function currentTokenAmount() external view returns (uint256);
+	function currentTokenAmount() external view returns (uint256);
 
-    function currentRepaymentAmount() external view returns (uint256);
+	function currentRepaymentAmount() external view returns (uint256);
 }

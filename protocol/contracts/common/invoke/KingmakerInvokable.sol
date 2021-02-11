@@ -25,43 +25,43 @@ import "../utils/BalanceCarrier.sol";
 import "../../__oz__/math/SafeMath.sol";
 
 abstract contract KingmakerInvokable is BalanceCarrier, IInvokable {
-    using SafeMath for uint256;
+	using SafeMath for uint256;
 
-    uint256 internal MAX_REWARD_BIPS = 100;
+	uint256 internal MAX_REWARD_BIPS = 100;
 
-    constructor() BalanceCarrier(address(1)) {}
+	constructor() BalanceCarrier(address(1)) {}
 
-    function repay() internal repaymentSafeguard {
-        require(
-            transfer(currentTokenAddress(), msg.sender, currentRepaymentAmount()),
-            "KingmakerInvokable: failed to repay"
-        );
-    }
+	function repay() internal repaymentSafeguard {
+		require(
+			transfer(currentTokenAddress(), msg.sender, currentRepaymentAmount()),
+			"KingmakerInvokable: failed to repay"
+		);
+	}
 
-    function currentSender() internal view returns (address) {
-        return IInvocationHook(msg.sender).currentSender();
-    }
+	function currentSender() internal view returns (address) {
+		return IInvocationHook(msg.sender).currentSender();
+	}
 
-    function currentTokenAddress() internal view returns (address) {
-        return IInvocationHook(msg.sender).currentTokenAddress();
-    }
+	function currentTokenAddress() internal view returns (address) {
+		return IInvocationHook(msg.sender).currentTokenAddress();
+	}
 
-    function currentTokenAmount() internal view returns (uint256) {
-        return IInvocationHook(msg.sender).currentTokenAmount();
-    }
+	function currentTokenAmount() internal view returns (uint256) {
+		return IInvocationHook(msg.sender).currentTokenAmount();
+	}
 
-    function currentRepaymentAmount() internal view returns (uint256) {
-        return IInvocationHook(msg.sender).currentRepaymentAmount();
-    }
+	function currentRepaymentAmount() internal view returns (uint256) {
+		return IInvocationHook(msg.sender).currentRepaymentAmount();
+	}
 
-    function isCurrentTokenEther() internal view returns (bool) {
-        return currentTokenAddress() == address(1);
-    }
+	function isCurrentTokenEther() internal view returns (bool) {
+		return currentTokenAddress() == address(1);
+	}
 
-    modifier repaymentSafeguard() {
-        uint256 effectiveReward = currentRepaymentAmount().sub(currentTokenAmount()).mul(10000).div(currentTokenAmount());
+	modifier repaymentSafeguard() {
+		uint256 effectiveReward = currentRepaymentAmount().sub(currentTokenAmount()).mul(10000).div(currentTokenAmount());
 
-        require(effectiveReward <= MAX_REWARD_BIPS, "KingmakerInvokable: repayment reward too high");
-        _;
-    }
+		require(effectiveReward <= MAX_REWARD_BIPS, "KingmakerInvokable: repayment reward too high");
+		_;
+	}
 }

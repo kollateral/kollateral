@@ -1,18 +1,29 @@
 {
-  "extends": "solhint:default",
-  "plugins": [ "prettier" ],
-  "rules": {
-    "prettier/prettier": "error",
-
-    "avoid-suicide": "error",
-    "compiler-version": "off",
-    "func-visibility": [
-      "warn",
-      { "ignoreConstructors": true }
-    ],
-    "max-line-length": [
-      "error",
-      122
-    ]
-  }
+	"extends": "solhint:default",
+	"plugins": [ "prettier" ],
+	"rules": {
+		"prettier/prettier": [ "error", {
+			"endOfLine": "auto"
+			}
+		],
+		"avoid-suicide": "error",
+		"compiler-version": "off",
+		"code-complexity": ["error", 8],
+		"const-name-snakecase": "off",
+		"func-name-mixedcase": "off",
+		"constructor-syntax": "error",
+		"func-visibility": [ "error", {
+			"ignoreConstructors": true
+			}
+		],
+		"max-line-length": [
+			"error",
+			122
+		],
+		"not-rely-on-time": "off",
+		"reason-string": [ "warn", {
+			"maxLength": 88
+			}
+		]
+	}
 }

@@ -24,25 +24,25 @@ import "../__oz__/math/SafeMath.sol";
 import "../common/utils/ExternalCaller.sol";
 
 abstract contract CollateralizedEther is CollateralizedToken, ExternalCaller {
-    using SafeMath for uint256;
+	using SafeMath for uint256;
 
-    constructor() CollateralizedToken(address(1)) {}
+	constructor() CollateralizedToken(address(1)) {}
 
-    function mint() external payable returns (bool) {
-        return mintInternal(msg.value);
-    }
+	function mint() external payable returns (bool) {
+		return mintInternal(msg.value);
+	}
 
-    function transferUnderlying(address to, uint256 amount) internal override returns (bool) {
-        require(address(this).balance >= amount, "CollateralizedEther: not enough ETH balance");
-        externalTransfer(to, amount);
-        return true;
-    }
+	function transferUnderlying(address to, uint256 amount) internal override returns (bool) {
+		require(address(this).balance >= amount, "CollateralizedEther: not enough ETH balance");
+		externalTransfer(to, amount);
+		return true;
+	}
 
-    function isUnderlyingEther() public pure override returns (bool) {
-        return true;
-    }
+	function isUnderlyingEther() public pure override returns (bool) {
+		return true;
+	}
 
-    function totalReserve() public view override returns (uint256) {
-        return address(this).balance;
-    }
+	function totalReserve() public view override returns (uint256) {
+		return address(this).balance;
+	}
 }

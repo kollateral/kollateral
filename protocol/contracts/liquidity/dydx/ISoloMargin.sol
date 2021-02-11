@@ -22,9 +22,9 @@ pragma solidity ^0.8.1;
 import "./Types.sol";
 
 interface ISoloMargin {
-    function operate(Types.AccountInfo[] memory accounts, Types.ActionArgs[] memory actions) external;
+	function operate(Types.AccountInfo[] memory accounts, Types.ActionArgs[] memory actions) external;
 
-    function getMarketIsClosing(uint256 marketId) external view returns (bool);
+	function getMarketIsClosing(uint256 marketId) external view returns (bool);
 
-    function getMarketTokenAddress(uint256 marketId) external view returns (address);
+	function getMarketTokenAddress(uint256 marketId) external view returns (address);
 }

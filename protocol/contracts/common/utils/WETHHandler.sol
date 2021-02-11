@@ -22,20 +22,20 @@ pragma solidity ^0.8.1;
 import "./IWETH9.sol";
 
 abstract contract WETHHandler {
-    address payable internal _wethAddress;
+	address payable internal _wethAddress;
 
-    constructor(address payable wethAddress) {
-        _wethAddress = wethAddress;
-    }
+	constructor(address payable wethAddress) {
+		_wethAddress = wethAddress;
+	}
 
-    function wrap(uint256 tokenAmount) internal {
-        require(address(this).balance >= tokenAmount, "WETHHandler: not enough ether balance");
-        IWETH9(_wethAddress).deposit{ value: tokenAmount }();
-    }
+	function wrap(uint256 tokenAmount) internal {
+		require(address(this).balance >= tokenAmount, "WETHHandler: not enough ether balance");
+		IWETH9(_wethAddress).deposit{ value: tokenAmount }();
+	}
 
-    function unwrap(uint256 tokenAmount) internal {
-        IWETH9 weth = IWETH9(_wethAddress);
-        require(weth.balanceOf(address(this)) >= tokenAmount, "WETHHandler: not enough weth balance");
-        weth.withdraw(tokenAmount);
-    }
+	function unwrap(uint256 tokenAmount) internal {
+		IWETH9 weth = IWETH9(_wethAddress);
+		require(weth.balanceOf(address(this)) >= tokenAmount, "WETHHandler: not enough weth balance");
+		weth.withdraw(tokenAmount);
+	}
 }

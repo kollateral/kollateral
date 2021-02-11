@@ -1,14 +1,6 @@
-.gradle
-**/build
-/target
-**/out
-**/dist
-**/generated
-lib/abi
 .idea
 *.iml
 .env
 .DS_Store
 logs
 **/node_modules
-.cache

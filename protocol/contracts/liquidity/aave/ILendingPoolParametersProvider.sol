@@ -20,5 +20,5 @@
 pragma solidity ^0.8.1;
 
 interface ILendingPoolParametersProvider {
-    function getFlashLoanFeesInBips() external pure returns (uint256, uint256);
+	function getFlashLoanFeesInBips() external pure returns (uint256, uint256);
 }

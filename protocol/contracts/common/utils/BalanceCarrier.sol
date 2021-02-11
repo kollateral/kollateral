@@ -23,30 +23,30 @@ import "./ExternalCaller.sol";
 import "../../__oz__/token/ERC20/IERC20.sol";
 
 abstract contract BalanceCarrier is ExternalCaller {
-    address private _ethTokenAddress;
+	address private _ethTokenAddress;
 
-    constructor(address ethTokenAddress) {
-        _ethTokenAddress = ethTokenAddress;
-    }
+	constructor(address ethTokenAddress) {
+		_ethTokenAddress = ethTokenAddress;
+	}
 
-    function transfer(
-        address tokenAddress,
-        address to,
-        uint256 amount
-    ) internal returns (bool) {
-        if (tokenAddress == _ethTokenAddress) {
-            externalTransfer(to, amount);
-            return true;
-        } else {
-            return IERC20(tokenAddress).transfer(to, amount);
-        }
-    }
+	function transfer(
+		address tokenAddress,
+		address to,
+		uint256 amount
+	) internal returns (bool) {
+		if (tokenAddress == _ethTokenAddress) {
+			externalTransfer(to, amount);
+			return true;
+		} else {
+			return IERC20(tokenAddress).transfer(to, amount);
+		}
+	}
 
-    function balanceOf(address tokenAddress) internal view returns (uint256) {
-        if (tokenAddress == _ethTokenAddress) {
-            return address(this).balance;
-        } else {
-            return IERC20(tokenAddress).balanceOf(address(this));
-        }
-    }
+	function balanceOf(address tokenAddress) internal view returns (uint256) {
+		if (tokenAddress == _ethTokenAddress) {
+			return address(this).balance;
+		} else {
+			return IERC20(tokenAddress).balanceOf(address(this));
+		}
+	}
 }
