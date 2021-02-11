@@ -4,8 +4,8 @@ name: Kingmaker Protocol Runner
 on: push
 
 defaults:
-    run:
-        working-directory: protocol
+  run:
+    working-directory: protocol
 
 jobs:
   # Set the job key. The key is displayed as the job name when a job name is not provided
