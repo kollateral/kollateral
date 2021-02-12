@@ -39,13 +39,13 @@ export class Kingmaker {
     const invokerAbi = require('../protocol/artifacts/contracts/Invoker.sol/Invoker.json').abi;
     this._invoker = new this._web3.eth.Contract(invokerAbi, config.invokerAddress) as unknown as Invoker;
 
-    const kEtherAbi = require('../protocol/artifacts/contracts/token/ktoken/KEther.sol/KEther.json').abi;
+    const kEtherAbi = require('../protocol/artifacts/contracts/tokens/ktoken/KEther.sol/KEther.json').abi;
     this._kEther = new this._web3.eth.Contract(kEtherAbi, config.network.tokens.get(Token.ETH)!.kTokenAddress) as unknown as KEther;
 
-    const kErc20Abi = require('../protocol/artifacts/contracts/token/ktoken/KErc20.sol/KErc20.json').abi;
+    const kErc20Abi = require('../protocol/artifacts/contracts/tokens/ktoken/KErc20.sol/KErc20.json').abi;
     this._kErc20s = new Map<string, KErc20>();
 
-    const kTokenAbi = require('../protocol/artifacts/contracts/token/ktoken/KToken.sol/KToken.json').abi;
+    const kTokenAbi = require('../protocol/artifacts/contracts/tokens/ktoken/KToken.sol/KToken.json').abi;
     this._kTokens = new Map<string, KToken>();
 
     this._erc20Abi = require('../protocol/artifacts/contracts/testing/TestToken.sol/TestToken.json').abi;
@@ -204,7 +204,7 @@ export class Kingmaker {
   /* Private */
   private getTokenAddressOrThrow(token: Token): string {
     if (!TokenUtils.isSupportedToken(this._config.network.network, token)) {
-      throw("Unsupported token");
+      throw("Unsupported tokens");
     }
     return TokenUtils.getAddress(this._config.network.network, token)!;
   }

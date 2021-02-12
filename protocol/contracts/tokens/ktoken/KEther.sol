@@ -24,7 +24,7 @@ import "../CollateralizedEther.sol";
 import "../../__oz__/math/SafeMath.sol";
 
 contract KEther is KToken, CollateralizedEther {
-	constructor() CollateralizedEther() ERC20("Kingmaker", "KING") {}
+	constructor() CollateralizedEther() ERC20("Kingmaker/Ether", "kETH") {}
 
 	function payableReserveAdjustment() internal override returns (uint256) {
 		return msg.value;
