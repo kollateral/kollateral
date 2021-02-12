@@ -61,7 +61,7 @@
 		"ethereum-waffle": "^3.2.2",
 		"ethers": "^5.0.30",
 		"fs-extra": "^7.0.1",
-		"hardhat": "^2.0.9",
+		"hardhat": "^2.0.10",
 		"hardhat-deploy": "^0.7.0-beta.44",
 		"hardhat-deploy-ethers": "^0.3.0-beta.7",
 		"hardhat-gas-reporter": "^1.0.4",
