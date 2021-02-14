@@ -19,8 +19,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.1;
 
-import "../token/CollateralizedERC20.sol";
-import "../token/CollateralizedToken.sol";
+import "../tokens/CollateralizedERC20.sol";
+import "../tokens/CollateralizedToken.sol";
 
 contract TestCollateralizedERC20 is CollateralizedERC20 {
 	constructor(

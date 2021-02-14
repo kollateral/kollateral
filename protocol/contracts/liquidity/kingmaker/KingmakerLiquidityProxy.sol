@@ -24,8 +24,8 @@ import "../../__oz__/utils/Pausable.sol";
 import "../../__oz__/access/Ownable.sol";
 import "../../common/invoke/IInvoker.sol";
 import "../../common/utils/BalanceCarrier.sol";
-import "../../token/CollateralizedToken.sol";
-import "../../token/ktoken/KToken.sol";
+import "../../tokens/CollateralizedToken.sol";
+import "../../tokens/ktoken/KToken.sol";
 
 contract KingmakerLiquidityProxy is BalanceCarrier, IInvokable, ILiquidityProxy, Ownable {
 	mapping(address => address) _tokenAddressToKTokenAddress;

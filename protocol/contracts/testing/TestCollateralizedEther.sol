@@ -19,7 +19,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.1;
 
-import "../token/CollateralizedEther.sol";
+import "../tokens/CollateralizedEther.sol";
 
 contract TestCollateralizedEther is CollateralizedEther {
 	constructor(string memory name, string memory symbol) ERC20(name, symbol) {}

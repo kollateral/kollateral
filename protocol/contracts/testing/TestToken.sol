@@ -19,7 +19,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.1;
 
-import "../token/UnlimitedApprovalERC20.sol";
+import "../tokens/UnlimitedApprovalERC20.sol";
 
 contract TestToken is UnlimitedApprovalERC20 {
 	constructor(string memory name, string memory symbol) ERC20(name, symbol) {}
