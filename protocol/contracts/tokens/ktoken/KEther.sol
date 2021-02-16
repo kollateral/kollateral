@@ -21,7 +21,7 @@ pragma solidity ^0.8.1;
 
 import "./KToken.sol";
 import "../CollateralizedEther.sol";
-import "../../__oz__/math/SafeMath.sol";
+import "../../libraries/math/SafeMath.sol";
 
 contract KEther is KToken, CollateralizedEther {
 	constructor() CollateralizedEther() ERC20("Kingmaker/Ether", "kETH") {}

@@ -1,6 +1,5 @@
 /*
 
-    Copyright 2020 Kollateral LLC
     Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,29 +18,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.1;
 
-import "../libraries/token/ERC20/ERC20.sol";
-import "../libraries/math/SafeMath.sol";
-
-abstract contract UnlimitedApprovalERC20 is ERC20 {
-	function transferFrom(
-		address sender,
-		address recipient,
-		uint256 amount
-	) public override returns (bool) {
-		_transfer(sender, recipient, amount);
-		// Check for and update remaining allowance
-		if (allowance(sender, _msgSender()) != type(uint256).max) {
-			_approve(
-				sender,
-				_msgSender(),
-				SafeMath.sub(
-					allowance(sender, _msgSender()),
-					amount,
-					"UnlimitedApprovalERC20: transfer amount exceeds allowance"
-				)
-			);
-		}
-
-		return true;
+contract GovernanceFaucet {
+	function govern(string calldata name) external pure returns (string memory) {
+		return string(abi.encodePacked("Greetings, ", name));
 	}
 }

@@ -1,6 +1,5 @@
 /*
 
-    Copyright 2020 Kollateral LLC
     Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,21 +15,19 @@
     limitations under the License.
 
 */
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.1;
 
-import "../../libraries/math/SafeMath.sol";
+import "../libraries/diamond/LibDiamond.sol";
+import "../interfaces/access/IERC173.sol";
 
-contract ExtendedMath {
-	using SafeMath for uint256;
+contract OwnershipFacet is IERC173 {
+	function transferOwnership(address _newOwner) external override {
+		LibDiamond.enforceIsContractOwner();
+		LibDiamond.setContractOwner(_newOwner);
+	}
 
-	// divide a/b then optionally floor or ceiling
-	function divAndRound(
-		uint256 a,
-		uint256 b,
-		bool ceiling
-	) internal pure returns (uint256) {
-		uint256 floor = a.div(b);
-		return (ceiling && a.mod(b) != 0) ? floor.add(1) : floor;
+	function owner() external view override returns (address king_) {
+		king_ = LibDiamond.contractOwner();
 	}
 }

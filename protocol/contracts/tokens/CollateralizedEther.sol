@@ -20,7 +20,7 @@
 pragma solidity ^0.8.1;
 
 import "./CollateralizedToken.sol";
-import "../__oz__/math/SafeMath.sol";
+import "../libraries/math/SafeMath.sol";
 import "../common/utils/ExternalCaller.sol";
 
 abstract contract CollateralizedEther is CollateralizedToken, ExternalCaller {

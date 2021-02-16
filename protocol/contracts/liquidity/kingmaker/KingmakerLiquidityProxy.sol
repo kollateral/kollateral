@@ -20,8 +20,8 @@
 pragma solidity ^0.8.1;
 
 import "../ILiquidityProxy.sol";
-import "../../__oz__/utils/Pausable.sol";
-import "../../__oz__/access/Ownable.sol";
+import "../../libraries/utils/Pausable.sol";
+import "../../libraries/access/Ownable.sol";
 import "../../common/invoke/IInvoker.sol";
 import "../../common/utils/BalanceCarrier.sol";
 import "../../tokens/CollateralizedToken.sol";

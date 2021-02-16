@@ -11,7 +11,7 @@ module.exports = {
 	plugins: ['@typescript-eslint'],
 	extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'prettier', 'prettier/@typescript-eslint'],
 	rules: {
-		'@typescript-eslint/ban-ts-comment': 1,
+		'@typescript-eslint/ban-ts-comment': 0,
 		'@typescript-eslint/no-unused-vars': 0,
 		'@typescript-eslint/no-explicit-any': 0,
 	},

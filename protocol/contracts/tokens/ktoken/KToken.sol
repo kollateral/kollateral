@@ -20,9 +20,9 @@
 pragma solidity ^0.8.1;
 
 import "../CollateralizedToken.sol";
-import "../../__oz__/access/Ownable.sol";
-import "../../__oz__/math/SafeMath.sol";
-import "../../__oz__/utils/Pausable.sol";
+import "../../libraries/access/Ownable.sol";
+import "../../libraries/math/SafeMath.sol";
+import "../../libraries/utils/Pausable.sol";
 import "../../common/invoke/IInvocationHook.sol";
 import "../../common/invoke/IInvokable.sol";
 

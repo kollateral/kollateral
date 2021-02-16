@@ -20,8 +20,8 @@
 pragma solidity ^0.8.1;
 
 import "./UnlimitedApprovalERC20.sol";
-import "../__oz__/math/SafeMath.sol";
-import "../__oz__/utils/ReentrancyGuard.sol";
+import "../libraries/math/SafeMath.sol";
+import "../libraries/utils/ReentrancyGuard.sol";
 import "../common/utils/ExtendedMath.sol";
 
 abstract contract CollateralizedToken is ExtendedMath, ReentrancyGuard, UnlimitedApprovalERC20 {

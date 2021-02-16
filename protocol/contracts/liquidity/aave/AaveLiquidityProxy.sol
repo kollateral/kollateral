@@ -24,8 +24,8 @@ import "./ILendingPoolAddressesProvider.sol";
 import "./ILendingPoolCore.sol";
 import "./ILendingPoolParametersProvider.sol";
 import "../ILiquidityProxy.sol";
-import "../../__oz__/math/SafeMath.sol";
-import "../../__oz__/token/ERC20/IERC20.sol";
+import "../../libraries/math/SafeMath.sol";
+import "../../interfaces/token/ERC20/IERC20.sol";
 import "../../common/invoke/IInvoker.sol";
 import "../../common/utils/BalanceCarrier.sol";
 

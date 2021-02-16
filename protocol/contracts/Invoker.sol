@@ -19,11 +19,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.1;
 
-import "./__oz__/access/Ownable.sol";
-import "./__oz__/math/SafeMath.sol";
 import "./common/utils/BalanceCarrier.sol";
 import "./common/invoke/IInvokable.sol";
 import "./common/invoke/IInvoker.sol";
+import "./libraries/access/Ownable.sol";
+import "./libraries/math/SafeMath.sol";
 import "./liquidity/ILiquidityProxy.sol";
 
 contract Invoker is BalanceCarrier, IInvoker, Ownable {

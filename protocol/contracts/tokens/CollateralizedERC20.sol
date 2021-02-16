@@ -20,7 +20,7 @@
 pragma solidity ^0.8.1;
 
 import "./CollateralizedToken.sol";
-import "../__oz__/math/SafeMath.sol";
+import "../libraries/math/SafeMath.sol";
 
 abstract contract CollateralizedERC20 is CollateralizedToken {
 	using SafeMath for uint256;
