@@ -1,5 +1,6 @@
-contracts/__oz__/**
-contracts/__oz__/**/*
+contracts/libraries/math/SafeMath.sol
+contracts/libraries/utils/Context.sol
+contracts/testing/WETH9.sol
 export/
 deployments/
 artifacts/
