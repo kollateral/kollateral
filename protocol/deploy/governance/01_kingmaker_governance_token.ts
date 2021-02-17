@@ -1,7 +1,7 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DeployFunction } from 'hardhat-deploy/types';
 
-import { cyan, bold, blue, italic, underline, greenBright, cyanBright, blueBright } from 'colorette';
+import { bold, italic, cyanBright, blueBright } from 'colorette';
 import { logDeployResult } from '../../libs/hardhat/DeployUtils';
 
 export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {

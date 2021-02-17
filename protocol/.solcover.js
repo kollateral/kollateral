@@ -1,3 +1,3 @@
 module.exports = {
-	skipFiles: ['__oz__/*.sol'],
+	skipFiles: ['libraries/**/*.sol', 'liquidity/aave/*.sol', 'liquidity/dydx/*.sol', 'testing/**/*.sol'],
 };
