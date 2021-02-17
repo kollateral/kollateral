@@ -8,42 +8,13 @@ import 'hardhat-gas-reporter';
 import 'solidity-coverage';
 // import "@tenderly/hardhat-tenderly"
 
-import 'dotenv/config';
 import { HardhatUserConfig } from 'hardhat/config';
-
-import chalk from 'chalk';
-
-function getEnv(key: string): string | undefined {
-	const variable = process.env[key];
-	if (variable === undefined) {
-		return undefined;
-	}
-	return variable.trim();
-}
-
-function printWarning(env: string) {
-	console.warn(chalk.bold.yellowBright.bgBlackBright(`TEST RUN INCOMPLETE: Set the env variable ${env} in /protocol/.env`));
-}
+import 'dotenv/config';
+import { getEnv, printWarning } from './libs/hardhat/ConfigUtils';
 
 const projectId = getEnv('ALCHEMY_PROJECT_ID') || '0xFEAD';
 const deployerPK = getEnv('KINGMAKER_DEPLOYER_PK') || '0xDEAD';
 const deployerAddr = getEnv('KINGMAKER_DEPLOYER_ADDR') || '0xC0DE';
-const deployer = {
-	privateKey: '0xb7d5e9cbedf93abcfea27ff147a316568b7f58cbf8125de65437208509c42f94',
-	balance: '10000000000000000000000',
-};
-const feeCollector = {
-	privateKey: '0x547c0b03b0988e67bf0557c3bf0230b03e83e481e3047ba63a96660ca79cbaa1',
-	balance: '10000000000000000000000',
-};
-const lepidotteri = {
-	privateKey: '0xd0f1f5f4bd9f4b990240a689d568abd1d5f2a1e6b6d220b86d66891722e5313a',
-	balance: '10000000000000000000000',
-};
-const SHA_2048 = {
-	privateKey: '0x1febd0c69f2138a7dcedd7d9d6e481b6eb2a607c205905a47f77fcd7bf0f599e',
-	balance: '10000000000000000000000',
-};
 
 if (projectId === undefined || projectId === '0xFEAD') {
 	printWarning('ALCHEMY_PROJECT_ID');
@@ -55,7 +26,24 @@ if (deployerAddr === undefined || deployerAddr === '0xC0DE') {
 	printWarning('KINGMAKER_DEPLOYER_ADDR');
 }
 
-const kingmakerAccounts = [deployer, feeCollector, lepidotteri, SHA_2048];
+const deployer = {
+	privateKey: deployerPK,
+	balance: '10000000000000000000000',
+};
+const lepidotteri = {
+	privateKey: '0xd0f1f5f4bd9f4b990240a689d568abd1d5f2a1e6b6d220b86d66891722e5313a', // addr: 0x0A26a1eBca217c8090f9a7759Ef82f19a1E19ea1
+	balance: '10000000000000000000000',
+};
+const SHA_2048 = {
+	privateKey: '0x1febd0c69f2138a7dcedd7d9d6e481b6eb2a607c205905a47f77fcd7bf0f599e', // addr: 0x0E041eDB5CFe0e053B051a56773356aBeb101Be4
+	balance: '10000000000000000000000',
+};
+const feeCollector = {
+	privateKey: '0x547c0b03b0988e67bf0557c3bf0230b03e83e481e3047ba63a96660ca79cbaa1', // addr: 0x09ba909BF9de148952B12c27d3f754fab36aa542
+	balance: '10000000000000000000000',
+};
+
+const kingmakerAccounts = [deployer, lepidotteri, SHA_2048, feeCollector];
 
 const config: HardhatUserConfig = {
 	defaultNetwork: 'hardhat',
@@ -74,28 +62,28 @@ const config: HardhatUserConfig = {
 		},
 		staging: {
 			url: 'https://eth-ropsten.alchemyapi.io/v2/' + projectId,
-			accounts: [deployerPK],
+			accounts: [deployer.privateKey, lepidotteri.privateKey, SHA_2048.privateKey, feeCollector.privateKey],
 			live: true,
 			saveDeployments: true,
 			tags: ['staging'],
 		},
 		rinkeby: {
 			url: 'https://eth-rinkeby.alchemyapi.io/v2/' + projectId,
-			accounts: [deployerPK],
+			accounts: [deployer.privateKey, lepidotteri.privateKey, SHA_2048.privateKey, feeCollector.privateKey],
 			live: true,
 			saveDeployments: true,
 			tags: ['staging'],
 		},
 		kovan: {
 			url: 'https://eth-kovan.alchemyapi.io/v2/' + projectId,
-			accounts: [deployerPK],
+			accounts: [deployer.privateKey, lepidotteri.privateKey, SHA_2048.privateKey, feeCollector.privateKey],
 			live: true,
 			saveDeployments: true,
 			tags: ['staging'],
 		},
 		mainnet: {
 			url: 'https://eth-mainnet.alchemyapi.io/v2/' + projectId,
-			accounts: [deployerPK],
+			accounts: [deployer.privateKey, lepidotteri.privateKey, SHA_2048.privateKey, feeCollector.privateKey],
 			live: true,
 			saveDeployments: true,
 			tags: ['production'],
@@ -110,21 +98,31 @@ const config: HardhatUserConfig = {
 	namedAccounts: {
 		deployer: {
 			default: 0, // here this will by default take the first account as deployer
-			1: 0, // similarly on mainnet it will take the first account as deployer. Note though that depending on how hardhat network are configured, the account 0 on one network can be different than on another
-			2: 0, // same on ropsten  (staging network)
-			4: '0xFCCD70144337cCEF521C3677A46eD3525e91cc27', // but for rinkeby it will be a specific address
-			kovan: '0xFCCD70144337cCEF521C3677A46eD3525e91cc27', //it can also specify a specific netwotk name (specified in hardhat.config.js)
+			0: 0, // similarly on mainnet it will take the first account as deployer. Note though that depending on how hardhat network are configured, the account 0 on one network can be different than on another
+			1: 0, // same on ropsten  (staging network)
+			4: 0, // but for rinkeby it will be a specific address
+			kovan: '0xfEeDc0DE1EBE0A72f52590Df786101e1c3944545', // it can also specify the network name and literal address
 		},
 		lepidotteri: {
-			default: 1, // here this will by default take the first account as deployer
+			default: 1, // will by default take the second account
+			0: 1,
+			1: 1,
+			4: 1,
+			kovan: 1,
 		},
 		SHA_2048: {
-			default: 2, // here this will by default take the first account as deployer
+			default: 2, // will by default take the third account
+			0: 2,
+			1: 2,
+			rinkeby: 2,
+			kovan: 2,
 		},
 		feeCollector: {
-			default: 3, // here this will, by default, take the second account as feeCollector (so in the test this will be a different account than the deployer)
-			1: '0x09ba909BF9de148952B12c27d3f754fab36aa542', // on the mainnet the feeCollector could be (e.g.) a multi sig
-			4: '0x09ba909BF9de148952B12c27d3f754fab36aa542', // on rinkeby it might as well be another account
+			default: 3, // here this will, by default, take the fourth account
+			1: 3, // on the mainnet the feeCollector could be (e.g.) a multi sig
+			2: 3,
+			4: 3, // on rinkeby it might as well be the same account
+			kovan: 3,
 		},
 	},
 	solidity: {

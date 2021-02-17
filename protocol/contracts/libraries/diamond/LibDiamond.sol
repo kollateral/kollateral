@@ -80,7 +80,8 @@ library LibDiamond {
 
 	event DiamondCut(IDiamondCut.FacetCut[] _diamondCut, address _init, bytes _calldata);
 
-	// Internal function version of diamondCut
+	// Internal function version of diamondCut.
+	// Like normal proxies you can also execute a function at the time of an upgrade.
 	function diamondCut(
 		IDiamondCut.FacetCut[] memory _diamondCut,
 		address _init,

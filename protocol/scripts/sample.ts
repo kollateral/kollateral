@@ -10,22 +10,26 @@ import hre from 'hardhat';
  * Must only be used for local (i.e. 'hardhat' network) trial and error
  */
 async function main() {
+	const { deployments, getNamedAccounts } = hre;
+	const { deploy, log, read, execute, rawTx } = deployments;
 	// Hardhat always runs the compile task when running scripts with its command
 	// line interface.
 	//
 	// If this script is run directly using `node` you may want to call compile
 	// manually to make sure everything is compiled
 	// await hre.run('compile');
-	const weirdPK = '1111111111111111111111111111111111111111111111111111111111111111';
-	const wallet = new hre.ethers.Wallet(weirdPK);
-	console.log(wallet.address);
+	// const feeCollectorPK = '0x547c0b03b0988e67bf0557c3bf0230b03e83e481e3047ba63a96660ca79cbaa1';
+	// const feeCollectorWallet = new hre.ethers.Wallet(feeCollectorPK);
+	// console.log(feeCollectorWallet.address);
+
+	const namedAccounts = await getNamedAccounts();
+	console.log('namedAccounts:', '\n', namedAccounts);
 
 	// We get the contract to deploy
 	const Greeter = await hre.ethers.getContractFactory('Greeter');
 	const greeter = await Greeter.deploy('Hello, Hardhat!');
 
 	await greeter.deployed();
-
 	console.log('Greeter deployed to:', greeter.address);
 
 	const greeting = await greeter.callStatic.greet();
