@@ -12,7 +12,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
 	await diamond.deploy('Cowl', {
 		from: deployer,
-		facets: ['GovernanceFaucet'],
+		facets: ['CrownGovernanceFacet'],
 		log: false,
 	});
 

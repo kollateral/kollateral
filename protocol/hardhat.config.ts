@@ -10,7 +10,7 @@ import 'solidity-coverage';
 
 import { HardhatUserConfig } from 'hardhat/config';
 import 'dotenv/config';
-import { getEnv, printWarning } from './libs/hardhat/ConfigUtils';
+import { getEnv, printWarning } from './libs/ConfigUtils';
 
 const projectId = getEnv('ALCHEMY_PROJECT_ID') || '0xFEAD';
 const deployerPK = getEnv('KINGMAKER_DEPLOYER_PK') || '0xDEAD';

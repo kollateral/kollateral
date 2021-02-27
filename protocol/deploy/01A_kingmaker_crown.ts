@@ -1,9 +1,10 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+
 import { DeployFunction, DeployResult } from 'hardhat-deploy/types';
 
 import { bold, italic, cyanBright, blueBright } from 'colorette';
-import { logDeployResult } from '../libs/hardhat/DeployUtils';
-import { FacetCutAction, getSelectors } from '../libs/CrownHelper';
+import { logDeployResult } from '../libs/DeployUtils';
+import { FacetCutAction, getSelectors } from '../libs/diamond/DiamondUtils';
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 	const { deployments, getNamedAccounts } = hre;

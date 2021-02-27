@@ -25,6 +25,7 @@ pragma solidity ^0.8.1;
 /******************************************************************************/
 
 import "../libraries/diamond/LibDiamond.sol";
+import "../libraries/diamond/LibOwnership.sol";
 import "../interfaces/diamond/IDiamondCut.sol";
 
 contract DiamondCutFacet is IDiamondCut {
@@ -37,7 +38,7 @@ contract DiamondCutFacet is IDiamondCut {
 		address _init,
 		bytes calldata _callData
 	) external override {
-		LibDiamond.enforceIsContractOwner();
+		LibOwnership.enforceIsContractOwner();
 		LibDiamond.diamondCut(_diamondCut, _init, _callData);
 	}
 }

@@ -18,7 +18,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.1;
 
-contract GovernanceFaucet {
+contract CrownGovernanceFacet {
 	function govern(string calldata name) external pure returns (string memory) {
 		return string(abi.encodePacked("Greetings, ", name));
 	}

@@ -19,6 +19,7 @@
 pragma solidity ^0.8.1;
 
 import "./libraries/diamond/LibDiamond.sol";
+import "./libraries/diamond/LibOwnership.sol";
 import "./interfaces/diamond/IDiamondLoupe.sol";
 import "./interfaces/diamond/IDiamondCut.sol";
 import "./interfaces/access/IERC173.sol";
@@ -33,9 +34,9 @@ contract Crown {
 
 	constructor(IDiamondCut.FacetCut[] memory _diamondCut, CrownArgs memory _args) payable {
 		LibDiamond.diamondCut(_diamondCut, address(0), new bytes(0));
-		LibDiamond.setContractOwner(_args.king);
+		LibOwnership.setContractOwner(_args.king);
 
-		LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+		LibDiamondStorage.DiamondStorage storage ds = LibDiamondStorage.diamondStorage();
 
 		// adding ERC165 data
 		ds.supportedInterfaces[type(IERC165).interfaceId] = true;
@@ -47,8 +48,8 @@ contract Crown {
 	// Find facet for function that is called and execute the
 	// function if a facet is found and return any value.
 	fallback() external payable {
-		LibDiamond.DiamondStorage storage ds;
-		bytes32 position = LibDiamond.DIAMOND_STORAGE_POSITION;
+		LibDiamondStorage.DiamondStorage storage ds;
+		bytes32 position = LibDiamondStorage.DIAMOND_STORAGE_POSITION;
 
 		assembly {
 			ds.slot := position

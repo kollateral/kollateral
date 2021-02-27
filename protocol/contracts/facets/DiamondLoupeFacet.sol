@@ -24,7 +24,7 @@ pragma solidity ^0.8.1;
 * EIP-2535 Diamond Standard: https://eips.ethereum.org/EIPS/eip-2535
 /******************************************************************************/
 
-import "../libraries/diamond/LibDiamond.sol";
+import "../libraries/diamond/LibDiamondStorage.sol";
 import "../interfaces/diamond/IDiamondCut.sol";
 import "../interfaces/diamond/IDiamondLoupe.sol";
 import "../interfaces/introspection/IERC165.sol";
@@ -33,7 +33,7 @@ contract DiamondLoupeFacet is IDiamondLoupe, IERC165 {
 	/// @notice Gets all facets and their selectors.
 	/// @return facets_ Facet
 	function facets() external view override returns (Facet[] memory facets_) {
-		LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+		LibDiamondStorage.DiamondStorage storage ds = LibDiamondStorage.diamondStorage();
 		uint256 numFacets = ds.facetAddresses.length;
 		facets_ = new Facet[](numFacets);
 		for (uint256 i; i < numFacets; i++) {
@@ -52,14 +52,14 @@ contract DiamondLoupeFacet is IDiamondLoupe, IERC165 {
 		override
 		returns (bytes4[] memory facetFunctionSelectors_)
 	{
-		LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+		LibDiamondStorage.DiamondStorage storage ds = LibDiamondStorage.diamondStorage();
 		facetFunctionSelectors_ = ds.facetFunctionSelectors[_facet].functionSelectors;
 	}
 
 	/// @notice Get all the facet addresses used by a diamond.
 	/// @return facetAddresses_
 	function facetAddresses() external view override returns (address[] memory facetAddresses_) {
-		LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+		LibDiamondStorage.DiamondStorage storage ds = LibDiamondStorage.diamondStorage();
 		facetAddresses_ = ds.facetAddresses;
 	}
 
@@ -68,13 +68,13 @@ contract DiamondLoupeFacet is IDiamondLoupe, IERC165 {
 	/// @param _functionSelector The function selector.
 	/// @return facetAddress_ The facet address.
 	function facetAddress(bytes4 _functionSelector) external view override returns (address facetAddress_) {
-		LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+		LibDiamondStorage.DiamondStorage storage ds = LibDiamondStorage.diamondStorage();
 		facetAddress_ = ds.selectorToFacetAndPosition[_functionSelector].facetAddress;
 	}
 
 	// This implements ERC-165.
 	function supportsInterface(bytes4 _interfaceId) external view override returns (bool) {
-		LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+		LibDiamondStorage.DiamondStorage storage ds = LibDiamondStorage.diamondStorage();
 		return ds.supportedInterfaces[_interfaceId];
 	}
 }
