@@ -1,5 +1,5 @@
 /*
-
+	Copyright 2020 Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)
     Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,17 +15,14 @@
     limitations under the License.
 
 */
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.1;
 
-/******************************************************************************\
-* Author: Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)
-* Contributors: [ lepidotteri, ]
-* EIP-2535 Diamond Standard: https://eips.ethereum.org/EIPS/eip-2535
-/******************************************************************************/
+import "hardhat/console.sol";
 
 import "../libraries/diamond/LibDiamond.sol";
-import "../libraries/diamond/LibOwnership.sol";
+import "../libraries/diamond/LibDiamondOwnership.sol";
+
 import "../interfaces/diamond/IDiamondCut.sol";
 
 contract DiamondCutFacet is IDiamondCut {
@@ -38,7 +35,7 @@ contract DiamondCutFacet is IDiamondCut {
 		address _init,
 		bytes calldata _callData
 	) external override {
-		LibOwnership.enforceIsContractOwner();
+		LibDiamondOwnership.enforceIsContractOwner();
 		LibDiamond.diamondCut(_diamondCut, _init, _callData);
 	}
 }

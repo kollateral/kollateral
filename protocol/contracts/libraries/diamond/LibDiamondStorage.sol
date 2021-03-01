@@ -1,6 +1,5 @@
 /*
 
-	Copyright 2020 Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)
     Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +15,7 @@
     limitations under the License.
 
 */
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.1;
 
 library LibDiamondStorage {

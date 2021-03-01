@@ -12,12 +12,12 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 	// Friday, December 31, 2021 11:59:59 PM (GMT)
 	const firstSupplyChangeAllowed = 1640995199;
 	log(bold(blueBright(`\n【】GOVERNANCE`)));
-	log(italic(cyanBright(`1) Kingmaker Governance Token`)));
+	log(italic(cyanBright(`1) Kingmaker Crown Governance Token`)));
 
-	// Deploy GovernanceToken.sol contract
-	const deployResult = await deploy('GovernanceToken', {
+	// Deploy CrownGovernanceToken.sol contract
+	const deployResult = await deploy('CrownGovernanceToken', {
 		from: deployer,
-		contract: 'GovernanceToken',
+		contract: 'CrownGovernanceToken',
 		gasLimit: 9696969, // 9,696,969 out of 12,500,000 max gas units
 		args: [lepidotteri, lepidotteri, firstSupplyChangeAllowed],
 		skipIfAlreadyDeployed: true,
@@ -25,6 +25,6 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 	logDeployResult(deployResult, log);
 };
 
-export const tags = ['1', 'governance', 'GovernanceToken'];
+export const tags = ['1', 'governance', 'CrownGovernanceToken'];
 export const dependencies = ['Crown'];
 export default func;

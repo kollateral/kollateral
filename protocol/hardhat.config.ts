@@ -8,7 +8,7 @@ import 'hardhat-gas-reporter';
 import 'solidity-coverage';
 // import "@tenderly/hardhat-tenderly"
 
-import { HardhatUserConfig } from 'hardhat/config';
+import { HardhatUserConfig, task } from 'hardhat/config';
 import 'dotenv/config';
 import { getEnv, printWarning } from './libs/ConfigUtils';
 
@@ -25,6 +25,15 @@ if (deployerPK === undefined || deployerPK === '0xDEAD') {
 if (deployerAddr === undefined || deployerAddr === '0xC0DE') {
 	printWarning('KINGMAKER_DEPLOYER_ADDR');
 }
+
+// REQUIRED TO ENSURE METADATA IS SAVED IN DEPLOYMENTS (because solidity-coverage disable it otherwise)
+import { TASK_COMPILE_SOLIDITY_GET_COMPILER_INPUT } from 'hardhat/builtin-tasks/task-names';
+
+task(TASK_COMPILE_SOLIDITY_GET_COMPILER_INPUT).setAction(async (_, bre, runSuper) => {
+	const input = await runSuper();
+	input.settings.metadata.useLiteralContent = bre.network.name !== 'coverage';
+	return input;
+});
 
 const deployer = {
 	privateKey: deployerPK,
@@ -44,12 +53,13 @@ const feeCollector = {
 };
 
 const kingmakerAccounts = [deployer, lepidotteri, SHA_2048, feeCollector];
+const realAccounts = [deployer.privateKey, lepidotteri.privateKey, SHA_2048.privateKey, feeCollector.privateKey];
 
 const config: HardhatUserConfig = {
 	defaultNetwork: 'hardhat',
 	networks: {
 		hardhat: {
-			blockGasLimit: 12500000,
+			blockGasLimit: 11500000,
 			hardfork: 'muirGlacier',
 			accounts: kingmakerAccounts,
 			forking: {
@@ -60,30 +70,30 @@ const config: HardhatUserConfig = {
 			saveDeployments: true,
 			tags: ['test', 'local'],
 		},
-		staging: {
+		ropsten: {
 			url: 'https://eth-ropsten.alchemyapi.io/v2/' + projectId,
-			accounts: [deployer.privateKey, lepidotteri.privateKey, SHA_2048.privateKey, feeCollector.privateKey],
+			accounts: realAccounts,
 			live: true,
 			saveDeployments: true,
-			tags: ['staging'],
+			tags: ['ropsten'],
 		},
 		rinkeby: {
 			url: 'https://eth-rinkeby.alchemyapi.io/v2/' + projectId,
-			accounts: [deployer.privateKey, lepidotteri.privateKey, SHA_2048.privateKey, feeCollector.privateKey],
+			accounts: realAccounts,
 			live: true,
 			saveDeployments: true,
 			tags: ['staging'],
 		},
 		kovan: {
 			url: 'https://eth-kovan.alchemyapi.io/v2/' + projectId,
-			accounts: [deployer.privateKey, lepidotteri.privateKey, SHA_2048.privateKey, feeCollector.privateKey],
+			accounts: realAccounts,
 			live: true,
 			saveDeployments: true,
 			tags: ['staging'],
 		},
 		mainnet: {
 			url: 'https://eth-mainnet.alchemyapi.io/v2/' + projectId,
-			accounts: [deployer.privateKey, lepidotteri.privateKey, SHA_2048.privateKey, feeCollector.privateKey],
+			accounts: realAccounts,
 			live: true,
 			saveDeployments: true,
 			tags: ['production'],
@@ -129,11 +139,21 @@ const config: HardhatUserConfig = {
 		compilers: [
 			{
 				version: '0.5.15',
-				settings: {},
+				settings: {
+					optimizer: {
+						enabled: false,
+						runs: 200,
+					},
+				},
 			},
 			{
 				version: '0.8.1',
-				settings: {},
+				settings: {
+					optimizer: {
+						enabled: false,
+						runs: 1000,
+					},
+				},
 			},
 		],
 	},
@@ -141,13 +161,16 @@ const config: HardhatUserConfig = {
 		timeout: 100000,
 	},
 	paths: {
+		artifacts: './artifacts',
+		cache: './cache',
 		deploy: './deploy',
 		deployments: './deployments',
 		imports: `./imports`,
 		sources: './contracts',
 		tests: './test',
-		cache: './cache',
-		artifacts: './artifacts',
+		// @ts-ignore
+		coverage: './coverage',
+		coverageJson: './coverage.json',
 	},
 	// typechain: {
 	//     // outDir: "src/types",

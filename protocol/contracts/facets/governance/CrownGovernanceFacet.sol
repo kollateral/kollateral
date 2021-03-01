@@ -1,5 +1,6 @@
 /*
 
+	Copyright (c) [2020] [Archer DAO]
     Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +18,8 @@
 */
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.1;
+
+import "hardhat/console.sol";
 
 contract CrownGovernanceFacet {
 	function govern(string calldata name) external pure returns (string memory) {

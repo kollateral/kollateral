@@ -1,6 +1,9 @@
 contracts/libraries/math/SafeMath.sol
 contracts/libraries/utils/Context.sol
+contracts/libraries/utils/Address.sol
+contracts/libraries/token/ERC20/utils/SafeERC20.sol
 contracts/testing/WETH9.sol
+
 export/
 deployments/
 artifacts/

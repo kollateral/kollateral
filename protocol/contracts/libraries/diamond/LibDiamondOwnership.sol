@@ -1,6 +1,5 @@
 /*
 
-	Copyright 2020 Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)
     Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,16 +15,12 @@
     limitations under the License.
 
 */
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.1;
-
-/********************************************************************\
-* EIP-2535 Diamond Standard: https://eips.ethereum.org/EIPS/eip-2535 *
-/********************************************************************/
 
 import "./LibDiamondStorage.sol";
 
-library LibOwnership {
+library LibDiamondOwnership {
 	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
 	function setContractOwner(address _newOwner) internal {
@@ -44,14 +39,14 @@ library LibOwnership {
 	}
 
 	function enforceIsContractOwner() internal view {
-		require(msg.sender == LibDiamondStorage.diamondStorage().contractOwner, "LibDiamond: Must be contract owner");
+		require(msg.sender == LibDiamondStorage.diamondStorage().contractOwner, "Diamond: Must be contract owner");
 	}
 
 	/*
 	 * Helpful modifier, Ownable-style
 	 */
 	modifier onlyOwner {
-		require(msg.sender == LibDiamondStorage.diamondStorage().contractOwner, "LibDiamond: Must be contract owner");
+		require(msg.sender == LibDiamondStorage.diamondStorage().contractOwner, "Diamond: Must be contract owner");
 		_;
 	}
 }

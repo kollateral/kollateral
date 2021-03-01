@@ -12,7 +12,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 	const { deployer, lepidotteri } = await getNamedAccounts();
 
 	log(bold(blueBright(`\n【】CROWN`)));
-	log(italic(cyanBright(`1A) Kingmaker Crown`)));
+	log(italic(cyanBright(`1) Kingmaker Crown`)));
 
 	// Deploy DiamondCutFacet.sol contract
 	const cutFacet: DeployResult = await deploy('DiamondCutFacet', {

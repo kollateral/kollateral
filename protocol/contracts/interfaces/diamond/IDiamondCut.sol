@@ -1,5 +1,6 @@
 /*
 
+	Copyright 2020 Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)
     Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,16 +16,11 @@
     limitations under the License.
 
 */
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.1;
 
-/******************************************************************************\
-* Author: Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)
-* EIP-2535 Diamond Standard: https://eips.ethereum.org/EIPS/eip-2535
-/******************************************************************************/
-
 /**
- * A cut is a powerful cutter used to alter diamonds.
+ * Each diamond cut is a powerful cutter used to alter diamond contracts (add, replace, remove facets).
  */
 interface IDiamondCut {
 	enum FacetCutAction { Add, Replace, Remove }

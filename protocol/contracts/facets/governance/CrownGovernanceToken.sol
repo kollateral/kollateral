@@ -1,5 +1,6 @@
 /*
 
+	Copyright (c) [2020] [Archer DAO]
     Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,46 +21,47 @@ pragma solidity ^0.8.1;
 
 import "hardhat/console.sol";
 
-import "../../interfaces/token/ERC20/IERC20.sol";
+import "../../interfaces/governance/ICrownGovernanceToken.sol";
+
 import "../../libraries/math/SafeMath.sol";
 
 /**
- * @title KING
+ * @title $KING
  * @dev The governance token for the Kingmaker protocol
  * @notice ERC-20 with supply controls + add-ons to allow for offchain signing (see EIP-712, EIP-2612, and EIP-3009)
  */
-contract GovernanceToken is IERC20 {
+contract CrownGovernanceToken is ICrownGovernanceToken {
 	using SafeMath for uint256;
 
 	/// @notice EIP-20 token name for this token
-	string public name = "Kingmaker Governance Token";
+	string public override name = "Kingmaker Governance Token";
 
 	/// @notice EIP-20 token symbol for this token
-	string public symbol = "KING";
+	string public override symbol = "KING";
 
 	/// @notice EIP-20 token decimals for this token
-	uint8 public constant decimals = 18;
+	uint8 public constant override decimals = 18;
 
 	/// @notice Total number of tokens in circulation
 	uint256 public override totalSupply = 90000e18; // 90 thousands units
 
 	/// @notice Address which may mint/burn tokens
-	address public supplyManager;
+	address public override supplyManager;
 
 	/// @notice Address which may change token metadata
-	address public metadataManager;
+	address public override metadataManager;
 
 	/// @notice The timestamp after which a supply change may occur
-	uint256 public supplyChangeAllowedAfter;
+	uint256 public override supplyChangeAllowedAfter;
 
 	/// @notice The initial minimum waiting time for changing the token supply
-	uint32 public supplyChangeWaitingPeriod = 1 days * 365; // 1 year
+	uint32 public override supplyChangeWaitingPeriod = 1 days * 365; // 1 year
 
 	/// @notice Hard cap on the minimum waiting time for changing the token supply
-	uint32 public constant supplyChangeWaitingPeriodMinimum = 1 days * 90;
+	uint32 public constant override supplyChangeWaitingPeriodMinimum = 1 days * 90;
 	// solhint-disable-next-line max-line-length
 	/// @notice Cap on the total amount that can be minted at each mint (measured in bips: 10,000 bips = 1% of current totalSupply)
-	uint32 public mintCap = 900000;
+	uint32 public override mintCap = 900000;
 
 	/// @dev Allowance amounts on behalf of others
 	mapping(address => mapping(address => uint256)) internal allowances;
@@ -97,24 +99,6 @@ contract GovernanceToken is IERC20 {
 	/// @dev authorizer address > nonce > state (true = used / false = unused)
 	mapping(address => mapping(bytes32 => bool)) public authorizationState;
 
-	/// @notice An event that's emitted when the mintCap is changed
-	event MintCapChanged(uint32 indexed oldMintCap, uint32 indexed newMintCap);
-
-	/// @notice An event that's emitted when the supplyManager address is changed
-	event SupplyManagerChanged(address indexed oldManager, address indexed newManager);
-
-	/// @notice An event that's emitted when the supplyChangeWaitingPeriod is changed
-	event SupplyChangeWaitingPeriodChanged(uint32 indexed oldWaitingPeriod, uint32 indexed newWaitingPeriod);
-
-	/// @notice An event that's emitted when the metadataManager address is changed
-	event MetadataManagerChanged(address indexed oldManager, address indexed newManager);
-
-	/// @notice An event that's emitted when the token name and symbol are changed
-	event TokenMetaUpdated(string indexed name, string indexed symbol);
-
-	/// @notice An event that's emitted whenever an authorized transfer occurs
-	event AuthorizationUsed(address indexed authorizer, bytes32 indexed nonce);
-
 	/**
 	 * @notice Construct a new KING token
 	 * @param _metadataManager The address with the ability to alter the token metadata
@@ -128,7 +112,7 @@ contract GovernanceToken is IERC20 {
 	) {
 		require(
 			_firstSupplyChangeAllowed >= block.timestamp,
-			"KING::constructor: minting can only begin after deployment"
+			"CrownGovernanceToken::constructor: minting can only begin after deployment"
 		);
 
 		balances[msg.sender] = totalSupply;
@@ -147,8 +131,8 @@ contract GovernanceToken is IERC20 {
 	 * @param newSupplyManager The address of the new supply manager
 	 * @return true if successful
 	 */
-	function setSupplyManager(address newSupplyManager) external returns (bool) {
-		require(msg.sender == supplyManager, "KING::setSupplyManager: only SM can change SM");
+	function setSupplyManager(address newSupplyManager) external override returns (bool) {
+		require(msg.sender == supplyManager, "CrownGovernanceToken::setSupplyManager: only SM can change SM");
 		emit SupplyManagerChanged(supplyManager, newSupplyManager);
 		supplyManager = newSupplyManager;
 		return true;
@@ -159,8 +143,8 @@ contract GovernanceToken is IERC20 {
 	 * @param newMetadataManager The address of the new metadata manager
 	 * @return true if successful
 	 */
-	function setMetadataManager(address newMetadataManager) external returns (bool) {
-		require(msg.sender == metadataManager, "KING::setMetadataManager: only MM can change MM");
+	function setMetadataManager(address newMetadataManager) external override returns (bool) {
+		require(msg.sender == metadataManager, "CrownGovernanceToken::setMetadataManager: only MM can change MM");
 		emit MetadataManagerChanged(metadataManager, newMetadataManager);
 		metadataManager = newMetadataManager;
 		return true;
@@ -172,11 +156,11 @@ contract GovernanceToken is IERC20 {
 	 * @param amount The number of tokens to be minted
 	 * @return Boolean indicating success of mint
 	 */
-	function mint(address dst, uint256 amount) external returns (bool) {
-		require(msg.sender == supplyManager, "KING::mint: only the supplyManager can mint");
-		require(dst != address(0), "KING::mint: cannot transfer to the zero address");
-		require(amount <= (totalSupply * (mintCap)) / (1000000), "KING::mint: exceeded mint cap");
-		require(block.timestamp >= supplyChangeAllowedAfter, "KING::mint: minting not allowed yet");
+	function mint(address dst, uint256 amount) external override returns (bool) {
+		require(msg.sender == supplyManager, "CrownGovernanceToken::mint: only the supplyManager can mint");
+		require(dst != address(0), "CrownGovernanceToken::mint: cannot transfer to the zero address");
+		require(amount <= (totalSupply * (mintCap)) / (1000000), "CrownGovernanceToken::mint: exceeded mint cap");
+		require(block.timestamp >= supplyChangeAllowedAfter, "CrownGovernanceToken::mint: minting not allowed yet");
 
 		// update the next supply change allowed timestamp
 		supplyChangeAllowedAfter = block.timestamp + supplyChangeWaitingPeriod;
@@ -192,16 +176,17 @@ contract GovernanceToken is IERC20 {
 	 * @param amount The number of tokens to be burned
 	 * @return Boolean indicating success of burn
 	 */
-	function burn(address src, uint256 amount) external returns (bool) {
+	function burn(address src, uint256 amount) external override returns (bool) {
 		address spender = msg.sender;
-		require(spender == supplyManager, "KING::burn: only the supplyManager can burn");
-		require(src != address(0), "KING::burn: cannot transfer from the zero address");
-		require(block.timestamp >= supplyChangeAllowedAfter, "KING::burn: burning not allowed yet");
+		require(spender == supplyManager, "CrownGovernanceToken::burn: only the supplyManager can burn");
+		require(src != address(0), "CrownGovernanceToken::burn: cannot transfer from the zero address");
+		require(block.timestamp >= supplyChangeAllowedAfter, "CrownGovernanceToken::burn: burning not allowed yet");
 
 		uint256 spenderAllowance = allowances[src][spender];
 		// check allowance and reduce by amount
 		if (spender != src && spenderAllowance != type(uint256).max) {
-			uint256 newAllowance = spenderAllowance.sub(amount, "KING::burn: burn amount exceeds allowance");
+			uint256 newAllowance =
+				spenderAllowance.sub(amount, "CrownGovernanceToken::burn: burn amount exceeds allowance");
 			allowances[src][spender] = newAllowance;
 
 			emit Approval(src, spender, newAllowance);
@@ -220,8 +205,8 @@ contract GovernanceToken is IERC20 {
 	 * @param newCap The new mint cap in bips (10,000 bips = 1% of totalSupply)
 	 * @return true if successful
 	 */
-	function setMintCap(uint16 newCap) external returns (bool) {
-		require(msg.sender == supplyManager, "KING::setMintCap: only SM can change mint cap");
+	function setMintCap(uint32 newCap) external override returns (bool) {
+		require(msg.sender == supplyManager, "CrownGovernanceToken::setMintCap: only SM can change mint cap");
 		emit MintCapChanged(mintCap, newCap);
 		mintCap = newCap;
 		return true;
@@ -232,11 +217,14 @@ contract GovernanceToken is IERC20 {
 	 * @param period The new supply change waiting period
 	 * @return true if succssful
 	 */
-	function setSupplyChangeWaitingPeriod(uint32 period) external returns (bool) {
-		require(msg.sender == supplyManager, "KING::setSupplyChangeWaitingPeriod: only SM can change waiting period");
+	function setSupplyChangeWaitingPeriod(uint32 period) external override returns (bool) {
+		require(
+			msg.sender == supplyManager,
+			"CrownGovernanceToken::setSupplyChangeWaitingPeriod: only SM can change waiting period"
+		);
 		require(
 			period >= supplyChangeWaitingPeriodMinimum,
-			"KING::setSupplyChangeWaitingPeriod: waiting period must be > minimum"
+			"CrownGovernanceToken::setSupplyChangeWaitingPeriod: waiting period must be > minimum"
 		);
 		emit SupplyChangeWaitingPeriodChanged(supplyChangeWaitingPeriod, period);
 		supplyChangeWaitingPeriod = period;
@@ -249,8 +237,11 @@ contract GovernanceToken is IERC20 {
 	 * @param tokenSymbol The new symbol for the token
 	 * @return true if successful
 	 */
-	function updateTokenMetadata(string memory tokenName, string memory tokenSymbol) external returns (bool) {
-		require(msg.sender == metadataManager, "KING::updateTokenMeta: only MM can update token metadata");
+	function updateTokenMetadata(string memory tokenName, string memory tokenSymbol) external override returns (bool) {
+		require(
+			msg.sender == metadataManager,
+			"CrownGovernanceToken::updateTokenMeta: only MM can update token metadata"
+		);
 		name = tokenName;
 		symbol = tokenSymbol;
 		emit TokenMetaUpdated(name, symbol);
@@ -321,8 +312,8 @@ contract GovernanceToken is IERC20 {
 		uint8 v,
 		bytes32 r,
 		bytes32 s
-	) external {
-		require(deadline >= block.timestamp, "KING::permit: signature expired");
+	) external override {
+		require(deadline >= block.timestamp, "CrownGovernanceToken::permit: signature expired");
 
 		bytes32 encodeData = keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline));
 		_validateSignedData(owner, encodeData, v, r, s);
@@ -366,7 +357,8 @@ contract GovernanceToken is IERC20 {
 		uint256 spenderAllowance = allowances[src][spender];
 
 		if (spender != src && spenderAllowance != type(uint256).max) {
-			uint256 newAllowance = spenderAllowance.sub(amount, "KING::transferFrom: transfer amount exceeds allowance");
+			uint256 newAllowance =
+				spenderAllowance.sub(amount, "CrownGovernanceToken::transferFrom: transfer amount exceeds allowance");
 			allowances[src][spender] = newAllowance;
 
 			emit Approval(src, spender, newAllowance);
@@ -399,9 +391,9 @@ contract GovernanceToken is IERC20 {
 		bytes32 r,
 		bytes32 s
 	) external {
-		require(block.timestamp > validAfter, "KING::transferWithAuth: auth not yet valid");
-		require(block.timestamp < validBefore, "KING::transferWithAuth: auth expired");
-		require(!authorizationState[from][nonce], "KING::transferWithAuth: auth already used");
+		require(block.timestamp > validAfter, "CrownGovernanceToken::transferWithAuth: auth not yet valid");
+		require(block.timestamp < validBefore, "CrownGovernanceToken::transferWithAuth: auth expired");
+		require(!authorizationState[from][nonce], "CrownGovernanceToken::transferWithAuth: auth already used");
 
 		bytes32 encodeData =
 			keccak256(abi.encode(TRANSFER_WITH_AUTHORIZATION_TYPEHASH, from, to, value, validAfter, validBefore, nonce));
@@ -438,10 +430,10 @@ contract GovernanceToken is IERC20 {
 		bytes32 r,
 		bytes32 s
 	) external {
-		require(to == msg.sender, "KING::receiveWithAuth: caller must be the payee");
-		require(block.timestamp > validAfter, "KING::receiveWithAuth: auth not yet valid");
-		require(block.timestamp < validBefore, "KING::receiveWithAuth: auth expired");
-		require(!authorizationState[from][nonce], "KING::receiveWithAuth: auth already used");
+		require(to == msg.sender, "CrownGovernanceToken::receiveWithAuth: caller must be the payee");
+		require(block.timestamp > validAfter, "CrownGovernanceToken::receiveWithAuth: auth not yet valid");
+		require(block.timestamp < validBefore, "CrownGovernanceToken::receiveWithAuth: auth expired");
+		require(!authorizationState[from][nonce], "CrownGovernanceToken::receiveWithAuth: auth already used");
 
 		bytes32 encodeData =
 			keccak256(abi.encode(RECEIVE_WITH_AUTHORIZATION_TYPEHASH, from, to, value, validAfter, validBefore, nonce));
@@ -480,7 +472,10 @@ contract GovernanceToken is IERC20 {
 		address recoveredAddress = ecrecover(digest, v, r, s);
 
 		// Explicitly disallow authorizations for address(0) as ecrecover returns address(0) on malformed messages
-		require(recoveredAddress != address(0) && recoveredAddress == signer, "KING::validateSig: invalid signature");
+		require(
+			recoveredAddress != address(0) && recoveredAddress == signer,
+			"CrownGovernanceToken::validateSig: invalid signature"
+		);
 	}
 
 	/**
@@ -494,8 +489,8 @@ contract GovernanceToken is IERC20 {
 		address spender,
 		uint256 amount
 	) internal {
-		require(owner != address(0), "KING::_approve: approve from the zero address");
-		require(spender != address(0), "KING::_approve: approve to the zero address");
+		require(owner != address(0), "CrownGovernanceToken::_approve: approve from the zero address");
+		require(spender != address(0), "CrownGovernanceToken::_approve: approve to the zero address");
 		allowances[owner][spender] = amount;
 		emit Approval(owner, spender, amount);
 	}
@@ -516,7 +511,10 @@ contract GovernanceToken is IERC20 {
 		_approve(
 			owner,
 			spender,
-			allowances[owner][spender].sub(subtractedValue, "KING::_decreaseAllowance: decreased allowance below zero")
+			allowances[owner][spender].sub(
+				subtractedValue,
+				"CrownGovernanceToken::_decreaseAllowance: decreased allowance below zero"
+			)
 		);
 	}
 
@@ -531,9 +529,12 @@ contract GovernanceToken is IERC20 {
 		address to,
 		uint256 value
 	) internal {
-		require(to != address(0), "KING::_transferTokens: cannot transfer to the zero address");
+		require(to != address(0), "CrownGovernanceToken::_transferTokens: cannot transfer to the zero address");
 
-		balances[from] = balances[from].sub(value, "KING::_transferTokens: transfer exceeds from balance");
+		balances[from] = balances[from].sub(
+			value,
+			"CrownGovernanceToken::_transferTokens: transfer exceeds from balance"
+		);
 		balances[to] = balances[to] + value;
 		emit Transfer(from, to, value);
 	}
@@ -555,8 +556,8 @@ contract GovernanceToken is IERC20 {
 	 * @param value The number of tokens that are being burned
 	 */
 	function _burn(address from, uint256 value) internal {
-		balances[from] = balances[from].sub(value, "KING::_burn: burn amount exceeds from balance");
-		totalSupply = totalSupply.sub(value, "KING::_burn: burn amount exceeds total supply");
+		balances[from] = balances[from].sub(value, "CrownGovernanceToken::_burn: burn amount exceeds from balance");
+		totalSupply = totalSupply.sub(value, "CrownGovernanceToken::_burn: burn amount exceeds total supply");
 		emit Transfer(from, address(0), value);
 	}
 

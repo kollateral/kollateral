@@ -1,5 +1,5 @@
 /*
-
+	Copyright 2020 Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)
     Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,16 +18,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.1;
 
-/******************************************************************************\
-* Author: Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)
-* Contributors: [ lepidotteri, ]
-* EIP-2535 Diamond Standard: https://eips.ethereum.org/EIPS/eip-2535
-/******************************************************************************/
+import "hardhat/console.sol";
 
-import "../libraries/diamond/LibDiamondStorage.sol";
 import "../interfaces/diamond/IDiamondCut.sol";
 import "../interfaces/diamond/IDiamondLoupe.sol";
 import "../interfaces/introspection/IERC165.sol";
+
+import "../libraries/diamond/LibDiamondStorage.sol";
 
 contract DiamondLoupeFacet is IDiamondLoupe, IERC165 {
 	/// @notice Gets all facets and their selectors.
