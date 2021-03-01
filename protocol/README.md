@@ -7,7 +7,6 @@ Solidity Smart Contracts for the Kingmaker protocol
 Though we make our best efforts to provide thorough test coverage, Kingmaker is as of yet unaudited. We appreciate your interest in building on Kingmaker, so please consider this alpha software and use at your own risk.
 
 ```
-Copyright 2020 Kollateral LLC
 Copyright 2020 ARM Finance LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
