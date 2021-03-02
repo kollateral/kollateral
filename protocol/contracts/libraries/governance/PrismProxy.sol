@@ -63,7 +63,7 @@ contract PrismProxy {
 		}
 	}
 
-	/*** Admin Functions ***/
+	// Admin Functions //
 
 	/**
 	 * @notice Create new pending implementation for prism. msg.sender must be admin

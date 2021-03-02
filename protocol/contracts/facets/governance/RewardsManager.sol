@@ -42,20 +42,19 @@ contract RewardsManager is ReentrancyGuard {
 
 	/// @notice Info of each user.
 	struct UserInfo {
-		uint256 amount; // How many tokens the user has provided.
-		uint256 rewardTokenDebt; // Reward debt for reward token. See explanation below.
-		uint256 sushiRewardDebt; // Reward debt for Sushi rewards. See explanation below.
+		// We do some basic math here. Basically, at any point in time, the amount of reward tokens
+		// entitled to a user, pending to be distributed, is given by:
 		//
-		// We do some fancy math here. Basically, any point in time, the amount of reward tokens
-		// entitled to a user but is pending to be distributed is:
-		//
-		//   pending reward = (user.amount * pool.accRewardsPerShare) - user.rewardDebt
+		//   pendingReward = (user.amount * pool.accRewardsPerShare) - user.rewardDebt
 		//
 		// Whenever a user deposits or withdraws tokens to a pool. Here's what happens:
 		//   1. The pool's `accRewardsPerShare` (and `lastRewardBlock`) gets updated.
 		//   2. User receives the pending reward sent to his/her address.
 		//   3. User's `amount` gets updated.
 		//   4. User's `rewardDebt` gets updated.
+		uint256 amount; // How many tokens the user has provided.
+		uint256 rewardTokenDebt; // Reward debt for reward token. See explanation above.
+		uint256 sushiRewardDebt; // Reward debt for Sushi rewards. See explanation above.
 	}
 
 	/// @notice Info of each pool.
@@ -420,7 +419,7 @@ contract RewardsManager is ReentrancyGuard {
 	 * @param v The recovery byte of the signature
 	 * @param r Half of the ECDSA signature pair
 	 * @param s Half of the ECDSA signature pair
-	 */
+
 	function depositWithPermit(
 		uint256 pid,
 		uint256 amount,
@@ -434,8 +433,8 @@ contract RewardsManager is ReentrancyGuard {
 		// TODO: find the best way to provide a richer ERC20 interface here
 		// pool.token.permit(msg.sender, address(this), amount, deadline, v, r, s);
 		// _deposit(pid, amount, pool, user);
-		console.log("RM::depositWithPermit: not allowed atm");
-	}
+		console.log("RM::depositWithPermit: not supported atm");
+	}*/
 
 	/**
 	 * @notice Withdraw tokens from RewardsManager, claiming rewards.

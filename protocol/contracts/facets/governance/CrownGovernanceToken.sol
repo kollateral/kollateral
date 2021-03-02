@@ -34,7 +34,7 @@ contract CrownGovernanceToken is ICrownGovernanceToken {
 	using SafeMath for uint256;
 
 	/// @notice EIP-20 token name for this token
-	string public override name = "Kingmaker Governance Token";
+	string public override name = "Kingmaker Crown Governance Token";
 
 	/// @notice EIP-20 token symbol for this token
 	string public override symbol = "KING";

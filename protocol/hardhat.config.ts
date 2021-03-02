@@ -10,21 +10,7 @@ import 'solidity-coverage';
 
 import { HardhatUserConfig, task } from 'hardhat/config';
 import 'dotenv/config';
-import { getEnv, printWarning } from './libs/ConfigUtils';
-
-const projectId = getEnv('ALCHEMY_PROJECT_ID') || '0xFEAD';
-const deployerPK = getEnv('KINGMAKER_DEPLOYER_PK') || '0xDEAD';
-const deployerAddr = getEnv('KINGMAKER_DEPLOYER_ADDR') || '0xC0DE';
-
-if (projectId === undefined || projectId === '0xFEAD') {
-	printWarning('ALCHEMY_PROJECT_ID');
-}
-if (deployerPK === undefined || deployerPK === '0xDEAD') {
-	printWarning('KINGMAKER_DEPLOYER_PK');
-}
-if (deployerAddr === undefined || deployerAddr === '0xC0DE') {
-	printWarning('KINGMAKER_DEPLOYER_ADDR');
-}
+import { getEnv, kingmakerAccounts, realAccounts } from './libs/ConfigUtils';
 
 // REQUIRED TO ENSURE METADATA IS SAVED IN DEPLOYMENTS (because solidity-coverage disable it otherwise)
 import { TASK_COMPILE_SOLIDITY_GET_COMPILER_INPUT } from 'hardhat/builtin-tasks/task-names';
@@ -35,26 +21,6 @@ task(TASK_COMPILE_SOLIDITY_GET_COMPILER_INPUT).setAction(async (_, bre, runSuper
 	return input;
 });
 
-const deployer = {
-	privateKey: deployerPK,
-	balance: '10000000000000000000000',
-};
-const lepidotteri = {
-	privateKey: '0xd0f1f5f4bd9f4b990240a689d568abd1d5f2a1e6b6d220b86d66891722e5313a', // addr: 0x0A26a1eBca217c8090f9a7759Ef82f19a1E19ea1
-	balance: '10000000000000000000000',
-};
-const SHA_2048 = {
-	privateKey: '0x1febd0c69f2138a7dcedd7d9d6e481b6eb2a607c205905a47f77fcd7bf0f599e', // addr: 0x0E041eDB5CFe0e053B051a56773356aBeb101Be4
-	balance: '10000000000000000000000',
-};
-const feeCollector = {
-	privateKey: '0x547c0b03b0988e67bf0557c3bf0230b03e83e481e3047ba63a96660ca79cbaa1', // addr: 0x09ba909BF9de148952B12c27d3f754fab36aa542
-	balance: '10000000000000000000000',
-};
-
-const kingmakerAccounts = [deployer, lepidotteri, SHA_2048, feeCollector];
-const realAccounts = [deployer.privateKey, lepidotteri.privateKey, SHA_2048.privateKey, feeCollector.privateKey];
-
 const config: HardhatUserConfig = {
 	defaultNetwork: 'hardhat',
 	networks: {
@@ -63,7 +29,7 @@ const config: HardhatUserConfig = {
 			hardfork: 'muirGlacier',
 			accounts: kingmakerAccounts,
 			forking: {
-				url: `https://eth-mainnet.alchemyapi.io/v2/${projectId}`,
+				url: `https://eth-mainnet.alchemyapi.io/v2/${getEnv('ALCHEMY_PROJECT_ID')}`,
 				blockNumber: 11830510,
 			},
 			live: false,
@@ -71,28 +37,28 @@ const config: HardhatUserConfig = {
 			tags: ['test', 'local'],
 		},
 		ropsten: {
-			url: 'https://eth-ropsten.alchemyapi.io/v2/' + projectId,
+			url: 'https://eth-ropsten.alchemyapi.io/v2/' + getEnv('ALCHEMY_PROJECT_ID'),
 			accounts: realAccounts,
 			live: true,
 			saveDeployments: true,
 			tags: ['ropsten'],
 		},
 		rinkeby: {
-			url: 'https://eth-rinkeby.alchemyapi.io/v2/' + projectId,
+			url: 'https://eth-rinkeby.alchemyapi.io/v2/' + getEnv('ALCHEMY_PROJECT_ID'),
 			accounts: realAccounts,
 			live: true,
 			saveDeployments: true,
 			tags: ['staging'],
 		},
 		kovan: {
-			url: 'https://eth-kovan.alchemyapi.io/v2/' + projectId,
+			url: 'https://eth-kovan.alchemyapi.io/v2/' + getEnv('ALCHEMY_PROJECT_ID'),
 			accounts: realAccounts,
 			live: true,
 			saveDeployments: true,
 			tags: ['staging'],
 		},
 		mainnet: {
-			url: 'https://eth-mainnet.alchemyapi.io/v2/' + projectId,
+			url: 'https://eth-mainnet.alchemyapi.io/v2/' + getEnv('ALCHEMY_PROJECT_ID'),
 			accounts: realAccounts,
 			live: true,
 			saveDeployments: true,
