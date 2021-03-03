@@ -16,7 +16,7 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.1;
+pragma solidity ^0.8.2;
 
 import "./libraries/diamond/LibDiamond.sol";
 import "./libraries/diamond/LibDiamondOwnership.sol";

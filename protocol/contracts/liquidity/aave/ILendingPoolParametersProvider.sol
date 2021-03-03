@@ -17,7 +17,7 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.1;
+pragma solidity ^0.8.2;
 
 interface ILendingPoolParametersProvider {
 	function getFlashLoanFeesInBips() external pure returns (uint256, uint256);

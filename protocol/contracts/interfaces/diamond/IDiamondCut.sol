@@ -17,7 +17,7 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.1;
+pragma solidity ^0.8.2;
 
 /**
  * Each diamond cut is a powerful cutter used to alter diamond contracts (add, replace, remove facets).

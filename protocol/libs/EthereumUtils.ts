@@ -4,6 +4,7 @@ import { ethers } from 'hardhat';
 import { BigNumber, Contract } from 'ethers';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 import { BigNumberish } from '@ethersproject/bignumber';
+import {Address} from "hardhat-deploy/dist/types";
 
 export const O_Address = '0x0000000000000000000000000000000000000000';
 export const zeroAddress = '0x0000000000000000000000000000000000000000';
@@ -62,8 +63,8 @@ const PERMIT_TYPEHASH = ethers.utils.keccak256(
 
 export function getEIP712PermitDigest(
 	domainSeparator: string,
-	owner: SignerWithAddress,
-	spender: SignerWithAddress,
+	owner: Address,
+	spender: Address,
 	value: BigNumberish,
 	nonce: BigNumberish,
 	deadline: BigNumberish
@@ -78,7 +79,7 @@ export function getEIP712PermitDigest(
 				ethers.utils.keccak256(
 					ethers.utils.defaultAbiCoder.encode(
 						['bytes32', 'address', 'address', 'uint256', 'uint256', 'uint256'],
-						[PERMIT_TYPEHASH, owner.address, spender.address, value, nonce, deadline]
+						[PERMIT_TYPEHASH, owner, spender, value, nonce, deadline]
 					)
 				),
 			]
@@ -94,8 +95,8 @@ const TRANSFER_WITH_AUTHORIZATION_TYPEHASH = ethers.utils.keccak256(
 
 export function getEIP712TransferWithAuthDigest(
 	domainSeparator: string,
-	from: SignerWithAddress,
-	to: SignerWithAddress,
+	from: Address,
+	to: Address,
 	value: BigNumberish,
 	validAfter: BigNumberish,
 	validBefore: BigNumberish,
@@ -111,7 +112,7 @@ export function getEIP712TransferWithAuthDigest(
 				ethers.utils.keccak256(
 					ethers.utils.defaultAbiCoder.encode(
 						['bytes32', 'address', 'address', 'uint256', 'uint256', 'uint256', 'uint256'],
-						[TRANSFER_WITH_AUTHORIZATION_TYPEHASH, from.address, to.address, value, validAfter, validBefore, nonce]
+						[TRANSFER_WITH_AUTHORIZATION_TYPEHASH, from, to, value, validAfter, validBefore, nonce]
 					)
 				),
 			]
@@ -127,8 +128,8 @@ const RECEIVE_WITH_AUTHORIZATION_TYPEHASH = ethers.utils.keccak256(
 
 export function getEIP712ReceiveWithAuthDigest(
 	domainSeparator: string,
-	from: SignerWithAddress,
-	to: SignerWithAddress,
+	from: Address,
+	to: Address,
 	value: BigNumberish,
 	validAfter: BigNumberish,
 	validBefore: BigNumberish,
@@ -144,7 +145,7 @@ export function getEIP712ReceiveWithAuthDigest(
 				ethers.utils.keccak256(
 					ethers.utils.defaultAbiCoder.encode(
 						['bytes32', 'address', 'address', 'uint256', 'uint256', 'uint256', 'uint256'],
-						[RECEIVE_WITH_AUTHORIZATION_TYPEHASH, from.address, to.address, value, validAfter, validBefore, nonce]
+						[RECEIVE_WITH_AUTHORIZATION_TYPEHASH, from, to, value, validAfter, validBefore, nonce]
 					)
 				),
 			]

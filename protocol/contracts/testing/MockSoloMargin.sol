@@ -17,7 +17,7 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.1;
+pragma solidity ^0.8.2;
 
 import "../interfaces/token/ERC20/IERC20.sol";
 import "../libraries/math/SafeMath.sol";

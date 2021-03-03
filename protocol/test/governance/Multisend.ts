@@ -3,8 +3,9 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-wit
 
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
-import { governanceFixture } from '../fixtures';
 import { ecsign } from 'ethereumjs-util';
+
+import { governanceFixture } from '../fixtures';
 import { getEnv } from '../../libs/ConfigUtils';
 
 const KINGMAKER_DEPLOYER_PK = getEnv('KINGMAKER_DEPLOYER_PK') || '0x';
@@ -20,6 +21,7 @@ const PERMIT_TYPEHASH = ethers.utils.keccak256(
 describe('Multisend', () => {
 	let govToken: Contract;
 	let multisend: Contract;
+
 	let deployer: SignerWithAddress;
 	let lepidotteri: SignerWithAddress;
 	let SHA_2048: SignerWithAddress;

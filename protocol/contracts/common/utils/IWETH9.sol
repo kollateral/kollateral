@@ -17,7 +17,7 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.1;
+pragma solidity ^0.8.2;
 
 abstract contract IWETH9 {
 	mapping(address => uint256) public balanceOf;
