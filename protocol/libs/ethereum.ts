@@ -4,7 +4,7 @@ import { ethers } from 'hardhat';
 import { BigNumber, Contract } from 'ethers';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 import { BigNumberish } from '@ethersproject/bignumber';
-import {Address} from "hardhat-deploy/dist/types";
+import { Address } from 'hardhat-deploy/dist/types';
 
 export const O_Address = '0x0000000000000000000000000000000000000000';
 export const zeroAddress = '0x0000000000000000000000000000000000000000';

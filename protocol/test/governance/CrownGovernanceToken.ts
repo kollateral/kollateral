@@ -6,13 +6,13 @@ import { ethers } from 'hardhat';
 import { ecsign } from 'ethereumjs-util';
 
 import { governanceFixture } from '../fixtures';
-import { getEnv } from '../../libs/ConfigUtils';
+import { getEnv } from '../../libs/config';
 import {
 	getEIP712DomainSeparator,
 	getEIP712PermitDigest,
 	getEIP712ReceiveWithAuthDigest,
 	getEIP712TransferWithAuthDigest,
-} from '../../libs/EthereumUtils';
+} from '../../libs/ethereum';
 
 const KINGMAKER_DEPLOYER_PK = getEnv('KINGMAKER_DEPLOYER_PK') || '0x';
 
@@ -37,7 +37,6 @@ describe('CrownGovernanceToken', () => {
 		Jester = f.Jester;
 		ZERO_ADDRESS = f.ZERO_ADDRESS;
 	});
-
 
 	context('setSupplyManager', async () => {
 		it('can set a new valid supply manager', async () => {
@@ -180,7 +179,15 @@ describe('CrownGovernanceToken', () => {
 			const nonce = ethers.BigNumber.from(ethers.utils.randomBytes(32));
 			const validAfter = 0;
 			const validBefore = ethers.constants.MaxUint256;
-			const digest = getEIP712TransferWithAuthDigest(domainSeparator, deployer.address, lepidotteri.address, value, validAfter, validBefore, nonce);
+			const digest = getEIP712TransferWithAuthDigest(
+				domainSeparator,
+				deployer.address,
+				lepidotteri.address,
+				value,
+				validAfter,
+				validBefore,
+				nonce
+			);
 			const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
 			const balanceBefore = await govToken.balanceOf(lepidotteri.address);
 
@@ -206,7 +213,15 @@ describe('CrownGovernanceToken', () => {
 			const { timestamp } = await ethers.provider.getBlock('latest');
 			const validAfter = timestamp + 1000;
 			const validBefore = ethers.constants.MaxUint256;
-			const digest = getEIP712TransferWithAuthDigest(domainSeparator, deployer.address, lepidotteri.address, value, validAfter, validBefore, nonce);
+			const digest = getEIP712TransferWithAuthDigest(
+				domainSeparator,
+				deployer.address,
+				lepidotteri.address,
+				value,
+				validAfter,
+				validBefore,
+				nonce
+			);
 			const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
 
 			await expect(
@@ -230,7 +245,15 @@ describe('CrownGovernanceToken', () => {
 			const nonce = ethers.BigNumber.from(ethers.utils.randomBytes(32));
 			const validAfter = 0;
 			const validBefore = 0;
-			const digest = getEIP712TransferWithAuthDigest(domainSeparator, deployer.address, lepidotteri.address, value, validAfter, validBefore, nonce);
+			const digest = getEIP712TransferWithAuthDigest(
+				domainSeparator,
+				deployer.address,
+				lepidotteri.address,
+				value,
+				validAfter,
+				validBefore,
+				nonce
+			);
 			const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
 
 			await expect(
@@ -254,7 +277,15 @@ describe('CrownGovernanceToken', () => {
 			const nonce = ethers.BigNumber.from(ethers.utils.randomBytes(32));
 			const validAfter = 0;
 			const validBefore = ethers.constants.MaxUint256;
-			let digest = getEIP712TransferWithAuthDigest(domainSeparator, deployer.address, lepidotteri.address, value, validAfter, validBefore, nonce);
+			let digest = getEIP712TransferWithAuthDigest(
+				domainSeparator,
+				deployer.address,
+				lepidotteri.address,
+				value,
+				validAfter,
+				validBefore,
+				nonce
+			);
 			const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
 
 			const balanceBefore = await govToken.balanceOf(lepidotteri.address);
@@ -271,7 +302,15 @@ describe('CrownGovernanceToken', () => {
 			);
 			expect(await govToken.balanceOf(lepidotteri.address)).to.eq(balanceBefore.add(value));
 
-			digest = getEIP712TransferWithAuthDigest(domainSeparator, deployer.address, SHA_2048.address, value, validAfter, validBefore, nonce);
+			digest = getEIP712TransferWithAuthDigest(
+				domainSeparator,
+				deployer.address,
+				SHA_2048.address,
+				value,
+				validAfter,
+				validBefore,
+				nonce
+			);
 			const sig = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
 
 			await expect(
@@ -297,7 +336,15 @@ describe('CrownGovernanceToken', () => {
 			const nonce = ethers.BigNumber.from(ethers.utils.randomBytes(32));
 			const validAfter = 0;
 			const validBefore = ethers.constants.MaxUint256;
-			const digest = getEIP712ReceiveWithAuthDigest(domainSeparator, deployer.address, lepidotteri.address, value, validAfter, validBefore, nonce);
+			const digest = getEIP712ReceiveWithAuthDigest(
+				domainSeparator,
+				deployer.address,
+				lepidotteri.address,
+				value,
+				validAfter,
+				validBefore,
+				nonce
+			);
 
 			const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
 
@@ -324,7 +371,15 @@ describe('CrownGovernanceToken', () => {
 			const nonce = ethers.BigNumber.from(ethers.utils.randomBytes(32));
 			const validAfter = 0;
 			const validBefore = ethers.constants.MaxUint256;
-			const digest = getEIP712ReceiveWithAuthDigest(domainSeparator, deployer.address, lepidotteri.address, value, validAfter, validBefore, nonce);
+			const digest = getEIP712ReceiveWithAuthDigest(
+				domainSeparator,
+				deployer.address,
+				lepidotteri.address,
+				value,
+				validAfter,
+				validBefore,
+				nonce
+			);
 			const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
 
 			await expect(
@@ -351,7 +406,15 @@ describe('CrownGovernanceToken', () => {
 			const { timestamp } = await ethers.provider.getBlock('latest');
 			const validAfter = timestamp + 1000;
 			const validBefore = ethers.constants.MaxUint256;
-			const digest = getEIP712ReceiveWithAuthDigest(domainSeparator, deployer.address, lepidotteri.address, value, validAfter, validBefore, nonce);
+			const digest = getEIP712ReceiveWithAuthDigest(
+				domainSeparator,
+				deployer.address,
+				lepidotteri.address,
+				value,
+				validAfter,
+				validBefore,
+				nonce
+			);
 			const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
 
 			await expect(
@@ -377,7 +440,15 @@ describe('CrownGovernanceToken', () => {
 			const nonce = ethers.BigNumber.from(ethers.utils.randomBytes(32));
 			const validAfter = 0;
 			const validBefore = 0;
-			const digest = getEIP712ReceiveWithAuthDigest(domainSeparator, deployer.address, lepidotteri.address, value, validAfter, validBefore, nonce);
+			const digest = getEIP712ReceiveWithAuthDigest(
+				domainSeparator,
+				deployer.address,
+				lepidotteri.address,
+				value,
+				validAfter,
+				validBefore,
+				nonce
+			);
 			const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
 
 			await expect(
@@ -403,7 +474,15 @@ describe('CrownGovernanceToken', () => {
 			const nonce = ethers.BigNumber.from(ethers.utils.randomBytes(32));
 			const validAfter = 0;
 			const validBefore = ethers.constants.MaxUint256;
-			let digest = getEIP712ReceiveWithAuthDigest(domainSeparator, deployer.address, lepidotteri.address, value, validAfter, validBefore, nonce);
+			let digest = getEIP712ReceiveWithAuthDigest(
+				domainSeparator,
+				deployer.address,
+				lepidotteri.address,
+				value,
+				validAfter,
+				validBefore,
+				nonce
+			);
 			const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
 
 			const balanceBefore = await govToken.balanceOf(lepidotteri.address);

@@ -4,9 +4,9 @@ import { DeployFunction, Receipt } from 'hardhat-deploy/types';
 
 import { italic, cyanBright, red, bold, yellow, underline, greenBright, green } from 'colorette';
 
-import { logDeployResult } from '../../libs/DeployUtils';
-import { O_Address } from '../../libs/EthereumUtils';
-import { FacetCutAction, getDiamondFacet, getSelectors } from '../../libs/diamond/DiamondUtils';
+import { logDeployResult } from '../../libs/deploy';
+import { O_Address } from '../../libs/ethereum';
+import { FacetCutAction, getDiamondFacet, getSelectors } from '../../libs/diamond/utils';
 
 export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 	const { deployments, getNamedAccounts, ethers } = hre;

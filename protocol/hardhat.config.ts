@@ -10,7 +10,7 @@ import 'solidity-coverage';
 
 import { HardhatUserConfig, task } from 'hardhat/config';
 import 'dotenv/config';
-import { getEnv, kingmakerAccounts, realAccounts } from './libs/ConfigUtils';
+import { getEnv, kingmakerAccounts, realAccounts } from './libs/config';
 
 // REQUIRED TO ENSURE METADATA IS SAVED IN DEPLOYMENTS (because solidity-coverage disable it otherwise)
 import { TASK_COMPILE_SOLIDITY_GET_COMPILER_INPUT } from 'hardhat/builtin-tasks/task-names';

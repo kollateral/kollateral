@@ -45,6 +45,12 @@ contract Vesting {
 	/// @dev Used to translate vesting periods specified in days to seconds
 	uint256 internal constant SECONDS_PER_DAY = 86400;
 
+	/// @dev Used to limit vesting periods specified in days
+	uint16 internal constant MAX_GRANT_VESTING_DAYS = 9 * 365;
+
+	/// @dev Used to limit cliff periods specified in days
+	uint16 internal constant MAX_GRANT_CLIFF_DAYS = 1 * 365;
+
 	/// @notice Crown Governance token
 	ICrownGovernanceToken public token;
 
@@ -102,9 +108,9 @@ contract Vesting {
 	) external {
 		require(msg.sender == owner, "Vest::addTokenGrant: not owner");
 		require(address(votingPower) != address(0), "Vest::addTokenGrant: Set Voting Power contract first");
-		require(vestingCliffInDays <= 10 * 365, "Vest::addTokenGrant: cliff more than 10 years");
+		require(vestingCliffInDays <= MAX_GRANT_CLIFF_DAYS, "Vest::addTokenGrant: cliff more than 1 year");
 		require(vestingDurationInDays > 0, "Vest::addTokenGrant: duration must be > 0");
-		require(vestingDurationInDays <= 25 * 365, "Vest::addTokenGrant: duration more than 25 years");
+		require(vestingDurationInDays <= MAX_GRANT_VESTING_DAYS, "Vest::addTokenGrant: duration more than 9 years");
 		require(vestingDurationInDays >= vestingCliffInDays, "Vest::addTokenGrant: duration < cliff");
 		require(tokenGrants[recipient].amount == 0, "Vest::addTokenGrant: grant already exists for account");
 
@@ -259,6 +265,7 @@ contract Vesting {
 			IVotingPower(newContract).govToken() == address(token),
 			"Vest::setVotingPowerContract: voting power not initialized"
 		);
+
 		address oldContract = address(votingPower);
 		votingPower = IVotingPower(newContract);
 		emit ChangedVotingPower(oldContract, newContract);

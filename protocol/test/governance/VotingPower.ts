@@ -5,16 +5,12 @@ import { ethers, network } from 'hardhat';
 import { ecsign } from 'ethereumjs-util';
 
 import { governanceFixture } from '../fixtures';
-import { getEnv } from '../../libs/ConfigUtils';
+import { getEnv } from '../../libs/config';
 import { Contract } from 'ethers';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
-import {getEIP712DomainSeparator, getEIP712PermitDigest} from "../../libs/EthereumUtils";
+import { getEIP712DomainSeparator, getEIP712PermitDigest } from '../../libs/ethereum';
 
 const KINGMAKER_DEPLOYER_PK = getEnv('KINGMAKER_DEPLOYER_PK') || '0x';
-
-const PERMIT_TYPEHASH = ethers.utils.keccak256(
-	ethers.utils.toUtf8Bytes('Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)')
-);
 
 describe('VotingPower', () => {
 	let govToken: Contract;
@@ -44,7 +40,7 @@ describe('VotingPower', () => {
 		ZERO_ADDRESS = f.ZERO_ADDRESS;
 	});
 
-	context('Pre-Init', async () => {
+	context('Pre-init', async () => {
 		context('govToken', async () => {
 			it('reverts', async () => {
 				await expect(votingPower.govToken()).to.reverted;
@@ -52,7 +48,7 @@ describe('VotingPower', () => {
 		});
 	});
 
-	context('Post-Init', async () => {
+	context('Post-init', async () => {
 		beforeEach(async () => {
 			await votingPowerPrism.setPendingProxyImplementation(votingPowerImplementation.address);
 			await votingPowerImplementation.become(votingPowerPrism.address);
@@ -84,7 +80,7 @@ describe('VotingPower', () => {
 				const userBalanceBefore = await govToken.balanceOf(deployer.address);
 				const contractBalanceBefore = await govToken.balanceOf(votingPower.address);
 				const totalArchStakedBefore = await votingPower.getCrownTokenAmountStaked(deployer.address);
-				const userVotesBefore = await votingPower.balanceOf(deployer.address);
+				const userVotesBefore = await votingPower.votingPowerOf(deployer.address);
 
 				await govToken.approve(votingPower.address, 1000);
 				await votingPower['stake(uint256)'](1000);
@@ -92,7 +88,7 @@ describe('VotingPower', () => {
 				expect(await govToken.balanceOf(deployer.address)).to.eq(userBalanceBefore.sub(1000));
 				expect(await govToken.balanceOf(votingPower.address)).to.eq(contractBalanceBefore.add(1000));
 				expect(await votingPower.getCrownTokenAmountStaked(deployer.address)).to.eq(totalArchStakedBefore.add(1000));
-				expect(await votingPower.balanceOf(deployer.address)).to.eq(userVotesBefore.add(1000));
+				expect(await votingPower.votingPowerOf(deployer.address)).to.eq(userVotesBefore.add(1000));
 			});
 
 			it('does not allow a zero stake amount', async () => {
@@ -114,7 +110,7 @@ describe('VotingPower', () => {
 				const userBalanceBefore = await govToken.balanceOf(deployer.address);
 				const contractBalanceBefore = await govToken.balanceOf(votingPower.address);
 				const totalArchStakedBefore = await votingPower.getCrownTokenAmountStaked(deployer.address);
-				const userVotesBefore = await votingPower.balanceOf(deployer.address);
+				const userVotesBefore = await votingPower.votingPowerOf(deployer.address);
 				const domainSeparator = getEIP712DomainSeparator(await govToken.name(), govToken.address);
 				const nonce = await govToken.nonces(deployer.address);
 				const deadline = ethers.constants.MaxUint256;
@@ -126,7 +122,7 @@ describe('VotingPower', () => {
 				expect(await govToken.balanceOf(deployer.address)).to.eq(userBalanceBefore.sub(value));
 				expect(await govToken.balanceOf(votingPower.address)).to.eq(contractBalanceBefore.add(value));
 				expect(await votingPower.getCrownTokenAmountStaked(deployer.address)).to.eq(totalArchStakedBefore.add(value));
-				expect(await votingPower.balanceOf(deployer.address)).to.eq(userVotesBefore.add(value));
+				expect(await votingPower.votingPowerOf(deployer.address)).to.eq(userVotesBefore.add(value));
 			});
 
 			it('does not allow a zero stake amount', async () => {
@@ -202,7 +198,7 @@ describe('VotingPower', () => {
 				const userBalanceBefore = await govToken.balanceOf(deployer.address);
 				const contractBalanceBefore = await govToken.balanceOf(votingPower.address);
 				const totalArchStakedBefore = await votingPower.getCrownTokenAmountStaked(deployer.address);
-				const userVotesBefore = await votingPower.balanceOf(deployer.address);
+				const userVotesBefore = await votingPower.votingPowerOf(deployer.address);
 				await govToken.approve(votingPower.address, 1000);
 				await votingPower['stake(uint256)'](1000);
 
@@ -210,7 +206,7 @@ describe('VotingPower', () => {
 				expect(await govToken.balanceOf(votingPower.address)).to.eq(contractBalanceBefore.add(1000));
 				expect(await votingPower.getCrownTokenAmountStaked(deployer.address)).to.eq(totalArchStakedBefore.add(1000));
 
-				const userVotesAfter = await votingPower.balanceOf(deployer.address);
+				const userVotesAfter = await votingPower.votingPowerOf(deployer.address);
 
 				expect(userVotesAfter).to.eq(userVotesBefore.add(1000));
 
@@ -219,7 +215,7 @@ describe('VotingPower', () => {
 				expect(await govToken.balanceOf(deployer.address)).to.eq(userBalanceBefore);
 				expect(await govToken.balanceOf(votingPower.address)).to.eq(contractBalanceBefore);
 				expect(await votingPower.getCrownTokenAmountStaked(deployer.address)).to.eq(totalArchStakedBefore);
-				expect(await votingPower.balanceOf(deployer.address)).to.eq(0);
+				expect(await votingPower.votingPowerOf(deployer.address)).to.eq(0);
 			});
 
 			it('does not allow a zero-amount withdrawal', async () => {

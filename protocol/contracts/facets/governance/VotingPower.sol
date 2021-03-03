@@ -204,10 +204,7 @@ contract VotingPower is PrismProxyImplementation, ReentrancyGuardUpgradeSafe {
 		IERC20 lptoken = IERC20(token);
 		require(amount > 0, "VP::stake: cannot stake 0");
 		require(lptoken.balanceOf(msg.sender) >= amount, "VP::stake: not enough tokens");
-		require(
-			lptoken.allowance(msg.sender, address(this)) >= amount,
-			"VP::stake: must approve tokens before staking"
-		);
+		require(lptoken.allowance(msg.sender, address(this)) >= amount, "VP::stake: must approve tokens before staking");
 
 		CrownStorage storage crown = LibCrownStorage.govStorage();
 		address tokenFormulaAddress = crown.tokenRegistry.tokenFormulas(token);
@@ -337,7 +334,7 @@ contract VotingPower is PrismProxyImplementation, ReentrancyGuardUpgradeSafe {
 	 * @param account The address to get votes balance
 	 * @return The number of current votes for `account`
 	 */
-	function balanceOf(address account) public view returns (uint256) {
+	function votingPowerOf(address account) public view returns (uint256) {
 		CheckpointStorage storage cs = LibCrownStorage.checkpointStorage();
 		uint32 nCheckpoints = cs.numCheckpoints[account];
 		return nCheckpoints > 0 ? cs.checkpoints[account][nCheckpoints - 1].votes : 0;
@@ -350,8 +347,8 @@ contract VotingPower is PrismProxyImplementation, ReentrancyGuardUpgradeSafe {
 	 * @param blockNumber The block number to get the vote balance at
 	 * @return The number of votes the account had as of the given block
 	 */
-	function balanceOfAt(address account, uint256 blockNumber) public view returns (uint256) {
-		require(blockNumber < block.number, "VP::balanceOfAt: not yet determined");
+	function votingPowerOfAt(address account, uint256 blockNumber) public view returns (uint256) {
+		require(blockNumber < block.number, "VP::votingPowerOfAt: not yet determined");
 
 		CheckpointStorage storage cs = LibCrownStorage.checkpointStorage();
 		uint32 nCheckpoints = cs.numCheckpoints[account];

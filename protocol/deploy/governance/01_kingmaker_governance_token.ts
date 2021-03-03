@@ -2,7 +2,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DeployFunction } from 'hardhat-deploy/types';
 
 import { bold, italic, cyanBright, blueBright } from 'colorette';
-import { logDeployResult } from '../../libs/DeployUtils';
+import { logDeployResult } from '../../libs/deploy';
 
 export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 	const { deployments, getNamedAccounts } = hre;

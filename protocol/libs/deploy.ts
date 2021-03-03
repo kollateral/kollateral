@@ -6,7 +6,7 @@ import { DeployResult } from 'hardhat-deploy/types';
 
 import { magenta, gray, bold, strikethrough, yellowBright } from 'colorette';
 
-import * as diamond from './diamond/DiamondUtils';
+import * as diamond from './diamond/utils';
 
 export async function deployContract(name: string, args?: Array<any>): Promise<Contract> {
 	const factory: ContractFactory = await ethers.getContractFactory(name);

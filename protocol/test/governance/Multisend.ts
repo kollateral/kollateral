@@ -6,8 +6,8 @@ import { ethers } from 'hardhat';
 import { ecsign } from 'ethereumjs-util';
 
 import { governanceFixture } from '../fixtures';
-import { getEnv } from '../../libs/ConfigUtils';
-import {getEIP712DomainSeparator, getEIP712PermitDigest} from "../../libs/EthereumUtils";
+import { getEnv } from '../../libs/config';
+import { getEIP712DomainSeparator, getEIP712PermitDigest } from '../../libs/ethereum';
 
 const KINGMAKER_DEPLOYER_PK = getEnv('KINGMAKER_DEPLOYER_PK') || '0x';
 

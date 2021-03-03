@@ -37,7 +37,7 @@ contract SupplyManager {
 	/// @notice Crown Governance token
 	ICrownGovernanceToken public token;
 
-	/// @notice Address which may make changes to token supply by calling provided functions
+	/// @notice Address which may make changes the token supply by calling provided functions
 	address public admin;
 
 	/// @notice The timestamp after which a change may occur
