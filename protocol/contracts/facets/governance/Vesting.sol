@@ -256,7 +256,7 @@ contract Vesting {
 			"Vest::setVotingPowerContract: not valid contract"
 		);
 		require(
-			IVotingPower(newContract).archToken() == address(token),
+			IVotingPower(newContract).govToken() == address(token),
 			"Vest::setVotingPowerContract: voting power not initialized"
 		);
 		address oldContract = address(votingPower);

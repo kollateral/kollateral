@@ -61,7 +61,7 @@ interface IVotingPower {
 
 	function owner() external view returns (address);
 
-	function archToken() external view returns (address);
+	function govToken() external view returns (address);
 
 	function vestingContract() external view returns (address);
 
@@ -95,11 +95,11 @@ interface IVotingPower {
 
 	function removeVotingPowerForUnlockedTokens(address account, uint256 amount) external;
 
-	function getARCHAmountStaked(address staker) external view returns (uint256);
+	function getCrownTokenAmountStaked(address staker) external view returns (uint256);
 
 	function getAmountStaked(address staker, address stakedToken) external view returns (uint256);
 
-	function getARCHStake(address staker) external view returns (Stake memory);
+	function getCrownTokenStake(address staker) external view returns (Stake memory);
 
 	function getStake(address staker, address stakedToken) external view returns (Stake memory);
 

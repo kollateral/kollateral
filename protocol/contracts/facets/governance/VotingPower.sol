@@ -86,7 +86,7 @@ contract VotingPower is PrismProxyImplementation, ReentrancyGuardUpgradeSafe {
 	 * @notice Decimals used for voting power
 	 * @return decimals
 	 */
-	function decimals() public pure returns (uint8) {
+	function votingDecimals() public pure returns (uint8) {
 		return 18;
 	}
 
@@ -189,7 +189,7 @@ contract VotingPower is PrismProxyImplementation, ReentrancyGuardUpgradeSafe {
 		require(crown.govToken.balanceOf(msg.sender) >= amount, "VP::stake: not enough tokens");
 		require(
 			crown.govToken.allowance(msg.sender, address(this)) >= amount,
-			"VP::stake: must crownrove tokens before staking"
+			"VP::stake: must approve tokens before staking"
 		);
 
 		_stake(msg.sender, address(crown.govToken), amount, amount);
@@ -206,7 +206,7 @@ contract VotingPower is PrismProxyImplementation, ReentrancyGuardUpgradeSafe {
 		require(lptoken.balanceOf(msg.sender) >= amount, "VP::stake: not enough tokens");
 		require(
 			lptoken.allowance(msg.sender, address(this)) >= amount,
-			"VP::stake: must crownrove tokens before staking"
+			"VP::stake: must approve tokens before staking"
 		);
 
 		CrownStorage storage crown = LibCrownStorage.govStorage();
@@ -297,8 +297,8 @@ contract VotingPower is PrismProxyImplementation, ReentrancyGuardUpgradeSafe {
 	 * @param staker The user with staked KING
 	 * @return total KING amount staked
 	 */
-	function getKINGAmountStaked(address staker) public view returns (uint256) {
-		return getKINGStake(staker).amount;
+	function getCrownTokenAmountStaked(address staker) public view returns (uint256) {
+		return getCrownTokenStake(staker).amount;
 	}
 
 	/**
@@ -316,7 +316,7 @@ contract VotingPower is PrismProxyImplementation, ReentrancyGuardUpgradeSafe {
 	 * @param staker The user with staked KING
 	 * @return total KING staked
 	 */
-	function getKINGStake(address staker) public view returns (Stake memory) {
+	function getCrownTokenStake(address staker) public view returns (Stake memory) {
 		CrownStorage storage crown = LibCrownStorage.govStorage();
 		return getStake(staker, address(crown.govToken));
 	}

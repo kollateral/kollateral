@@ -38,17 +38,94 @@ describe('CrownGovernanceToken', () => {
 		ZERO_ADDRESS = f.ZERO_ADDRESS;
 	});
 
+
+	context('setSupplyManager', async () => {
+		it('can set a new valid supply manager', async () => {
+			await govToken.setSupplyManager(SHA_2048.address);
+			expect(await govToken.supplyManager()).to.equal(SHA_2048.address);
+		});
+
+		it('only supply manager can set a new supply manager', async () => {
+			await expect(govToken.connect(lepidotteri).setSupplyManager(SHA_2048.address)).to.revertedWith(
+				'revert CrownGovernanceToken::setSupplyManager: only SM can change SM'
+			);
+		});
+	});
+
+	context('setMetadataManager', async () => {
+		it('can set a new valid metadata manager', async () => {
+			await govToken.connect(admin).setMetadataManager(SHA_2048.address);
+			expect(await govToken.metadataManager()).to.equal(SHA_2048.address);
+		});
+
+		it('only metadata manager can set a new metadata manager', async () => {
+			await expect(govToken.connect(Jester).setMetadataManager(SHA_2048.address)).to.revertedWith(
+				'revert CrownGovernanceToken::setMetadataManager: only MM can change MM'
+			);
+		});
+	});
+
+	context('setMintCap', async () => {
+		it('can set a new valid mint cap', async () => {
+			await govToken.setMintCap(0);
+			expect(await govToken.mintCap()).to.equal(0);
+		});
+
+		it('only supply manager can set a new mint cap', async () => {
+			await expect(govToken.connect(lepidotteri).setMintCap(0)).to.revertedWith(
+				'revert CrownGovernanceToken::setMintCap: only SM can change mint cap'
+			);
+		});
+	});
+
+	context('setSupplyChangeWaitingPeriod', async () => {
+		it('can set a new valid supply change waiting period', async () => {
+			const waitingPeriodMinimum = await govToken.supplyChangeWaitingPeriodMinimum();
+			await govToken.setSupplyChangeWaitingPeriod(waitingPeriodMinimum);
+			expect(await govToken.supplyChangeWaitingPeriod()).to.equal(waitingPeriodMinimum);
+		});
+
+		it('only supply manager can set a new supply change waiting period', async () => {
+			const waitingPeriodMinimum = await govToken.supplyChangeWaitingPeriodMinimum();
+			await expect(govToken.connect(lepidotteri).setSupplyChangeWaitingPeriod(waitingPeriodMinimum)).to.revertedWith(
+				'revert CrownGovernanceToken::setSupplyChangeWaitingPeriod: only SM can change waiting period'
+			);
+		});
+
+		it('waiting period must be > minimum', async () => {
+			await expect(govToken.setSupplyChangeWaitingPeriod(0)).to.revertedWith(
+				'revert CrownGovernanceToken::setSupplyChangeWaitingPeriod: waiting period must be > minimum'
+			);
+		});
+	});
+
+	context('updateTokenMetadata', async () => {
+		it('metadata manager can update token metadata', async () => {
+			await govToken.connect(admin).updateTokenMetadata('New Token', 'NEW');
+			expect(await govToken.name()).to.equal('New Token');
+			expect(await govToken.symbol()).to.equal('NEW');
+		});
+
+		it('only metadata manager can update token metadata', async () => {
+			await expect(govToken.connect(Jester).updateTokenMetadata('New Token', 'NEW')).to.revertedWith(
+				'revert CrownGovernanceToken::updateTokenMeta: only MM can update token metadata'
+			);
+		});
+	});
+
 	context('transfer', async () => {
 		it('allows a valid transfer', async () => {
 			const amount = 900;
 			const balanceBefore = await govToken.balanceOf(lepidotteri.address);
 
 			await govToken.transfer(lepidotteri.address, amount);
+
 			expect(await govToken.balanceOf(lepidotteri.address)).to.eq(balanceBefore.add(amount));
 		});
 
 		it('does not allow a transfer to the zero address', async () => {
 			const amount = 900;
+
 			await expect(govToken.transfer(ZERO_ADDRESS, amount)).to.revertedWith(
 				'CrownGovernanceToken::_transferTokens: cannot transfer to the zero address'
 			);
@@ -62,9 +139,11 @@ describe('CrownGovernanceToken', () => {
 			const receiverBalanceBefore = await govToken.balanceOf(SHA_2048.address);
 
 			await govToken.approve(lepidotteri.address, amount);
+
 			expect(await govToken.allowance(deployer.address, lepidotteri.address)).to.eq(amount);
 
 			await govToken.connect(lepidotteri).transferFrom(deployer.address, SHA_2048.address, amount);
+
 			expect(await govToken.balanceOf(deployer.address)).to.eq(senderBalanceBefore.sub(amount));
 			expect(await govToken.balanceOf(SHA_2048.address)).to.eq(receiverBalanceBefore.add(amount));
 			expect(await govToken.allowance(deployer.address, lepidotteri.address)).to.eq(0);
@@ -75,9 +154,11 @@ describe('CrownGovernanceToken', () => {
 			const maxAmount = ethers.constants.MaxUint256;
 
 			await govToken.approve(lepidotteri.address, maxAmount);
+
 			expect(await govToken.allowance(deployer.address, lepidotteri.address)).to.eq(maxAmount);
 
 			await govToken.connect(lepidotteri).transferFrom(deployer.address, SHA_2048.address, amount);
+
 			expect(await govToken.allowance(deployer.address, lepidotteri.address)).to.eq(maxAmount);
 		});
 
@@ -85,6 +166,7 @@ describe('CrownGovernanceToken', () => {
 			await govToken.transfer(lepidotteri.address, 900);
 
 			const balance = await govToken.balanceOf(lepidotteri.address);
+
 			await expect(govToken.transferFrom(lepidotteri.address, SHA_2048.address, balance)).to.revertedWith(
 				'revert CrownGovernanceToken::transferFrom: transfer amount exceeds allowance'
 			);
@@ -100,8 +182,8 @@ describe('CrownGovernanceToken', () => {
 			const validBefore = ethers.constants.MaxUint256;
 			const digest = getEIP712TransferWithAuthDigest(domainSeparator, deployer.address, lepidotteri.address, value, validAfter, validBefore, nonce);
 			const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
-
 			const balanceBefore = await govToken.balanceOf(lepidotteri.address);
+
 			await govToken.transferWithAuthorization(
 				deployer.address,
 				lepidotteri.address,
@@ -113,6 +195,7 @@ describe('CrownGovernanceToken', () => {
 				ethers.utils.hexlify(r),
 				ethers.utils.hexlify(s)
 			);
+
 			expect(await govToken.balanceOf(lepidotteri.address)).to.eq(balanceBefore.add(value));
 		});
 
@@ -478,80 +561,6 @@ describe('CrownGovernanceToken', () => {
 			const balance = await govToken.balanceOf(lepidotteri.address);
 			await expect(govToken.burn(lepidotteri.address, balance)).to.revertedWith(
 				'revert CrownGovernanceToken::burn: burn amount exceeds allowance'
-			);
-		});
-	});
-
-	context('setSupplyManager', async () => {
-		it('can set a new valid supply manager', async () => {
-			await govToken.setSupplyManager(SHA_2048.address);
-			expect(await govToken.supplyManager()).to.equal(SHA_2048.address);
-		});
-
-		it('only supply manager can set a new supply manager', async () => {
-			await expect(govToken.connect(lepidotteri).setSupplyManager(SHA_2048.address)).to.revertedWith(
-				'revert CrownGovernanceToken::setSupplyManager: only SM can change SM'
-			);
-		});
-	});
-
-	context('setMetadataManager', async () => {
-		it('can set a new valid metadata manager', async () => {
-			await govToken.connect(admin).setMetadataManager(SHA_2048.address);
-			expect(await govToken.metadataManager()).to.equal(SHA_2048.address);
-		});
-
-		it('only metadata manager can set a new metadata manager', async () => {
-			await expect(govToken.connect(Jester).setMetadataManager(SHA_2048.address)).to.revertedWith(
-				'revert CrownGovernanceToken::setMetadataManager: only MM can change MM'
-			);
-		});
-	});
-
-	context('setMintCap', async () => {
-		it('can set a new valid mint cap', async () => {
-			await govToken.setMintCap(0);
-			expect(await govToken.mintCap()).to.equal(0);
-		});
-
-		it('only supply manager can set a new mint cap', async () => {
-			await expect(govToken.connect(lepidotteri).setMintCap(0)).to.revertedWith(
-				'revert CrownGovernanceToken::setMintCap: only SM can change mint cap'
-			);
-		});
-	});
-
-	context('setSupplyChangeWaitingPeriod', async () => {
-		it('can set a new valid supply change waiting period', async () => {
-			const waitingPeriodMinimum = await govToken.supplyChangeWaitingPeriodMinimum();
-			await govToken.setSupplyChangeWaitingPeriod(waitingPeriodMinimum);
-			expect(await govToken.supplyChangeWaitingPeriod()).to.equal(waitingPeriodMinimum);
-		});
-
-		it('only supply manager can set a new supply change waiting period', async () => {
-			const waitingPeriodMinimum = await govToken.supplyChangeWaitingPeriodMinimum();
-			await expect(govToken.connect(lepidotteri).setSupplyChangeWaitingPeriod(waitingPeriodMinimum)).to.revertedWith(
-				'revert CrownGovernanceToken::setSupplyChangeWaitingPeriod: only SM can change waiting period'
-			);
-		});
-
-		it('waiting period must be > minimum', async () => {
-			await expect(govToken.setSupplyChangeWaitingPeriod(0)).to.revertedWith(
-				'revert CrownGovernanceToken::setSupplyChangeWaitingPeriod: waiting period must be > minimum'
-			);
-		});
-	});
-
-	context('updateTokenMetadata', async () => {
-		it('metadata manager can update token metadata', async () => {
-			await govToken.connect(admin).updateTokenMetadata('New Token', 'NEW');
-			expect(await govToken.name()).to.equal('New Token');
-			expect(await govToken.symbol()).to.equal('NEW');
-		});
-
-		it('only metadata manager can update token metadata', async () => {
-			await expect(govToken.connect(Jester).updateTokenMetadata('New Token', 'NEW')).to.revertedWith(
-				'revert CrownGovernanceToken::updateTokenMeta: only MM can update token metadata'
 			);
 		});
 	});
