@@ -30,11 +30,10 @@ import "../../libraries/token/ERC20/utils/SafeERC20.sol";
 import "../../interfaces/governance/IVault.sol";
 
 /**
- * @title Vault
- * @dev Contract for locking up tokens for set periods of time
- * + optionally providing locked tokens with voting power
+ * @title Treasury (prev. Vault)
+ * @dev Contract for locking up tokens for arbitrary time intervals, optionally providing voting power
  */
-contract Vault is IVault {
+contract Treasury is IVault {
 	using SafeMath for uint256;
 	using SafeERC20 for IERC20;
 
@@ -86,7 +85,7 @@ contract Vault is IVault {
 	);
 
 	/**
-	 * @notice Create a new Vault contract
+	 * @notice Create a new Treasury contract
 	 */
 	constructor(address _lockManager) {
 		lockManager = ILockManager(_lockManager);
@@ -112,10 +111,10 @@ contract Vault is IVault {
 		uint16 cliffDurationInDays,
 		bool grantVotingPower
 	) external override {
-		require(vestingDurationInDays > 0, "Vault::lockTokens: vesting duration must be > 0");
-		require(vestingDurationInDays <= 25 * 365, "Vault::lockTokens: vesting duration more than 25 years");
-		require(vestingDurationInDays >= cliffDurationInDays, "Vault::lockTokens: vesting duration < cliff");
-		require(amount > 0, "Vault::lockTokens: amount not > 0");
+		require(vestingDurationInDays > 0, "Treasury::lockTokens: vesting duration must be > 0");
+		require(vestingDurationInDays <= 50 * 365, "Treasury::lockTokens: vesting duration more than 50 years");
+		require(vestingDurationInDays >= cliffDurationInDays, "Treasury::lockTokens: vesting duration < cliff");
+		require(amount > 0, "Treasury::lockTokens: amount not > 0");
 		_lockTokens(
 			token,
 			locker,
@@ -160,10 +159,10 @@ contract Vault is IVault {
 	)
 	external override
 	{
-		require(vestingDurationInDays > 0, "Vault::lockTokensWithPermit: vesting duration must be > 0");
-		require(vestingDurationInDays <= 25 * 365, "Vault::lockTokensWithPermit: vesting duration more than 25 years");
-		require(vestingDurationInDays >= cliffDurationInDays, "Vault::lockTokensWithPermit: duration < cliff");
-		require(amount > 0, "Vault::lockTokensWithPermit: amount not > 0");
+		require(vestingDurationInDays > 0, "Treasury::lockTokensWithPermit: vesting duration must be > 0");
+		require(vestingDurationInDays <= 25 * 365, "Treasury::lockTokensWithPermit: vesting duration more than 25 years");
+		require(vestingDurationInDays >= cliffDurationInDays, "Treasury::lockTokensWithPermit: duration < cliff");
+		require(amount > 0, "Treasury::lockTokensWithPermit: amount not > 0");
 
 		// TODO: Set approval using permit signature
 		IERC20(token).permit(locker, address(this), amount, deadline, v, r, s);
@@ -496,7 +495,7 @@ contract Vault is IVault {
 	function claimAllUnlockedTokens(uint256[] memory locks) external override {
 		for (uint256 i = 0; i < locks.length; i++) {
 			uint256 claimableAmount = claimableBalance(locks[i]);
-			require(claimableAmount > 0, "Vault::claimAllUnlockedTokens: claimableAmount is 0");
+			require(claimableAmount > 0, "Treasury::claimAllUnlockedTokens: claimableAmount is 0");
 			_claimTokens(locks[i], claimableAmount);
 		}
 	}
@@ -509,10 +508,10 @@ contract Vault is IVault {
 	 * @param amounts The amount of each unlocked token to claim
 	 */
 	function claimUnlockedTokenAmounts(uint256[] memory locks, uint256[] memory amounts) external override {
-		require(locks.length == amounts.length, "Vault::claimUnlockedTokenAmounts: arrays must be same length");
+		require(locks.length == amounts.length, "Treasury::claimUnlockedTokenAmounts: arrays must be same length");
 		for (uint256 i = 0; i < locks.length; i++) {
 			uint256 claimableAmount = claimableBalance(locks[i]);
-			require(claimableAmount >= amounts[i], "Vault::claimUnlockedTokenAmounts: claimableAmount < amount");
+			require(claimableAmount >= amounts[i], "Treasury::claimUnlockedTokenAmounts: claimableAmount < amount");
 			_claimTokens(locks[i], amounts[i]);
 		}
 	}
@@ -529,15 +528,16 @@ contract Vault is IVault {
 		uint16 cliffDaysToAdd
 	) external override {
 		Lock storage lock = tokenLocks[lockId];
-		require(msg.sender == lock.receiver, "Vault::extendLock: msg.sender must be receiver");
+		require(msg.sender == lock.receiver, "Treasury::extendLock: msg.sender must be receiver");
 		uint16 oldVestingDuration = lock.vestingDurationInDays;
 		uint16 newVestingDuration =
-			_add16(oldVestingDuration, vestingDaysToAdd, "Vault::extendLock: vesting max days exceeded");
+			_add16(oldVestingDuration, vestingDaysToAdd, "Treasury::extendLock: vesting max days exceeded");
 		uint16 oldCliffDuration = lock.cliffDurationInDays;
-		uint16 newCliffDuration = _add16(oldCliffDuration, cliffDaysToAdd, "Vault::extendLock: cliff max days exceeded");
-		require(newCliffDuration <= 10 * 365, "Vault::extendLock: cliff more than 10 years");
-		require(newVestingDuration <= 25 * 365, "Vault::extendLock: vesting duration more than 25 years");
-		require(newVestingDuration >= newCliffDuration, "Vault::extendLock: duration < cliff");
+		uint16 newCliffDuration =
+			_add16(oldCliffDuration, cliffDaysToAdd, "Treasury::extendLock: cliff max days exceeded");
+		require(newCliffDuration <= 10 * 365, "Treasury::extendLock: cliff more than 10 years");
+		require(newVestingDuration <= 25 * 365, "Treasury::extendLock: vesting duration more than 25 years");
+		require(newVestingDuration >= newCliffDuration, "Treasury::extendLock: duration < cliff");
 		lock.vestingDurationInDays = newVestingDuration;
 		emit LockExtended(
 			lockId,

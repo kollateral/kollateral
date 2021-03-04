@@ -25,15 +25,16 @@ import "../../interfaces/governance/ILockManager.sol";
 import "../../interfaces/governance/IMasterChef.sol";
 import "../../interfaces/governance/IVault.sol";
 
+import "../../libraries/governance/LibCrownStorage.sol";
 import "../../libraries/math/SafeMath.sol";
 import "../../libraries/security/ReentrancyGuard.sol";
 import "../../libraries/token/ERC20/utils/SafeERC20.sol";
 
 /**
- * @title RewardsManager
- * @dev Controls rewards distribution for network
+ * @title Treasurer (prev. RewardsManager)
+ * @dev Oversees rewards distribution withing the Kingmaker ecosystem
  */
-contract RewardsManager is ReentrancyGuard {
+contract Treasurer is ReentrancyGuard {
 	using SafeMath for uint256;
 	using SafeERC20 for IERC20;
 
@@ -67,8 +68,8 @@ contract RewardsManager is ReentrancyGuard {
 		uint16 vestingPeriod; // Vesting period in days for vesting rewards
 		uint16 vestingCliff; // Vesting cliff in days for vesting rewards
 		uint256 totalStaked; // Total amount of token staked via Rewards Manager
-		bool vpForDeposit; // Do users get voting power for deposits of this token?
-		bool vpForVesting; // Do users get voting power for vesting balances?
+		bool vpForDeposit; // Should users gain voting power for depositing this token?
+		bool vpForVesting; // Should users gain voting power for vesting this token?
 	}
 
 	/// @notice Reward token
@@ -107,9 +108,10 @@ contract RewardsManager is ReentrancyGuard {
 	/// @notice The block number when rewards end.
 	uint256 public endBlock;
 
-	/// @notice only owner can call function
-	modifier onlyOwner {
-		require(msg.sender == owner, "not owner");
+	/// @notice restrict functions to just owner address
+	modifier onlyTheKing {
+		CrownStorage storage crown = LibCrownStorage.crownStorage();
+		require(crown.king == address(0) || msg.sender == crown.king, "Crown::onlyTheKing: not the king");
 		_;
 	}
 
@@ -161,7 +163,7 @@ contract RewardsManager is ReentrancyGuard {
 	 * @param _sushiToken address of SUSHI token
 	 * @param _masterChef address of SushiSwap MasterChef contract
 	 * @param _startBlock block number when rewards will start
-	 * @param _rewardTokensPerBlock initial amount of reward tokens to be distributed per block
+	 * @param _rewardTokensPerBlock *initial* amount of reward tokens to be distributed per block
 	 */
 	constructor(
 		address _owner,
@@ -231,7 +233,7 @@ contract RewardsManager is ReentrancyGuard {
 		uint256 sushiPid,
 		bool vpForDeposit,
 		bool vpForVesting
-	) external onlyOwner {
+	) external onlyTheKing {
 		if (withUpdate) {
 			massUpdatePools();
 		}
@@ -282,7 +284,7 @@ contract RewardsManager is ReentrancyGuard {
 		uint256 pid,
 		uint256 allocPoint,
 		bool withUpdate
-	) external onlyOwner {
+	) external onlyTheKing {
 		if (withUpdate) {
 			massUpdatePools();
 		}
@@ -400,7 +402,7 @@ contract RewardsManager is ReentrancyGuard {
 	}
 
 	/**
-	 * @notice Deposit tokens to RewardsManager for rewards allocation.
+	 * @notice Deposit tokens to Treasurer for rewards allocation.
 	 * @param pid pool id
 	 * @param amount number of tokens to deposit
 	 */
@@ -411,7 +413,7 @@ contract RewardsManager is ReentrancyGuard {
 	}
 
 	/**
-	 * @notice Deposit tokens to RewardsManager for rewards allocation, using permit for approval
+	 * @notice Deposit tokens to Treasurer for rewards allocation, using permit for approval
 	 * @dev It is up to the frontend developer to ensure the pool token implements permit - otherwise this will fail
 	 * @param pid pool id
 	 * @param amount number of tokens to deposit
@@ -433,16 +435,16 @@ contract RewardsManager is ReentrancyGuard {
 		// TODO: find the best way to provide a richer ERC20 interface here
 		// pool.token.permit(msg.sender, address(this), amount, deadline, v, r, s);
 		// _deposit(pid, amount, pool, user);
-		console.log("RM::depositWithPermit: not supported atm");
+		console.log("Treasurer::depositWithPermit: not supported atm");
 	}*/
 
 	/**
-	 * @notice Withdraw tokens from RewardsManager, claiming rewards.
+	 * @notice Withdraw tokens from Treasurer, claiming rewards.
 	 * @param pid pool id
 	 * @param amount number of tokens to withdraw
 	 */
 	function withdraw(uint256 pid, uint256 amount) external nonReentrant {
-		require(amount > 0, "RM::withdraw: amount must be > 0");
+		require(amount > 0, "Treasurer::withdraw: amount must be > 0");
 		PoolInfo storage pool = poolInfo[pid];
 		UserInfo storage user = userInfo[pid][msg.sender];
 		_withdraw(pid, amount, pool, user);
@@ -488,8 +490,8 @@ contract RewardsManager is ReentrancyGuard {
 		address[] memory tokensToApprove,
 		uint256[] memory approvalAmounts,
 		address spender
-	) external onlyOwner {
-		require(tokensToApprove.length == approvalAmounts.length, "RM::tokenAllow: not same length");
+	) external onlyTheKing {
+		require(tokensToApprove.length == approvalAmounts.length, "Treasurer::tokenAllow: not same length");
 		for (uint256 i = 0; i < tokensToApprove.length; i++) {
 			IERC20 token = IERC20(tokensToApprove[i]);
 			if (token.allowance(address(this), spender) != type(uint256).max) {
@@ -511,8 +513,8 @@ contract RewardsManager is ReentrancyGuard {
 		uint256[] calldata amounts,
 		address receiver,
 		bool updateRewardsEndBlock
-	) external onlyOwner {
-		require(tokens.length == amounts.length, "RM::rescueTokens: not same length");
+	) external onlyTheKing {
+		require(tokens.length == amounts.length, "Treasurer::rescueTokens: not same length");
 		for (uint256 i = 0; i < tokens.length; i++) {
 			IERC20 token = IERC20(tokens[i]);
 			uint256 withdrawalAmount;
@@ -525,8 +527,8 @@ contract RewardsManager is ReentrancyGuard {
 					withdrawalAmount = tokenBalance;
 				}
 			} else {
-				require(tokenBalance >= amounts[i], "RM::rescueTokens: contract balance too low");
-				require(tokenAllowance >= amounts[i], "RM::rescueTokens: increase token allowance");
+				require(tokenBalance >= amounts[i], "Treasurer::rescueTokens: contract balance too low");
+				require(tokenAllowance >= amounts[i], "Treasurer::rescueTokens: increase token allowance");
 				withdrawalAmount = amounts[i];
 			}
 			token.safeTransferFrom(address(this), receiver, withdrawalAmount);
@@ -542,7 +544,7 @@ contract RewardsManager is ReentrancyGuard {
 	 * @dev Can only be called by the owner
 	 * @param newRewardTokensPerBlock new amount of reward token to reward each block
 	 */
-	function setRewardsPerBlock(uint256 newRewardTokensPerBlock) external onlyOwner {
+	function setRewardsPerBlock(uint256 newRewardTokensPerBlock) external onlyTheKing {
 		emit ChangedRewardTokensPerBlock(rewardTokensPerBlock, newRewardTokensPerBlock);
 		rewardTokensPerBlock = newRewardTokensPerBlock;
 		_setRewardsEndBlock();
@@ -553,7 +555,7 @@ contract RewardsManager is ReentrancyGuard {
 	 * @param newToken address of new reward token
 	 * @param newRewardTokensPerBlock new amount of reward token to reward each block
 	 */
-	function setRewardToken(address newToken, uint256 newRewardTokensPerBlock) external onlyOwner {
+	function setRewardToken(address newToken, uint256 newRewardTokensPerBlock) external onlyTheKing {
 		emit ChangedAddress("REWARD_TOKEN", address(rewardToken), newToken);
 		rewardToken = IERC20(newToken);
 		rewardTokensPerBlock = newRewardTokensPerBlock;
@@ -565,7 +567,7 @@ contract RewardsManager is ReentrancyGuard {
 	 * @dev Can only be called by the owner
 	 * @param newToken address of new SUSHI token
 	 */
-	function setSushiToken(address newToken) external onlyOwner {
+	function setSushiToken(address newToken) external onlyTheKing {
 		emit ChangedAddress("SUSHI_TOKEN", address(sushiToken), newToken);
 		sushiToken = IERC20(newToken);
 	}
@@ -575,7 +577,7 @@ contract RewardsManager is ReentrancyGuard {
 	 * @dev Can only be called by the owner
 	 * @param newAddress address of new MasterChef
 	 */
-	function setMasterChef(address newAddress) external onlyOwner {
+	function setMasterChef(address newAddress) external onlyTheKing {
 		emit ChangedAddress("MASTER_CHEF", address(masterChef), newAddress);
 		masterChef = IMasterChef(newAddress);
 	}
@@ -584,7 +586,7 @@ contract RewardsManager is ReentrancyGuard {
 	 * @notice Set new Vault address
 	 * @param newAddress address of new Vault
 	 */
-	function setVault(address newAddress) external onlyOwner {
+	function setVault(address newAddress) external onlyTheKing {
 		emit ChangedAddress("VAULT", address(vault), newAddress);
 		vault = IVault(newAddress);
 	}
@@ -593,7 +595,7 @@ contract RewardsManager is ReentrancyGuard {
 	 * @notice Set new LockManager address
 	 * @param newAddress address of new LockManager
 	 */
-	function setLockManager(address newAddress) external onlyOwner {
+	function setLockManager(address newAddress) external onlyTheKing {
 		emit ChangedAddress("LOCK_MANAGER", address(lockManager), newAddress);
 		lockManager = ILockManager(newAddress);
 	}
@@ -603,7 +605,7 @@ contract RewardsManager is ReentrancyGuard {
 	 * @dev Can only be called by the owner
 	 * @param amount amount of tokens to add
 	 */
-	function addRewardsBalance(uint256 amount) external onlyOwner {
+	function addRewardsBalance(uint256 amount) external onlyTheKing {
 		rewardToken.safeTransferFrom(msg.sender, address(this), amount);
 		_setRewardsEndBlock();
 	}
@@ -611,7 +613,7 @@ contract RewardsManager is ReentrancyGuard {
 	/**
 	 * @notice Reset rewards end block manually based on new balances
 	 */
-	function resetRewardsEndBlock() external onlyOwner {
+	function resetRewardsEndBlock() external onlyTheKing {
 		_setRewardsEndBlock();
 	}
 
@@ -620,8 +622,8 @@ contract RewardsManager is ReentrancyGuard {
 	 * @dev Can only be called by the owner
 	 * @param newOwner New owner address
 	 */
-	function changeOwner(address newOwner) external onlyOwner {
-		require(newOwner != address(0) && newOwner != address(this), "RM::changeOwner: not valid address");
+	function changeOwner(address newOwner) external onlyTheKing {
+		require(newOwner != address(0) && newOwner != address(this), "Treasurer::changeOwner: not valid address");
 		emit ChangedOwner(owner, newOwner);
 		owner = newOwner;
 	}
@@ -701,7 +703,7 @@ contract RewardsManager is ReentrancyGuard {
 		PoolInfo storage pool,
 		UserInfo storage user
 	) internal {
-		require(user.amount >= amount, "RM::_withdraw: amount > user balance");
+		require(user.amount >= amount, "Treasurer::_withdraw: amount > user balance");
 
 		updatePool(pid);
 

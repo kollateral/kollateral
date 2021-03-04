@@ -1,6 +1,5 @@
 /*
 
-	Copyright (c) [2020] [Archer DAO]
     Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,10 +18,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.2;
 
-import "hardhat/console.sol";
+/**
+ * @title Alchemist
+ * @dev Allows for the initial distribution of the governance token and the bootstrapping of initial locked liquidity.
+ *      See also Mines.sol
+ */
+contract Alchemist {
 
-contract CrownGovernanceFacet {
-	function govern(string calldata name) external pure returns (string memory) {
-		return string(abi.encodePacked("Greetings, ", name));
-	}
 }

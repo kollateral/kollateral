@@ -14,7 +14,7 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 	log(bold(blueBright(`\n【】GOVERNANCE`)));
 	log(italic(cyanBright(`1) Kingmaker Crown Governance Token`)));
 
-	// Deploy CrownGovernanceToken.sol contract
+	// Deploy KING.sol contract
 	const deployResult = await deploy('CrownGovernanceToken', {
 		from: deployer,
 		contract: 'CrownGovernanceToken',

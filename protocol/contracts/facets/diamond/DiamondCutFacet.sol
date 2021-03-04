@@ -20,10 +20,10 @@ pragma solidity ^0.8.2;
 
 import "hardhat/console.sol";
 
-import "../libraries/diamond/LibDiamond.sol";
-import "../libraries/diamond/LibDiamondOwnership.sol";
+import "../../libraries/diamond/LibDiamond.sol";
+import "../../libraries/diamond/LibDiamondOwnership.sol";
 
-import "../interfaces/diamond/IDiamondCut.sol";
+import "../../interfaces/diamond/IDiamondCut.sol";
 
 contract DiamondCutFacet is IDiamondCut {
 	/// @notice Add/replace/remove any number of functions and optionally execute a function, with DELEGATECALL

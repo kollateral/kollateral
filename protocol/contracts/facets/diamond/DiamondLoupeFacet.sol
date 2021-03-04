@@ -20,11 +20,11 @@ pragma solidity ^0.8.2;
 
 import "hardhat/console.sol";
 
-import "../interfaces/diamond/IDiamondCut.sol";
-import "../interfaces/diamond/IDiamondLoupe.sol";
-import "../interfaces/introspection/IERC165.sol";
+import "../../interfaces/diamond/IDiamondCut.sol";
+import "../../interfaces/diamond/IDiamondLoupe.sol";
+import "../../interfaces/introspection/IERC165.sol";
 
-import "../libraries/diamond/LibDiamondStorage.sol";
+import "../../libraries/diamond/LibDiamondStorage.sol";
 
 contract DiamondLoupeFacet is IDiamondLoupe, IERC165 {
 	/// @notice Gets all facets and their selectors.

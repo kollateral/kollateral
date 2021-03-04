@@ -26,11 +26,11 @@ import "../../interfaces/governance/ICrownGovernanceToken.sol";
 import "../../libraries/math/SafeMath.sol";
 
 /**
- * @title $KING
+ * @title KING
  * @dev The governance token for the Kingmaker protocol
  * @notice ERC-20 with supply controls + add-ons to allow for offchain signing (see EIP-712, EIP-2612, and EIP-3009)
  */
-contract CrownGovernanceToken is ICrownGovernanceToken {
+contract KING is ICrownGovernanceToken {
 	using SafeMath for uint256;
 
 	/// @notice EIP-20 token name for this token
@@ -112,7 +112,7 @@ contract CrownGovernanceToken is ICrownGovernanceToken {
 	) {
 		require(
 			_firstSupplyChangeAllowed >= block.timestamp,
-			"CrownGovernanceToken::constructor: minting can only begin after deployment"
+			"KING::constructor: minting can only begin after deployment"
 		);
 
 		balances[msg.sender] = totalSupply;
@@ -132,7 +132,7 @@ contract CrownGovernanceToken is ICrownGovernanceToken {
 	 * @return true if successful
 	 */
 	function setSupplyManager(address newSupplyManager) external override returns (bool) {
-		require(msg.sender == supplyManager, "CrownGovernanceToken::setSupplyManager: only SM can change SM");
+		require(msg.sender == supplyManager, "KING::setSupplyManager: only SM can change SM");
 		emit SupplyManagerChanged(supplyManager, newSupplyManager);
 		supplyManager = newSupplyManager;
 		return true;
@@ -144,7 +144,7 @@ contract CrownGovernanceToken is ICrownGovernanceToken {
 	 * @return true if successful
 	 */
 	function setMetadataManager(address newMetadataManager) external override returns (bool) {
-		require(msg.sender == metadataManager, "CrownGovernanceToken::setMetadataManager: only MM can change MM");
+		require(msg.sender == metadataManager, "KING::setMetadataManager: only MM can change MM");
 		emit MetadataManagerChanged(metadataManager, newMetadataManager);
 		metadataManager = newMetadataManager;
 		return true;
@@ -157,10 +157,10 @@ contract CrownGovernanceToken is ICrownGovernanceToken {
 	 * @return Boolean indicating success of mint
 	 */
 	function mint(address dst, uint256 amount) external override returns (bool) {
-		require(msg.sender == supplyManager, "CrownGovernanceToken::mint: only the supplyManager can mint");
-		require(dst != address(0), "CrownGovernanceToken::mint: cannot transfer to the zero address");
-		require(amount <= (totalSupply * (mintCap)) / (1000000), "CrownGovernanceToken::mint: exceeded mint cap");
-		require(block.timestamp >= supplyChangeAllowedAfter, "CrownGovernanceToken::mint: minting not allowed yet");
+		require(msg.sender == supplyManager, "KING::mint: only the supplyManager can mint");
+		require(dst != address(0), "KING::mint: cannot transfer to the zero address");
+		require(amount <= (totalSupply * (mintCap)) / (1000000), "KING::mint: exceeded mint cap");
+		require(block.timestamp >= supplyChangeAllowedAfter, "KING::mint: minting not allowed yet");
 
 		// update the next supply change allowed timestamp
 		supplyChangeAllowedAfter = block.timestamp + supplyChangeWaitingPeriod;
@@ -178,15 +178,14 @@ contract CrownGovernanceToken is ICrownGovernanceToken {
 	 */
 	function burn(address src, uint256 amount) external override returns (bool) {
 		address spender = msg.sender;
-		require(spender == supplyManager, "CrownGovernanceToken::burn: only the supplyManager can burn");
-		require(src != address(0), "CrownGovernanceToken::burn: cannot transfer from the zero address");
-		require(block.timestamp >= supplyChangeAllowedAfter, "CrownGovernanceToken::burn: burning not allowed yet");
+		require(spender == supplyManager, "KING::burn: only the supplyManager can burn");
+		require(src != address(0), "KING::burn: cannot transfer from the zero address");
+		require(block.timestamp >= supplyChangeAllowedAfter, "KING::burn: burning not allowed yet");
 
 		uint256 spenderAllowance = allowances[src][spender];
 		// check allowance and reduce by amount
 		if (spender != src && spenderAllowance != type(uint256).max) {
-			uint256 newAllowance =
-				spenderAllowance.sub(amount, "CrownGovernanceToken::burn: burn amount exceeds allowance");
+			uint256 newAllowance = spenderAllowance.sub(amount, "KING::burn: burn amount exceeds allowance");
 			allowances[src][spender] = newAllowance;
 
 			emit Approval(src, spender, newAllowance);
@@ -206,7 +205,7 @@ contract CrownGovernanceToken is ICrownGovernanceToken {
 	 * @return true if successful
 	 */
 	function setMintCap(uint32 newCap) external override returns (bool) {
-		require(msg.sender == supplyManager, "CrownGovernanceToken::setMintCap: only SM can change mint cap");
+		require(msg.sender == supplyManager, "KING::setMintCap: only SM can change mint cap");
 		emit MintCapChanged(mintCap, newCap);
 		mintCap = newCap;
 		return true;
@@ -218,13 +217,10 @@ contract CrownGovernanceToken is ICrownGovernanceToken {
 	 * @return true if succssful
 	 */
 	function setSupplyChangeWaitingPeriod(uint32 period) external override returns (bool) {
-		require(
-			msg.sender == supplyManager,
-			"CrownGovernanceToken::setSupplyChangeWaitingPeriod: only SM can change waiting period"
-		);
+		require(msg.sender == supplyManager, "KING::setSupplyChangeWaitingPeriod: only SM can change waiting period");
 		require(
 			period >= supplyChangeWaitingPeriodMinimum,
-			"CrownGovernanceToken::setSupplyChangeWaitingPeriod: waiting period must be > minimum"
+			"KING::setSupplyChangeWaitingPeriod: waiting period must be > minimum"
 		);
 		emit SupplyChangeWaitingPeriodChanged(supplyChangeWaitingPeriod, period);
 		supplyChangeWaitingPeriod = period;
@@ -238,10 +234,7 @@ contract CrownGovernanceToken is ICrownGovernanceToken {
 	 * @return true if successful
 	 */
 	function updateTokenMetadata(string memory tokenName, string memory tokenSymbol) external override returns (bool) {
-		require(
-			msg.sender == metadataManager,
-			"CrownGovernanceToken::updateTokenMeta: only MM can update token metadata"
-		);
+		require(msg.sender == metadataManager, "KING::updateTokenMeta: only MM can update token metadata");
 		name = tokenName;
 		symbol = tokenSymbol;
 		emit TokenMetaUpdated(name, symbol);
@@ -313,7 +306,7 @@ contract CrownGovernanceToken is ICrownGovernanceToken {
 		bytes32 r,
 		bytes32 s
 	) external override {
-		require(deadline >= block.timestamp, "CrownGovernanceToken::permit: signature expired");
+		require(deadline >= block.timestamp, "KING::permit: signature expired");
 
 		bytes32 encodeData = keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline));
 		_validateSignedData(owner, encodeData, v, r, s);
@@ -357,8 +350,7 @@ contract CrownGovernanceToken is ICrownGovernanceToken {
 		uint256 spenderAllowance = allowances[src][spender];
 
 		if (spender != src && spenderAllowance != type(uint256).max) {
-			uint256 newAllowance =
-				spenderAllowance.sub(amount, "CrownGovernanceToken::transferFrom: transfer amount exceeds allowance");
+			uint256 newAllowance = spenderAllowance.sub(amount, "KING::transferFrom: transfer amount exceeds allowance");
 			allowances[src][spender] = newAllowance;
 
 			emit Approval(src, spender, newAllowance);
@@ -391,9 +383,9 @@ contract CrownGovernanceToken is ICrownGovernanceToken {
 		bytes32 r,
 		bytes32 s
 	) external {
-		require(block.timestamp > validAfter, "CrownGovernanceToken::transferWithAuth: auth not yet valid");
-		require(block.timestamp < validBefore, "CrownGovernanceToken::transferWithAuth: auth expired");
-		require(!authorizationState[from][nonce], "CrownGovernanceToken::transferWithAuth: auth already used");
+		require(block.timestamp > validAfter, "KING::transferWithAuth: auth not yet valid");
+		require(block.timestamp < validBefore, "KING::transferWithAuth: auth expired");
+		require(!authorizationState[from][nonce], "KING::transferWithAuth: auth already used");
 
 		bytes32 encodeData =
 			keccak256(abi.encode(TRANSFER_WITH_AUTHORIZATION_TYPEHASH, from, to, value, validAfter, validBefore, nonce));
@@ -430,10 +422,10 @@ contract CrownGovernanceToken is ICrownGovernanceToken {
 		bytes32 r,
 		bytes32 s
 	) external {
-		require(to == msg.sender, "CrownGovernanceToken::receiveWithAuth: caller must be the payee");
-		require(block.timestamp > validAfter, "CrownGovernanceToken::receiveWithAuth: auth not yet valid");
-		require(block.timestamp < validBefore, "CrownGovernanceToken::receiveWithAuth: auth expired");
-		require(!authorizationState[from][nonce], "CrownGovernanceToken::receiveWithAuth: auth already used");
+		require(to == msg.sender, "KING::receiveWithAuth: caller must be the payee");
+		require(block.timestamp > validAfter, "KING::receiveWithAuth: auth not yet valid");
+		require(block.timestamp < validBefore, "KING::receiveWithAuth: auth expired");
+		require(!authorizationState[from][nonce], "KING::receiveWithAuth: auth already used");
 
 		bytes32 encodeData =
 			keccak256(abi.encode(RECEIVE_WITH_AUTHORIZATION_TYPEHASH, from, to, value, validAfter, validBefore, nonce));
@@ -472,10 +464,7 @@ contract CrownGovernanceToken is ICrownGovernanceToken {
 		address recoveredAddress = ecrecover(digest, v, r, s);
 
 		// Explicitly disallow authorizations for address(0) as ecrecover returns address(0) on malformed messages
-		require(
-			recoveredAddress != address(0) && recoveredAddress == signer,
-			"CrownGovernanceToken::validateSig: invalid signature"
-		);
+		require(recoveredAddress != address(0) && recoveredAddress == signer, "KING::validateSig: invalid signature");
 	}
 
 	/**
@@ -489,8 +478,8 @@ contract CrownGovernanceToken is ICrownGovernanceToken {
 		address spender,
 		uint256 amount
 	) internal {
-		require(owner != address(0), "CrownGovernanceToken::_approve: approve from the zero address");
-		require(spender != address(0), "CrownGovernanceToken::_approve: approve to the zero address");
+		require(owner != address(0), "KING::_approve: approve from the zero address");
+		require(spender != address(0), "KING::_approve: approve to the zero address");
 		allowances[owner][spender] = amount;
 		emit Approval(owner, spender, amount);
 	}
@@ -511,10 +500,7 @@ contract CrownGovernanceToken is ICrownGovernanceToken {
 		_approve(
 			owner,
 			spender,
-			allowances[owner][spender].sub(
-				subtractedValue,
-				"CrownGovernanceToken::_decreaseAllowance: decreased allowance below zero"
-			)
+			allowances[owner][spender].sub(subtractedValue, "KING::_decreaseAllowance: decreased allowance below zero")
 		);
 	}
 
@@ -529,12 +515,9 @@ contract CrownGovernanceToken is ICrownGovernanceToken {
 		address to,
 		uint256 value
 	) internal {
-		require(to != address(0), "CrownGovernanceToken::_transferTokens: cannot transfer to the zero address");
+		require(to != address(0), "KING::_transferTokens: cannot transfer to the zero address");
 
-		balances[from] = balances[from].sub(
-			value,
-			"CrownGovernanceToken::_transferTokens: transfer exceeds from balance"
-		);
+		balances[from] = balances[from].sub(value, "KING::_transferTokens: transfer exceeds from balance");
 		balances[to] = balances[to] + value;
 		emit Transfer(from, to, value);
 	}
@@ -556,8 +539,8 @@ contract CrownGovernanceToken is ICrownGovernanceToken {
 	 * @param value The number of tokens that are being burned
 	 */
 	function _burn(address from, uint256 value) internal {
-		balances[from] = balances[from].sub(value, "CrownGovernanceToken::_burn: burn amount exceeds from balance");
-		totalSupply = totalSupply.sub(value, "CrownGovernanceToken::_burn: burn amount exceeds total supply");
+		balances[from] = balances[from].sub(value, "KING::_burn: burn amount exceeds from balance");
+		totalSupply = totalSupply.sub(value, "KING::_burn: burn amount exceeds total supply");
 		emit Transfer(from, address(0), value);
 	}
 

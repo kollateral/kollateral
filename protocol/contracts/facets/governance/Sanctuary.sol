@@ -1,6 +1,6 @@
 /*
 
-	Copyright (c) [2020] [Archer DAO]
+	Copyright (c) [2020] [KINGer DAO]
     Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,10 +27,10 @@ import "../../interfaces/governance/ICrownGovernanceToken.sol";
 import "../../libraries/math/SafeMath.sol";
 
 /**
- * @title Vesting
- * @dev The vesting vault contract for the initial token sale
+ * @title Sanctuary
+ * @dev The vesting contract for the initial governance token distribution
  */
-contract Vesting {
+contract Sanctuary {
 	using SafeMath for uint256;
 
 	/// @notice Grant definition
@@ -60,8 +60,14 @@ contract Vesting {
 	/// @notice Mapping of recipient address > token grant
 	mapping(address => Grant) public tokenGrants;
 
-	/// @notice Current owner of this contract
-	address public owner;
+	/// @notice Current clergy of this contract
+	address public clergy;
+
+	/// @notice only clergy can call function
+	modifier onlyTheChurch {
+		require(msg.sender == clergy, "Sanctuary::onlyTheChurch: not clergy");
+		_;
+	}
 
 	/// @notice Event emitted when a new grant is created
 	event GrantAdded(
@@ -75,20 +81,20 @@ contract Vesting {
 	/// @notice Event emitted when tokens are claimed by a recipient from a grant
 	event GrantTokensClaimed(address indexed recipient, uint256 indexed amountClaimed);
 
-	/// @notice Event emitted when the owner of the vesting contract is updated
-	event ChangedOwner(address indexed oldOwner, address indexed newOwner);
+	/// @notice Event emitted when the clergy of the vesting contract is updated
+	event ApostolicSuccession(address indexed oldOwner, address indexed newOwner);
 
 	/// @notice Event emitted when the voting power contract referenced by the vesting contract is updated
 	event ChangedVotingPower(address indexed oldContract, address indexed newContract);
 
 	/**
 	 * @notice Construct a new Vesting contract
-	 * @param _token Address of ARCH token
+	 * @param _token Address of KING token
 	 */
 	constructor(address _token) {
-		require(_token != address(0), "Vest::constructor: must be valid token address");
+		require(_token != address(0), "Sanctuary::constructor: must be valid token address");
 		token = ICrownGovernanceToken(_token);
-		owner = msg.sender;
+		clergy = msg.sender;
 	}
 
 	/**
@@ -105,20 +111,19 @@ contract Vesting {
 		uint256 amount,
 		uint16 vestingDurationInDays,
 		uint16 vestingCliffInDays
-	) external {
-		require(msg.sender == owner, "Vest::addTokenGrant: not owner");
-		require(address(votingPower) != address(0), "Vest::addTokenGrant: Set Voting Power contract first");
-		require(vestingCliffInDays <= MAX_GRANT_CLIFF_DAYS, "Vest::addTokenGrant: cliff more than 1 year");
-		require(vestingDurationInDays > 0, "Vest::addTokenGrant: duration must be > 0");
-		require(vestingDurationInDays <= MAX_GRANT_VESTING_DAYS, "Vest::addTokenGrant: duration more than 9 years");
-		require(vestingDurationInDays >= vestingCliffInDays, "Vest::addTokenGrant: duration < cliff");
-		require(tokenGrants[recipient].amount == 0, "Vest::addTokenGrant: grant already exists for account");
+	) external onlyTheChurch {
+		require(address(votingPower) != address(0), "Sanctuary::addTokenGrant: Set Voting Power contract first");
+		require(vestingCliffInDays <= MAX_GRANT_CLIFF_DAYS, "Sanctuary::addTokenGrant: cliff more than 1 year");
+		require(vestingDurationInDays > 0, "Sanctuary::addTokenGrant: duration must be > 0");
+		require(vestingDurationInDays <= MAX_GRANT_VESTING_DAYS, "Sanctuary::addTokenGrant: duration more than 9 years");
+		require(vestingDurationInDays >= vestingCliffInDays, "Sanctuary::addTokenGrant: duration < cliff");
+		require(tokenGrants[recipient].amount == 0, "Sanctuary::addTokenGrant: grant already exists for account");
 
 		uint256 amountVestedPerDay = amount.div(vestingDurationInDays);
-		require(amountVestedPerDay > 0, "Vest::addTokenGrant: amountVestedPerDay > 0");
+		require(amountVestedPerDay > 0, "Sanctuary::addTokenGrant: amountVestedPerDay > 0");
 
 		// Transfer the grant tokens under the control of the vesting contract
-		require(token.transferFrom(owner, address(this), amount), "Vest::addTokenGrant: transfer failed");
+		require(token.transferFrom(clergy, address(this), amount), "Sanctuary::addTokenGrant: transfer failed");
 
 		uint256 grantStartTime = startTime == 0 ? block.timestamp : startTime;
 
@@ -231,13 +236,13 @@ contract Vesting {
 	 */
 	function claimVestedTokens(address recipient) external {
 		uint256 amountVested = calculateGrantClaim(recipient);
-		require(amountVested > 0, "Vest::claimVested: amountVested is 0");
+		require(amountVested > 0, "Sanctuary::claimVested: amountVested is 0");
 		votingPower.removeVotingPowerForClaimedTokens(recipient, amountVested);
 
 		Grant storage tokenGrant = tokenGrants[recipient];
 		tokenGrant.totalClaimed = uint256(tokenGrant.totalClaimed.add(amountVested));
 
-		require(token.transfer(recipient, amountVested), "Vest::claimVested: transfer failed");
+		require(token.transfer(recipient, amountVested), "Sanctuary::claimVested: transfer failed");
 		emit GrantTokensClaimed(recipient, amountVested);
 	}
 
@@ -255,15 +260,14 @@ contract Vesting {
 	 * @notice Set voting power contract address
 	 * @param newContract New voting power contract address
 	 */
-	function setVotingPowerContract(address newContract) external {
-		require(msg.sender == owner, "Vest::setVotingPowerContract: not owner");
+	function setVotingPowerContract(address newContract) external onlyTheChurch {
 		require(
 			newContract != address(0) && newContract != address(this) && newContract != address(token),
-			"Vest::setVotingPowerContract: not valid contract"
+			"Sanctuary::setVotingPowerContract: not valid contract"
 		);
 		require(
 			IVotingPower(newContract).govToken() == address(token),
-			"Vest::setVotingPowerContract: voting power not initialized"
+			"Sanctuary::setVotingPowerContract: voting power not initialized"
 		);
 
 		address oldContract = address(votingPower);
@@ -272,18 +276,17 @@ contract Vesting {
 	}
 
 	/**
-	 * @notice Change owner of vesting contract
-	 * @param newOwner New owner address
+	 * @notice Change clergy of vesting contract
+	 * @param newOwner New clergy address
 	 */
-	function changeOwner(address newOwner) external {
-		require(msg.sender == owner, "Vest::changeOwner: not owner");
+	function changeClergy(address newOwner) external onlyTheChurch {
 		require(
 			newOwner != address(0) && newOwner != address(this) && newOwner != address(token),
-			"Vest::changeOwner: not valid address"
+			"Sanctuary::changeClergy: not valid address"
 		);
 
-		address oldOwner = owner;
-		owner = newOwner;
-		emit ChangedOwner(oldOwner, newOwner);
+		address oldOwner = clergy;
+		clergy = newOwner;
+		emit ApostolicSuccession(oldOwner, newOwner);
 	}
 }

@@ -15,22 +15,13 @@
     limitations under the License.
 
 */
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.2;
 
-import "hardhat/console.sol";
+/**
+ * @title Mines
+ * @dev Manages permanently-locked LPs throughout the Kingmaker ecosystem
+ */
+contract Mines {
 
-import "../interfaces/access/IERC173.sol";
-
-import "../libraries/diamond/LibDiamondOwnership.sol";
-
-contract OwnershipFacet is IERC173 {
-	function transferOwnership(address _newOwner) external override {
-		LibDiamondOwnership.enforceIsContractOwner();
-		LibDiamondOwnership.setContractOwner(_newOwner);
-	}
-
-	function owner() external view override returns (address owner_) {
-		owner_ = LibDiamondOwnership.contractOwner();
-	}
 }

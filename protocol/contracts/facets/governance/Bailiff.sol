@@ -29,10 +29,11 @@ import "../../libraries/access/AccessControl.sol";
 import "../../libraries/math/SafeMath.sol";
 
 /**
- * @title LockManager
- * @dev Manages voting power for stakes that are locked within the Kingmaker ecosystem, but not in the Crown Governance
+ * @title Bailiff (prev. LockManager)
+ * @dev Manages voting power for stakes that are locked within the Kingmaker protocol contracts,
+ * 	    but not in the Crown governance contracts themselves.
  */
-contract LockManager is AccessControl {
+contract Bailiff is AccessControl {
 	using SafeMath for uint256;
 
 	/// @notice Admin role to create voting power from locked stakes
@@ -51,8 +52,8 @@ contract LockManager is AccessControl {
 	IVotingPower public votingPower;
 
 	/// @notice modifier to restrict functions to only contracts that have been added as lockers
-	modifier onlyLockers() {
-		require(hasRole(LOCKER_ROLE, msg.sender), "Caller must have LOCKER_ROLE role");
+	modifier onlyBailiff() {
+		require(hasRole(LOCKER_ROLE, msg.sender), "Bailiff::onlyBailiff: Caller must have LOCKER_ROLE role");
 		_;
 	}
 
@@ -100,10 +101,10 @@ contract LockManager is AccessControl {
 	 */
 	function calculateVotingPower(address token, uint256 amount) public view returns (uint256) {
 		address registry = votingPower.tokenRegistry();
-		require(registry != address(0), "LM::calculateVotingPower: registry not set");
+		require(registry != address(0), "Bailiff::calculateVotingPower: registry not set");
 
-		address tokenFormulaAddress = ITokenRegistry(registry).tokenFormulas(token);
-		require(tokenFormulaAddress != address(0), "LM::calculateVotingPower: token not supported");
+		address tokenFormulaAddress = ITokenRegistry(registry).tokenFormula(token);
+		require(tokenFormulaAddress != address(0), "Bailiff::calculateVotingPower: token not supported");
 
 		IVotingPowerFormula tokenFormula = IVotingPowerFormula(tokenFormulaAddress);
 		return tokenFormula.convertTokensToVotingPower(amount);
@@ -120,7 +121,7 @@ contract LockManager is AccessControl {
 		address receiver,
 		address token,
 		uint256 tokenAmount
-	) public onlyLockers returns (uint256 votingPowerGranted) {
+	) public onlyBailiff returns (uint256 votingPowerGranted) {
 		votingPowerGranted = calculateVotingPower(token, tokenAmount);
 		lockedStakes[receiver][token].amount = lockedStakes[receiver][token].amount.add(tokenAmount);
 		lockedStakes[receiver][token].votingPower = lockedStakes[receiver][token].votingPower.add(votingPowerGranted);
@@ -140,8 +141,11 @@ contract LockManager is AccessControl {
 		address receiver,
 		address token,
 		uint256 tokenAmount
-	) public onlyLockers returns (uint256 votingPowerRemoved) {
-		require(lockedStakes[receiver][token].amount >= tokenAmount, "LM::removeVotingPower: not enough tokens staked");
+	) public onlyBailiff returns (uint256 votingPowerRemoved) {
+		require(
+			lockedStakes[receiver][token].amount >= tokenAmount,
+			"Bailiff::removeVotingPower: not enough tokens staked"
+		);
 
 		LockedStake memory s = getStake(receiver, token);
 		votingPowerRemoved = tokenAmount.mul(s.votingPower).div(s.amount);

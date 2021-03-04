@@ -24,11 +24,11 @@ import "hardhat/console.sol";
 import "../../libraries/governance/PrismProxy.sol";
 
 /**
- * @title VotingPowerPrism
+ * @title CrownPrism (prev. VotingPowerPrism)
  * @dev Storage for voting power is at this address, while contract calls are delegated to the PrismProxy implementation
- * @dev All contracts that use voting power should reference this contract
+ * @dev All contracts that make use of voting powers should interact with this contract only
  */
-contract VotingPowerPrism is PrismProxy {
+contract CrownPrism is PrismProxy {
 	/**
 	 * @notice Construct a new Voting Power Prism Proxy
 	 * @dev Sets initial proxy admin to `_admin`

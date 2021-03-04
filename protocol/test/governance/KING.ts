@@ -16,7 +16,7 @@ import {
 
 const KINGMAKER_DEPLOYER_PK = getEnv('KINGMAKER_DEPLOYER_PK') || '0x';
 
-describe('CrownGovernanceToken', () => {
+describe('KING', () => {
 	let govToken: Contract;
 
 	let deployer: SignerWithAddress;
@@ -46,7 +46,7 @@ describe('CrownGovernanceToken', () => {
 
 		it('only supply manager can set a new supply manager', async () => {
 			await expect(govToken.connect(lepidotteri).setSupplyManager(SHA_2048.address)).to.revertedWith(
-				'revert CrownGovernanceToken::setSupplyManager: only SM can change SM'
+				'revert KING::setSupplyManager: only SM can change SM'
 			);
 		});
 	});
@@ -59,7 +59,7 @@ describe('CrownGovernanceToken', () => {
 
 		it('only metadata manager can set a new metadata manager', async () => {
 			await expect(govToken.connect(Jester).setMetadataManager(SHA_2048.address)).to.revertedWith(
-				'revert CrownGovernanceToken::setMetadataManager: only MM can change MM'
+				'revert KING::setMetadataManager: only MM can change MM'
 			);
 		});
 	});
@@ -71,9 +71,7 @@ describe('CrownGovernanceToken', () => {
 		});
 
 		it('only supply manager can set a new mint cap', async () => {
-			await expect(govToken.connect(lepidotteri).setMintCap(0)).to.revertedWith(
-				'revert CrownGovernanceToken::setMintCap: only SM can change mint cap'
-			);
+			await expect(govToken.connect(lepidotteri).setMintCap(0)).to.revertedWith('revert KING::setMintCap: only SM can change mint cap');
 		});
 	});
 
@@ -87,13 +85,13 @@ describe('CrownGovernanceToken', () => {
 		it('only supply manager can set a new supply change waiting period', async () => {
 			const waitingPeriodMinimum = await govToken.supplyChangeWaitingPeriodMinimum();
 			await expect(govToken.connect(lepidotteri).setSupplyChangeWaitingPeriod(waitingPeriodMinimum)).to.revertedWith(
-				'revert CrownGovernanceToken::setSupplyChangeWaitingPeriod: only SM can change waiting period'
+				'revert KING::setSupplyChangeWaitingPeriod: only SM can change waiting period'
 			);
 		});
 
 		it('waiting period must be > minimum', async () => {
 			await expect(govToken.setSupplyChangeWaitingPeriod(0)).to.revertedWith(
-				'revert CrownGovernanceToken::setSupplyChangeWaitingPeriod: waiting period must be > minimum'
+				'revert KING::setSupplyChangeWaitingPeriod: waiting period must be > minimum'
 			);
 		});
 	});
@@ -107,7 +105,7 @@ describe('CrownGovernanceToken', () => {
 
 		it('only metadata manager can update token metadata', async () => {
 			await expect(govToken.connect(Jester).updateTokenMetadata('New Token', 'NEW')).to.revertedWith(
-				'revert CrownGovernanceToken::updateTokenMeta: only MM can update token metadata'
+				'revert KING::updateTokenMeta: only MM can update token metadata'
 			);
 		});
 	});
@@ -125,9 +123,7 @@ describe('CrownGovernanceToken', () => {
 		it('does not allow a transfer to the zero address', async () => {
 			const amount = 900;
 
-			await expect(govToken.transfer(ZERO_ADDRESS, amount)).to.revertedWith(
-				'CrownGovernanceToken::_transferTokens: cannot transfer to the zero address'
-			);
+			await expect(govToken.transfer(ZERO_ADDRESS, amount)).to.revertedWith('KING::_transferTokens: cannot transfer to the zero address');
 		});
 	});
 
@@ -167,7 +163,7 @@ describe('CrownGovernanceToken', () => {
 			const balance = await govToken.balanceOf(lepidotteri.address);
 
 			await expect(govToken.transferFrom(lepidotteri.address, SHA_2048.address, balance)).to.revertedWith(
-				'revert CrownGovernanceToken::transferFrom: transfer amount exceeds allowance'
+				'revert KING::transferFrom: transfer amount exceeds allowance'
 			);
 		});
 	});
@@ -236,7 +232,7 @@ describe('CrownGovernanceToken', () => {
 					ethers.utils.hexlify(r),
 					ethers.utils.hexlify(s)
 				)
-			).to.revertedWith('revert CrownGovernanceToken::transferWithAuth: auth not yet valid');
+			).to.revertedWith('revert KING::transferWithAuth: auth not yet valid');
 		});
 
 		it('does not allow a transfer after auth expiration', async () => {
@@ -268,7 +264,7 @@ describe('CrownGovernanceToken', () => {
 					ethers.utils.hexlify(r),
 					ethers.utils.hexlify(s)
 				)
-			).to.revertedWith('revert CrownGovernanceToken::transferWithAuth: auth expired');
+			).to.revertedWith('revert KING::transferWithAuth: auth expired');
 		});
 
 		it('does not allow a reuse of nonce', async () => {
@@ -325,7 +321,7 @@ describe('CrownGovernanceToken', () => {
 					ethers.utils.hexlify(sig.r),
 					ethers.utils.hexlify(sig.s)
 				)
-			).to.revertedWith('revert CrownGovernanceToken::transferWithAuth: auth already used');
+			).to.revertedWith('revert KING::transferWithAuth: auth already used');
 		});
 	});
 
@@ -396,7 +392,7 @@ describe('CrownGovernanceToken', () => {
 						ethers.utils.hexlify(r),
 						ethers.utils.hexlify(s)
 					)
-			).to.revertedWith('revert CrownGovernanceToken::receiveWithAuth: caller must be the payee');
+			).to.revertedWith('revert KING::receiveWithAuth: caller must be the payee');
 		});
 
 		it('does not allow a receive before auth valid', async () => {
@@ -431,7 +427,7 @@ describe('CrownGovernanceToken', () => {
 						ethers.utils.hexlify(r),
 						ethers.utils.hexlify(s)
 					)
-			).to.revertedWith('revert CrownGovernanceToken::receiveWithAuth: auth not yet valid');
+			).to.revertedWith('revert KING::receiveWithAuth: auth not yet valid');
 		});
 
 		it('does not allow a receive after auth expiration', async () => {
@@ -465,7 +461,7 @@ describe('CrownGovernanceToken', () => {
 						ethers.utils.hexlify(r),
 						ethers.utils.hexlify(s)
 					)
-			).to.revertedWith('revert CrownGovernanceToken::receiveWithAuth: auth expired');
+			).to.revertedWith('revert KING::receiveWithAuth: auth expired');
 		});
 
 		it('does not allow a reuse of nonce', async () => {
@@ -518,7 +514,7 @@ describe('CrownGovernanceToken', () => {
 						ethers.utils.hexlify(sig.r),
 						ethers.utils.hexlify(sig.s)
 					)
-			).to.revertedWith('revert CrownGovernanceToken::receiveWithAuth: auth already used');
+			).to.revertedWith('revert KING::receiveWithAuth: auth already used');
 		});
 	});
 
@@ -548,7 +544,7 @@ describe('CrownGovernanceToken', () => {
 
 			await expect(
 				govToken.permit(deployer.address, lepidotteri.address, value, deadline, v, ethers.utils.hexlify(r), ethers.utils.hexlify(s))
-			).to.revertedWith('revert CrownGovernanceToken::permit: signature expired');
+			).to.revertedWith('revert KING::permit: signature expired');
 		});
 	});
 
@@ -567,27 +563,23 @@ describe('CrownGovernanceToken', () => {
 
 		it('only supply manager can mint', async () => {
 			await expect(govToken.connect(lepidotteri).mint(SHA_2048.address, 1)).to.revertedWith(
-				'revert CrownGovernanceToken::mint: only the supplyManager can mint'
+				'revert KING::mint: only the supplyManager can mint'
 			);
 		});
 
 		it('cannot mint to the zero address', async () => {
-			await expect(govToken.mint(ZERO_ADDRESS, 1)).to.revertedWith(
-				'revert CrownGovernanceToken::mint: cannot transfer to the zero address'
-			);
+			await expect(govToken.mint(ZERO_ADDRESS, 1)).to.revertedWith('revert KING::mint: cannot transfer to the zero address');
 		});
 
 		it('cannot mint in excess of the mint cap', async () => {
 			const totalSupply = await govToken.totalSupply();
 			const mintCap = await govToken.mintCap();
 			const maxAmount = totalSupply.mul(mintCap).div(1000000);
-			await expect(govToken.mint(lepidotteri.address, maxAmount.add(1))).to.revertedWith(
-				'revert CrownGovernanceToken::mint: exceeded mint cap'
-			);
+			await expect(govToken.mint(lepidotteri.address, maxAmount.add(1))).to.revertedWith('revert KING::mint: exceeded mint cap');
 		});
 
 		it('cannot mint before supply change allowed', async () => {
-			await expect(govToken.mint(lepidotteri.address, 1)).to.revertedWith('revert CrownGovernanceToken::mint: minting not allowed yet');
+			await expect(govToken.mint(lepidotteri.address, 1)).to.revertedWith('revert KING::mint: minting not allowed yet');
 		});
 	});
 
@@ -609,18 +601,16 @@ describe('CrownGovernanceToken', () => {
 
 		it('only supply manager can burn', async () => {
 			await expect(govToken.connect(lepidotteri).burn(deployer.address, 1)).to.revertedWith(
-				'revert CrownGovernanceToken::burn: only the supplyManager can burn'
+				'revert KING::burn: only the supplyManager can burn'
 			);
 		});
 
 		it('cannot burn from the zero address', async () => {
-			await expect(govToken.burn(ZERO_ADDRESS, 1)).to.revertedWith(
-				'revert CrownGovernanceToken::burn: cannot transfer from the zero address'
-			);
+			await expect(govToken.burn(ZERO_ADDRESS, 1)).to.revertedWith('revert KING::burn: cannot transfer from the zero address');
 		});
 
 		it('cannot burn before supply change allowed', async () => {
-			await expect(govToken.burn(deployer.address, 1)).to.revertedWith('revert CrownGovernanceToken::burn: burning not allowed yet');
+			await expect(govToken.burn(deployer.address, 1)).to.revertedWith('revert KING::burn: burning not allowed yet');
 		});
 
 		it('cannot burn in excess of the spender balance', async () => {
@@ -629,7 +619,7 @@ describe('CrownGovernanceToken', () => {
 			const balance = await govToken.balanceOf(lepidotteri.address);
 			await govToken.connect(lepidotteri).approve(deployer.address, balance);
 			await expect(govToken.burn(lepidotteri.address, balance.add(1))).to.revertedWith(
-				'revert CrownGovernanceToken::burn: burn amount exceeds allowance'
+				'revert KING::burn: burn amount exceeds allowance'
 			);
 		});
 
@@ -638,9 +628,7 @@ describe('CrownGovernanceToken', () => {
 			await ethers.provider.send('evm_setNextBlockTimestamp', [parseInt(supplyChangeAllowed.toString())]);
 			await govToken.transfer(lepidotteri.address, 900);
 			const balance = await govToken.balanceOf(lepidotteri.address);
-			await expect(govToken.burn(lepidotteri.address, balance)).to.revertedWith(
-				'revert CrownGovernanceToken::burn: burn amount exceeds allowance'
-			);
+			await expect(govToken.burn(lepidotteri.address, balance)).to.revertedWith('revert KING::burn: burn amount exceeds allowance');
 		});
 	});
 });

@@ -9,6 +9,7 @@ import { O_Address } from '../../libs/ethereum';
 import { FacetCutAction, getDiamondFacet, getSelectors } from '../../libs/diamond/utils';
 
 export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
+	/*
 	const { deployments, getNamedAccounts, ethers } = hre;
 	const { deploy, log, read, execute, rawTx } = deployments;
 	const { deployer, lepidotteri } = await getNamedAccounts();
@@ -23,7 +24,6 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 	});
 	logDeployResult(CrownGovernanceFacet, log);
 
-	log(italic(cyanBright(`2.1) Cutting CrownGovernanceFacet into the Crown`)));
 	const Crown = await deployments.get('Crown');
 	const DiamondCutFacet = await deployments.get('DiamondCutFacet');
 
@@ -56,7 +56,24 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 	const govFacet: Contract = getDiamondFacet(Crown.address, CrownGovernanceFacet.abi, lepidotteriSig);
 	const king = await govFacet.govern('lepidotteri');
 	log(`   - Governance is: ${underline(greenBright(king))}`);
+	*/
 };
+
+export async function skip(hre: HardhatRuntimeEnvironment): Promise<boolean> {
+	const { deployments, getNamedAccounts, ethers } = hre;
+	const { log } = deployments;
+	log(italic(cyanBright(`2.1) Cutting CrownGovernanceFacet into the Crown`)));
+	// Hardhat-deploy execute/read methods failed to perform the cut
+	log(
+		red(
+			bold(
+				'   - Skipping step: hardhat-deploy was forced to skip the cut which would have been performed with its built-in support for Diamonds.'
+			)
+		)
+	);
+	log(italic(yellow(`   -> TODO: https://github.com/wighawag/hardhat-deploy/issues/72`)));
+	return true;
+}
 
 export const tags = ['2', 'governance', 'CrownGovernanceFacet'];
 export const dependencies = ['Crown', 'DiamondCutFacet', 'CrownGovernanceToken'];

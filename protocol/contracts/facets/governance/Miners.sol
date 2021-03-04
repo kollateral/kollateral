@@ -23,22 +23,23 @@ import "hardhat/console.sol";
 
 import "../../interfaces/governance/ICrownGovernanceToken.sol";
 
+import "../../libraries/governance/LibCrownStorage.sol";
 import "../../libraries/math/SafeMath.sol";
 
 /**
- * @title SupplyManager
+ * @title Miners (prev. SupplyManager)
  * @dev Responsible for enacting decisions related to Crown governance token supply
  * @notice Decisions are made via a timelocked propose/accept scheme
  * @notice Initial proposal length (timelock) is 30 days
  */
-contract SupplyManager {
+contract Miners {
 	using SafeMath for uint256;
 
 	/// @notice Crown Governance token
 	ICrownGovernanceToken public token;
 
 	/// @notice Address which may make changes the token supply by calling provided functions
-	address public admin;
+	address public king;
 
 	/// @notice The timestamp after which a change may occur
 	uint256 public changeAllowedAfter;
@@ -49,10 +50,10 @@ contract SupplyManager {
 	/// @notice The minimum time between proposal and acceptance
 	uint32 public proposalLengthMinimum = 1 days * 7;
 
-	/// @notice New admin proposal
-	struct AdminProposal {
+	/// @notice New king proposal
+	struct RoyalDecree {
 		uint256 eta;
-		address newAdmin;
+		address newKing;
 	}
 
 	/// @notice New mint proposal
@@ -82,9 +83,9 @@ contract SupplyManager {
 	}
 
 	/// @notice New supply manager proposal
-	struct SupplyManagerProposal {
+	struct MinersProposal {
 		uint256 eta;
-		address newSupplyManager;
+		address newMiners;
 	}
 
 	/// @notice New proposal length proposal
@@ -93,8 +94,8 @@ contract SupplyManager {
 		uint32 newLength;
 	}
 
-	/// @notice Current pending admin proposal
-	AdminProposal public pendingAdmin;
+	/// @notice Current pending king proposal
+	RoyalDecree public pendingKing;
 
 	/// @notice Current pending mint proposal
 	MintProposal public pendingMint;
@@ -109,19 +110,19 @@ contract SupplyManager {
 	WaitingPeriodProposal public pendingWaitingPeriod;
 
 	/// @notice Current pending supply manager proposal
-	SupplyManagerProposal public pendingSupplyManager;
+	MinersProposal public pendingMiners;
 
 	/// @notice Current pending proposal length proposal
 	ProposalLengthProposal public pendingProposalLength;
 
-	/// @notice An event that's emitted when a new admin is proposed
-	event AdminProposed(address indexed oldAdmin, address indexed newAdmin, uint256 eta);
+	/// @notice An event that's emitted when a new king is proposed
+	event KingProposed(address indexed oldKing, address indexed newKing, uint256 eta);
 
-	/// @notice An event that's emitted when an admin proposal is canceled
-	event AdminCanceled(address indexed proposedAdmin);
+	/// @notice An event that's emitted when an king proposal is canceled
+	event KingCanceled(address indexed proposedKing);
 
-	/// @notice An event that's emitted when a new admin is accepted
-	event AdminAccepted(address indexed oldAdmin, address indexed newAdmin);
+	/// @notice An event that's emitted when a new king is accepted
+	event KingAccepted(address indexed oldKing, address indexed newKing);
 
 	/// @notice An event that's emitted when a new mint is proposed
 	event MintProposed(
@@ -166,13 +167,13 @@ contract SupplyManager {
 	event WaitingPeriodAccepted(uint32 indexed oldWaitingPeriod, uint32 indexed newWaitingPeriod);
 
 	/// @notice An event that's emitted when a new supply manager is proposed
-	event SupplyManagerProposed(address indexed oldSupplyManager, address indexed newSupplyManager, uint256 eta);
+	event MinersProposed(address indexed oldMiners, address indexed newMiners, uint256 eta);
 
 	/// @notice An event that's emitted when a supply manager proposal is canceled
-	event SupplyManagerCanceled(address indexed proposedSupplyManager);
+	event MinersCanceled(address indexed proposedMiners);
 
 	/// @notice An event that's emitted when a new supply manager is accepted
-	event SupplyManagerAccepted(address indexed oldSupplyManager, address indexed newSupplyManager);
+	event MinersAccepted(address indexed oldMiners, address indexed newMiners);
 
 	/// @notice An event that's emitted when a new proposal length is proposed
 	event ProposalLengthProposed(uint32 indexed oldProposalLength, uint32 indexed newProposalLength, uint256 eta);
@@ -183,15 +184,22 @@ contract SupplyManager {
 	/// @notice An event that's emitted when a new proposal length is accepted
 	event ProposalLengthAccepted(uint32 indexed oldProposalLength, uint32 indexed newProposalLength);
 
+	/// @notice restrict functions to just owner address
+	modifier onlyTheKing {
+		CrownStorage storage crown = LibCrownStorage.crownStorage();
+		require(crown.king == address(0) || msg.sender == crown.king, "Crown::onlyTheKing: not the king");
+		_;
+	}
+
 	/**
 	 * @notice Construct a new supply manager
 	 * @param _token The address for the token
-	 * @param _admin The admin account for this contract
+	 * @param _king The king account for this contract
 	 */
-	constructor(address _token, address _admin) {
+	constructor(address _token, address _king) {
 		token = ICrownGovernanceToken(_token);
 		changeAllowedAfter = token.supplyChangeAllowedAfter();
-		admin = _admin;
+		king = _king;
 	}
 
 	/**
@@ -199,13 +207,15 @@ contract SupplyManager {
 	 * @param dst The address of the destination account
 	 * @param amount The number of tokens to be minted
 	 */
-	function proposeMint(address dst, uint256 amount) external {
+	function proposeMint(address dst, uint256 amount) external onlyTheKing {
 		uint256 currentSupply = token.totalSupply();
-		require(msg.sender == admin, "SM::proposeMint: caller must be admin");
-		require(dst != address(0), "SM::proposeMint: cannot transfer to the zero address");
-		require(amount <= currentSupply.mul(token.mintCap()).div(1000000), "SM::proposeMint: amount exceeds mint cap");
+		require(dst != address(0), "Miners::proposeMint: cannot transfer to the zero address");
+		require(
+			amount <= currentSupply.mul(token.mintCap()).div(1000000),
+			"Miners::proposeMint: amount exceeds mint cap"
+		);
 		uint256 eta = block.timestamp.add(proposalLength);
-		require(eta >= token.supplyChangeAllowedAfter(), "SM::proposeMint: minting not allowed yet");
+		require(eta >= token.supplyChangeAllowedAfter(), "Miners::proposeMint: minting not allowed yet");
 		pendingMint = MintProposal(eta, dst, amount);
 		emit MintProposed(amount, dst, currentSupply, currentSupply.add(amount), eta);
 	}
@@ -213,9 +223,8 @@ contract SupplyManager {
 	/**
 	 * @notice Cancel proposed token mint
 	 */
-	function cancelMint() external {
-		require(msg.sender == admin, "SM::cancelMint: caller must be admin");
-		require(pendingMint.eta != 0, "SM::cancelMint: no active proposal");
+	function cancelMint() external onlyTheKing {
+		require(pendingMint.eta != 0, "Miners::cancelMint: no active proposal");
 		emit MintCanceled(pendingMint.amount, pendingMint.destination);
 		pendingMint = MintProposal(0, address(0), 0);
 	}
@@ -223,15 +232,14 @@ contract SupplyManager {
 	/**
 	 * @notice Accept proposed token mint
 	 */
-	function acceptMint() external {
-		require(msg.sender == admin, "SM::acceptMint: caller must be admin");
-		require(pendingMint.eta != 0, "SM::acceptMint: no active proposal");
-		require(block.timestamp >= pendingMint.eta, "SM::acceptMint: proposal eta not yet passed");
+	function acceptMint() external onlyTheKing {
+		require(pendingMint.eta != 0, "Miners::acceptMint: no active proposal");
+		require(block.timestamp >= pendingMint.eta, "Miners::acceptMint: proposal eta not yet passed");
 		address dst = pendingMint.destination;
 		uint256 amount = pendingMint.amount;
 		uint256 oldSupply = token.totalSupply();
 		pendingMint = MintProposal(0, address(0), 0);
-		require(token.mint(dst, amount), "SM::acceptMint: unsuccessful");
+		require(token.mint(dst, amount), "Miners::acceptMint: unsuccessful");
 		emit MintAccepted(amount, dst, oldSupply, oldSupply.add(amount));
 	}
 
@@ -240,14 +248,13 @@ contract SupplyManager {
 	 * @param src The address of the account that will burn tokens
 	 * @param amount The number of tokens to be burned
 	 */
-	function proposeBurn(address src, uint256 amount) external {
-		require(msg.sender == admin, "SM::proposeBurn: caller must be admin");
-		require(src != address(0), "SM::proposeBurn: cannot transfer from the zero address");
-		require(token.allowance(src, address(this)) >= amount, "SM::proposeBurn: supplyManager approval < amount");
+	function proposeBurn(address src, uint256 amount) external onlyTheKing {
+		require(src != address(0), "Miners::proposeBurn: cannot transfer from the zero address");
+		require(token.allowance(src, address(this)) >= amount, "Miners::proposeBurn: supplyManager approval < amount");
 		uint256 currentSupply = token.totalSupply();
 		uint256 newSupply = currentSupply.sub(amount);
 		uint256 eta = block.timestamp.add(proposalLength);
-		require(eta >= token.supplyChangeAllowedAfter(), "SM::proposeBurn: burning not allowed yet");
+		require(eta >= token.supplyChangeAllowedAfter(), "Miners::proposeBurn: burning not allowed yet");
 		pendingBurn = BurnProposal(eta, src, amount);
 		emit BurnProposed(amount, src, currentSupply, newSupply, eta);
 	}
@@ -255,9 +262,8 @@ contract SupplyManager {
 	/**
 	 * @notice Cancel proposed token burn
 	 */
-	function cancelBurn() external {
-		require(msg.sender == admin, "SM::cancelBurn: caller must be admin");
-		require(pendingBurn.eta != 0, "SM::cancelBurn: no active proposal");
+	function cancelBurn() external onlyTheKing {
+		require(pendingBurn.eta != 0, "Miners::cancelBurn: no active proposal");
 		emit BurnCanceled(pendingBurn.amount, pendingBurn.source);
 		pendingBurn = BurnProposal(0, address(0), 0);
 	}
@@ -265,14 +271,13 @@ contract SupplyManager {
 	/**
 	 * @notice Accept proposed token burn
 	 */
-	function acceptBurn() external {
-		require(msg.sender == admin, "SM::acceptBurn: caller must be admin");
-		require(pendingBurn.eta != 0, "SM::acceptBurn: no active proposal");
-		require(block.timestamp >= pendingBurn.eta, "SM::acceptBurn: proposal eta not yet passed");
+	function acceptBurn() external onlyTheKing {
+		require(pendingBurn.eta != 0, "Miners::acceptBurn: no active proposal");
+		require(block.timestamp >= pendingBurn.eta, "Miners::acceptBurn: proposal eta not yet passed");
 		address src = pendingBurn.source;
 		uint256 amount = pendingBurn.amount;
 		pendingBurn = BurnProposal(0, address(0), 0);
-		require(token.burn(src, amount), "SM::acceptBurn: unsuccessful");
+		require(token.burn(src, amount), "Miners::acceptBurn: unsuccessful");
 		uint256 newSupply = token.totalSupply();
 		emit BurnAccepted(amount, src, newSupply.add(amount), newSupply);
 	}
@@ -281,8 +286,7 @@ contract SupplyManager {
 	 * @notice Propose change to the maximum amount of tokens that can be minted at once
 	 * @param newCap The new mint cap in bips (10,000 bips = 1% of totalSupply)
 	 */
-	function proposeMintCap(uint32 newCap) external {
-		require(msg.sender == admin, "SM::proposeMC: caller must be admin");
+	function proposeMintCap(uint32 newCap) external onlyTheKing {
 		uint256 eta = block.timestamp.add(proposalLength);
 		pendingMintCap = MintCapProposal(eta, newCap);
 		emit MintCapProposed(token.mintCap(), newCap, eta);
@@ -291,9 +295,8 @@ contract SupplyManager {
 	/**
 	 * @notice Cancel proposed mint cap
 	 */
-	function cancelMintCap() external {
-		require(msg.sender == admin, "SM::cancelMC: caller must be admin");
-		require(pendingMintCap.eta != 0, "SM::cancelMC: no active proposal");
+	function cancelMintCap() external onlyTheKing {
+		require(pendingMintCap.eta != 0, "Miners::cancelMC: no active proposal");
 		emit MintCapCanceled(pendingMintCap.newCap);
 		pendingMintCap = MintCapProposal(0, 0);
 	}
@@ -301,14 +304,13 @@ contract SupplyManager {
 	/**
 	 * @notice Accept change to the maximum amount of tokens that can be minted at once
 	 */
-	function acceptMintCap() external {
-		require(msg.sender == admin, "SM::acceptMC: caller must be admin");
-		require(pendingMintCap.eta != 0, "SM::acceptMC: no active proposal");
-		require(block.timestamp >= pendingMintCap.eta, "SM::acceptMC: proposal eta not yet passed");
+	function acceptMintCap() external onlyTheKing {
+		require(pendingMintCap.eta != 0, "Miners::acceptMC: no active proposal");
+		require(block.timestamp >= pendingMintCap.eta, "Miners::acceptMC: proposal eta not yet passed");
 		uint32 oldCap = token.mintCap();
 		uint32 newCap = pendingMintCap.newCap;
 		pendingMintCap = MintCapProposal(0, 0);
-		require(token.setMintCap(newCap), "SM::acceptMC: unsuccessful");
+		require(token.setMintCap(newCap), "Miners::acceptMC: unsuccessful");
 		emit MintCapAccepted(oldCap, newCap);
 	}
 
@@ -316,8 +318,7 @@ contract SupplyManager {
 	 * @notice Propose change to the supply change waiting period
 	 * @param newPeriod new waiting period
 	 */
-	function proposeSupplyChangeWaitingPeriod(uint32 newPeriod) external {
-		require(msg.sender == admin, "SM::proposeWP: caller must be admin");
+	function proposeSupplyChangeWaitingPeriod(uint32 newPeriod) external onlyTheKing {
 		uint256 eta = block.timestamp.add(proposalLength);
 		pendingWaitingPeriod = WaitingPeriodProposal(eta, newPeriod);
 		emit WaitingPeriodProposed(token.supplyChangeWaitingPeriod(), newPeriod, eta);
@@ -326,9 +327,8 @@ contract SupplyManager {
 	/**
 	 * @notice Cancel proposed waiting period
 	 */
-	function cancelWaitingPeriod() external {
-		require(msg.sender == admin, "SM::cancelWP: caller must be admin");
-		require(pendingWaitingPeriod.eta != 0, "SM::cancelWaitingPeriod: no active proposal");
+	function cancelWaitingPeriod() external onlyTheKing {
+		require(pendingWaitingPeriod.eta != 0, "Miners::cancelWaitingPeriod: no active proposal");
 		pendingWaitingPeriod = WaitingPeriodProposal(0, 0);
 		emit WaitingPeriodCanceled(pendingWaitingPeriod.newPeriod);
 	}
@@ -336,59 +336,54 @@ contract SupplyManager {
 	/**
 	 * @notice Accept change to the supply change waiting period
 	 */
-	function acceptSupplyChangeWaitingPeriod() external {
-		require(msg.sender == admin, "SM::acceptWP: caller must be admin");
-		require(pendingWaitingPeriod.eta != 0, "SM::acceptWP: no active proposal");
-		require(block.timestamp >= pendingWaitingPeriod.eta, "SM::acceptWP: proposal eta not yet passed");
+	function acceptSupplyChangeWaitingPeriod() external onlyTheKing {
+		require(pendingWaitingPeriod.eta != 0, "Miners::acceptWP: no active proposal");
+		require(block.timestamp >= pendingWaitingPeriod.eta, "Miners::acceptWP: proposal eta not yet passed");
 		uint32 oldPeriod = token.supplyChangeWaitingPeriod();
 		uint32 newPeriod = pendingWaitingPeriod.newPeriod;
 		pendingWaitingPeriod = WaitingPeriodProposal(0, 0);
-		require(token.setSupplyChangeWaitingPeriod(newPeriod), "SM::acceptWP: unsuccessful");
+		require(token.setSupplyChangeWaitingPeriod(newPeriod), "Miners::acceptWP: unsuccessful");
 		emit WaitingPeriodAccepted(oldPeriod, newPeriod);
 	}
 
 	/**
 	 * @notice Propose change to the supplyManager address
-	 * @param newSupplyManager new supply manager address
+	 * @param newMiners new supply manager address
 	 */
-	function proposeSupplyManager(address newSupplyManager) external {
-		require(msg.sender == admin, "SM::proposeSM: caller must be admin");
+	function proposeMiners(address newMiners) external onlyTheKing {
 		uint256 eta = block.timestamp.add(proposalLength);
-		pendingSupplyManager = SupplyManagerProposal(eta, newSupplyManager);
-		emit SupplyManagerProposed(token.supplyManager(), newSupplyManager, eta);
+		pendingMiners = MinersProposal(eta, newMiners);
+		emit MinersProposed(token.supplyManager(), newMiners, eta);
 	}
 
 	/**
 	 * @notice Cancel proposed supply manager update
 	 */
-	function cancelSupplyManager() external {
-		require(msg.sender == admin, "SM::cancelSM: caller must be admin");
-		require(pendingSupplyManager.eta != 0, "SM::cancelSM: no active proposal");
-		emit SupplyManagerCanceled(pendingSupplyManager.newSupplyManager);
-		pendingSupplyManager = SupplyManagerProposal(0, address(0));
+	function cancelMiners() external onlyTheKing {
+		require(pendingMiners.eta != 0, "Miners::cancelSM: no active proposal");
+		emit MinersCanceled(pendingMiners.newMiners);
+		pendingMiners = MinersProposal(0, address(0));
 	}
 
 	/**
 	 * @notice Accept change to the supplyManager address
 	 */
-	function acceptSupplyManager() external {
-		require(msg.sender == admin, "SM::acceptSM: caller must be admin");
-		require(pendingSupplyManager.eta != 0, "SM::acceptSM: no active proposal");
-		require(block.timestamp >= pendingSupplyManager.eta, "SM::acceptSM: proposal eta not yet passed");
-		address oldSupplyManager = token.supplyManager();
-		address newSupplyManager = pendingSupplyManager.newSupplyManager;
-		pendingSupplyManager = SupplyManagerProposal(0, address(0));
-		require(token.setSupplyManager(newSupplyManager), "SM::acceptSM: unsuccessful");
-		emit SupplyManagerAccepted(oldSupplyManager, newSupplyManager);
+	function acceptMiners() external onlyTheKing {
+		require(pendingMiners.eta != 0, "Miners::acceptSM: no active proposal");
+		require(block.timestamp >= pendingMiners.eta, "Miners::acceptSM: proposal eta not yet passed");
+		address oldMiners = token.supplyManager();
+		address newMiners = pendingMiners.newMiners;
+		pendingMiners = MinersProposal(0, address(0));
+		require(token.setSupplyManager(newMiners), "Miners::acceptSM: unsuccessful");
+		emit MinersAccepted(oldMiners, newMiners);
 	}
 
 	/**
 	 * @notice Propose change to the proposal length
 	 * @param newLength new proposal length
 	 */
-	function proposeNewProposalLength(uint32 newLength) external {
-		require(msg.sender == admin, "SM::proposePL: caller must be admin");
-		require(newLength >= proposalLengthMinimum, "SM::proposePL: length must be >= minimum");
+	function proposeNewProposalLength(uint32 newLength) external onlyTheKing {
+		require(newLength >= proposalLengthMinimum, "Miners::proposePL: length must be >= minimum");
 		uint256 eta = block.timestamp.add(proposalLength);
 		pendingProposalLength = ProposalLengthProposal(eta, newLength);
 		emit ProposalLengthProposed(proposalLength, newLength, eta);
@@ -397,9 +392,8 @@ contract SupplyManager {
 	/**
 	 * @notice Cancel proposed update to proposal length
 	 */
-	function cancelProposalLength() external {
-		require(msg.sender == admin, "SM::cancelPL: caller must be admin");
-		require(pendingProposalLength.eta != 0, "SM::cancelPL: no active proposal");
+	function cancelProposalLength() external onlyTheKing {
+		require(pendingProposalLength.eta != 0, "Miners::cancelPL: no active proposal");
 		emit ProposalLengthCanceled(pendingProposalLength.newLength);
 		pendingProposalLength = ProposalLengthProposal(0, 0);
 	}
@@ -407,10 +401,9 @@ contract SupplyManager {
 	/**
 	 * @notice Accept change to the proposal length
 	 */
-	function acceptProposalLength() external {
-		require(msg.sender == admin, "SM::acceptPL: caller must be admin");
-		require(pendingProposalLength.eta != 0, "SM::acceptPL: no active proposal");
-		require(block.timestamp >= pendingProposalLength.eta, "SM::acceptPL: proposal eta not yet passed");
+	function acceptProposalLength() external onlyTheKing {
+		require(pendingProposalLength.eta != 0, "Miners::acceptPL: no active proposal");
+		require(block.timestamp >= pendingProposalLength.eta, "Miners::acceptPL: proposal eta not yet passed");
 		uint32 oldLength = proposalLength;
 		uint32 newLength = pendingProposalLength.newLength;
 		pendingProposalLength = ProposalLengthProposal(0, 0);
@@ -419,38 +412,35 @@ contract SupplyManager {
 	}
 
 	/**
-	 * @notice Propose a new admin
-	 * @param newAdmin The address of the new admin
+	 * @notice Propose a new king
+	 * @param newKing The address of the new king
 	 */
-	function proposeAdmin(address newAdmin) external {
-		require(msg.sender == admin, "SM::proposeAdmin: caller must be admin");
+	function proposeKing(address newKing) external onlyTheKing {
 		// ETA set to minimum to allow for quicker changes if necessary
 		uint256 eta = block.timestamp.add(proposalLengthMinimum);
-		pendingAdmin = AdminProposal(eta, newAdmin);
-		emit AdminProposed(admin, newAdmin, eta);
+		pendingKing = RoyalDecree(eta, newKing);
+		emit KingProposed(king, newKing, eta);
 	}
 
 	/**
-	 * @notice Cancel proposed admin change
+	 * @notice Cancel proposed king change
 	 */
-	function cancelAdmin() external {
-		require(msg.sender == admin, "SM::cancelAdmin: caller must be admin");
-		require(pendingAdmin.eta != 0, "SM::cancelAdmin: no active proposal");
-		emit AdminCanceled(pendingAdmin.newAdmin);
-		pendingAdmin = AdminProposal(0, address(0));
+	function cancelKing() external onlyTheKing {
+		require(pendingKing.eta != 0, "Miners::cancelKing: no active proposal");
+		emit KingCanceled(pendingKing.newKing);
+		pendingKing = RoyalDecree(0, address(0));
 	}
 
 	/**
-	 * @notice Accept proposed admin
+	 * @notice Accept proposed king
 	 */
-	function acceptAdmin() external {
-		require(msg.sender == admin, "SM::acceptAdmin: caller must be admin");
-		require(pendingAdmin.eta != 0, "SM::acceptAdmin: no active proposal");
-		require(block.timestamp >= pendingAdmin.eta, "SM::acceptAdmin: proposal eta not yet passed");
-		address oldAdmin = admin;
-		address newAdmin = pendingAdmin.newAdmin;
-		pendingAdmin = AdminProposal(0, address(0));
-		admin = newAdmin;
-		emit AdminAccepted(oldAdmin, newAdmin);
+	function acceptKing() external onlyTheKing {
+		require(pendingKing.eta != 0, "Miners::acceptKing: no active proposal");
+		require(block.timestamp >= pendingKing.eta, "Miners::acceptKing: proposal eta not yet passed");
+		address oldKing = king;
+		address newKing = pendingKing.newKing;
+		pendingKing = RoyalDecree(0, address(0));
+		king = newKing;
+		emit KingAccepted(oldKing, newKing);
 	}
 }

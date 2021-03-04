@@ -1,6 +1,5 @@
 /*
 
-	Copyright (c) [2020] [Archer DAO]
     Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,18 +18,23 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.2;
 
-interface ITokenRegistry {
-	event ChangedOwner(address indexed oldOwner, address indexed newOwner);
-	event TokenAdded(address indexed token, address indexed formula);
-	event TokenRemoved(address indexed token);
+/// @notice ProtocolStorage struct
+struct ProtocolStorage {
+	// Crown owner
+	address king;
+}
 
-	function owner() external view returns (address);
+library KingmakerStorage {
+	bytes32 constant KINGMAKER_PROTOCOL_STORAGE = keccak256("kingmaker.protocol.storage");
 
-	function tokenFormula(address) external view returns (address);
-
-	function setTokenFormula(address token, address formula) external;
-
-	function removeToken(address token) external;
-
-	function changeOwner(address newOwner) external;
+	/**
+	 * @notice Load and return protocol storage struct
+	 * @return proto ProtocolStorage struct
+	 */
+	function protoStorage() internal pure returns (ProtocolStorage storage proto) {
+		bytes32 position = KINGMAKER_PROTOCOL_STORAGE;
+		assembly {
+			proto.slot := position
+		}
+	}
 }

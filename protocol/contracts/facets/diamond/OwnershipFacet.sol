@@ -1,6 +1,5 @@
 /*
 
-	Copyright (c) [2020] [Archer DAO]
     Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,21 +15,22 @@
     limitations under the License.
 
 */
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
-interface ITokenRegistry {
-	event ChangedOwner(address indexed oldOwner, address indexed newOwner);
-	event TokenAdded(address indexed token, address indexed formula);
-	event TokenRemoved(address indexed token);
+import "hardhat/console.sol";
 
-	function owner() external view returns (address);
+import "../../interfaces/access/IERC173.sol";
 
-	function tokenFormula(address) external view returns (address);
+import "../../libraries/diamond/LibDiamondOwnership.sol";
 
-	function setTokenFormula(address token, address formula) external;
+contract OwnershipFacet is IERC173 {
+	function transferOwnership(address _newOwner) external override {
+		LibDiamondOwnership.enforceIsContractOwner();
+		LibDiamondOwnership.setContractOwner(_newOwner);
+	}
 
-	function removeToken(address token) external;
-
-	function changeOwner(address newOwner) external;
+	function owner() external view override returns (address owner_) {
+		owner_ = LibDiamondOwnership.contractOwner();
+	}
 }

@@ -26,14 +26,14 @@ import "./interfaces/diamond/IDiamondCut.sol";
 import "./interfaces/access/IERC173.sol";
 import "./interfaces/introspection/IERC165.sol";
 
-contract Crown {
+contract Kingmaker {
 	// more arguments are added to this struct
 	// this avoids stack too deep errors
-	struct CrownArgs {
+	struct KingmakerArgs {
 		address king;
 	}
 
-	constructor(IDiamondCut.FacetCut[] memory _diamondCut, CrownArgs memory _args) payable {
+	constructor(IDiamondCut.FacetCut[] memory _diamondCut, KingmakerArgs memory _args) payable {
 		LibDiamond.diamondCut(_diamondCut, address(0), new bytes(0));
 		LibDiamondOwnership.setContractOwner(_args.king);
 

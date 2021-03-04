@@ -11,8 +11,8 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 	const { deploy, log } = deployments;
 	const { deployer, lepidotteri } = await getNamedAccounts();
 
-	log(bold(blueBright(`\n【】CROWN`)));
-	log(italic(cyanBright(`1) Kingmaker Crown`)));
+	log(bold(blueBright(`\n【】Kingmaker Protocol Smart Contracts`)));
+	log(italic(cyanBright(`1) Kingmaker Diamond`)));
 
 	// Deploy DiamondCutFacet.sol contract
 	const cutFacet: DeployResult = await deploy('DiamondCutFacet', {
@@ -47,15 +47,15 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 		[ownershipFacet.address, FacetCutAction.Add, getSelectors(ownershipFacet.abi)],
 	];
 
-	// Deploy Crown.sol contract
-	const crown: DeployResult = await deploy('Crown', {
+	// Deploy Kingmaker.sol contract
+	const crown: DeployResult = await deploy('Kingmaker', {
 		from: deployer,
-		contract: 'Crown',
+		contract: 'Kingmaker',
 		args: [diamondCut, [lepidotteri]],
 		skipIfAlreadyDeployed: true,
 	});
 	logDeployResult(crown, log);
 };
 
-export const tags = ['1', 'Crown'];
+export const tags = ['1', 'Kingmaker'];
 export default func;

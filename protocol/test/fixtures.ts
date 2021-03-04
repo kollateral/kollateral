@@ -13,38 +13,38 @@ export const governanceFixture = deployments.createFixture(async ({ deployments,
 	const admin = lepidotteri;
 	const liquidityProvider = King;
 
-	const govTokenFactory = await ethers.getContractFactory('CrownGovernanceToken');
-	const CrownGovernanceToken = await govTokenFactory.deploy(admin.address, deployer.address, FIRST_SUPPLY_CHANGE);
+	const govTokenFactory = await ethers.getContractFactory('KING');
+	const KING = await govTokenFactory.deploy(admin.address, deployer.address, FIRST_SUPPLY_CHANGE);
 
 	const multisendFactory = await ethers.getContractFactory('Multisend');
-	const Multisend = await multisendFactory.deploy(CrownGovernanceToken.address);
+	const Multisend = await multisendFactory.deploy(KING.address);
 
-	const vestingFactory = await ethers.getContractFactory('Vesting');
-	const Vesting = await vestingFactory.deploy(CrownGovernanceToken.address);
+	const sanctuaryFactory = await ethers.getContractFactory('Sanctuary');
+	const Sanctuary = await sanctuaryFactory.deploy(KING.address);
 
-	const votingPowerFactory = await ethers.getContractFactory('VotingPower');
-	const VotingPowerImplementation = await votingPowerFactory.deploy();
+	const crownFactory = await ethers.getContractFactory('Crown');
+	const CrownImplementation = await crownFactory.deploy();
 
-	const votingPowerPrismFactory = await ethers.getContractFactory('VotingPowerPrism');
-	const VotingPowerPrism = await votingPowerPrismFactory.deploy(deployer.address);
+	const crownPrismFactory = await ethers.getContractFactory('CrownPrism');
+	const CrownPrism = await crownPrismFactory.deploy(deployer.address);
 
-	const VotingPower = new ethers.Contract(VotingPowerPrism.address, VotingPowerImplementation.interface, deployer);
+	const Crown = new ethers.Contract(CrownPrism.address, CrownImplementation.interface, deployer);
 
-	const lockManagerFactory = await ethers.getContractFactory('LockManager');
-	const LockManager = await lockManagerFactory.deploy(VotingPowerPrism.address, deployer.address);
+	const bailiffFactory = await ethers.getContractFactory('Bailiff');
+	const Bailiff = await bailiffFactory.deploy(CrownPrism.address, deployer.address);
 
-	const vaultFactory = await ethers.getContractFactory('Vault');
-	const Vault = await vaultFactory.deploy(LockManager.address);
+	const treasuryFactory = await ethers.getContractFactory('Treasury');
+	const Treasury = await treasuryFactory.deploy(Bailiff.address);
 
 	return {
-		govToken: CrownGovernanceToken,
+		govToken: KING,
 		multisend: Multisend,
-		vesting: Vesting,
-		votingPower: VotingPower,
-		votingPowerImplementation: VotingPowerImplementation,
-		votingPowerPrism: VotingPowerPrism,
-		lockManager: LockManager,
-		vault: Vault,
+		sanctuary: Sanctuary,
+		crownImp: CrownImplementation,
+		crown: Crown,
+		crownPrism: CrownPrism,
+		bailiff: Bailiff,
+		treasury: Treasury,
 		deployer: deployer,
 		lepidotteri: lepidotteri,
 		SHA_2048: SHA_2048,

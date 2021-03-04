@@ -31,7 +31,7 @@ struct CrownStorage {
 	// Vesting contract
 	IVesting vesting;
 	// Voting Power owner
-	address owner;
+	address king;
 	// lockManager contract
 	address lockManager;
 	// Token registry contract
@@ -39,32 +39,32 @@ struct CrownStorage {
 }
 
 /// @notice A checkpoint for marking number of votes from a given block
-struct Checkpoint {
+struct CrownCheckpoint {
 	uint32 fromBlock;
 	uint256 votes;
 }
 
 /// @notice All storage variables related to checkpoints
-struct CheckpointStorage {
+struct CrownCheckpointStorage {
 	// A record of vote checkpoints for each account, by index
-	mapping(address => mapping(uint32 => Checkpoint)) checkpoints;
+	mapping(address => mapping(uint32 => CrownCheckpoint)) checkpoints;
 	// The number of checkpoints for each account
 	mapping(address => uint32) numCheckpoints;
 }
 
 /// @notice The amount of a given token that has been staked, and the resulting voting power
-struct Stake {
+struct CrownStake {
 	uint256 amount;
 	uint256 votingPower;
-	// TODO: ?
+	// TODO: delegation?
 	// uint256 expiryTimestamp;
 	// address delegatedTo;
 }
 
 /// @notice All storage variables related to staking
-struct StakeStorage {
+struct CrownStakeStorage {
 	// Official record of staked balances for each account > token > stake
-	mapping(address => mapping(address => Stake)) stakes;
+	mapping(address => mapping(address => CrownStake)) stakes;
 }
 
 library LibCrownStorage {
@@ -76,7 +76,7 @@ library LibCrownStorage {
 	 * @notice Load app storage struct from specified VOTING_POWER_APP_STORAGE_POSITION
 	 * @return crown CrownGovernance struct
 	 */
-	function govStorage() internal pure returns (CrownStorage storage crown) {
+	function crownStorage() internal pure returns (CrownStorage storage crown) {
 		bytes32 position = CROWN_GOVERNANCE_STORAGE;
 		assembly {
 			crown.slot := position
@@ -85,23 +85,23 @@ library LibCrownStorage {
 
 	/**
 	 * @notice Load checkpoint storage struct from specified VOTING_POWER_CHECKPOINT_STORAGE_POSITION
-	 * @return cs CheckpointStorage struct
+	 * @return checkpoint CheckpointStorage struct
 	 */
-	function checkpointStorage() internal pure returns (CheckpointStorage storage cs) {
+	function checkpointStorage() internal pure returns (CrownCheckpointStorage storage checkpoint) {
 		bytes32 position = CROWN_CHECKPOINT_STORAGE;
 		assembly {
-			cs.slot := position
+			checkpoint.slot := position
 		}
 	}
 
 	/**
 	 * @notice Load stake storage struct from specified VOTING_POWER_STAKE_STORAGE_POSITION
-	 * @return ss StakeStorage struct
+	 * @return stake StakeStorage struct
 	 */
-	function stakeStorage() internal pure returns (StakeStorage storage ss) {
+	function stakeStorage() internal pure returns (CrownStakeStorage storage stake) {
 		bytes32 position = CROWN_STAKE_STORAGE;
 		assembly {
-			ss.slot := position
+			stake.slot := position
 		}
 	}
 }

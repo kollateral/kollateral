@@ -102,6 +102,4 @@ interface IVault {
 		uint16 vestingDaysToAdd,
 		uint16 cliffDaysToAdd
 	) external;
-
-	// function tokenLocks(uint256 lockId) external view returns (Lock memory);
 }
