@@ -10,6 +10,8 @@ import "./LendingPool.sol";
 contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156FlashBorrower {
 	using SafeMath for uint256;
 
+	bytes32 public immutable CALLBACK_SUCCESS = keccak256("ERC3156FlashBorrower.onFlashLoan");
+
 	struct BorrowerData {
 		bytes callerData;
 		uint256 originalAmount;
@@ -133,7 +135,7 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 			concludeFlashLoan(stepData, token);
 		}
 
-		return keccak256("ERC3156FlashBorrower.onFlashLoan");
+		return CALLBACK_SUCCESS;
 	}
 
 	function executeNextFlashLoanStep(
@@ -164,7 +166,7 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 				stepData.borrower.originalAmount,
 				totalFees,
 				stepData.borrower.callerData
-			) == keccak256("ERC3156FlashBorrower.onFlashLoan"),
+			) == CALLBACK_SUCCESS,
 			"IERC3156: Callback failed"
 		);
 
