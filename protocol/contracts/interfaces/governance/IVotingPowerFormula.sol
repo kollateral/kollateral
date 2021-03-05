@@ -20,5 +20,5 @@
 pragma solidity ^0.8.2;
 
 interface IVotingPowerFormula {
-	function convertTokensToVotingPower(uint256 amount) external view returns (uint256);
+	function toVotingPower(uint256 amount) external view returns (uint256);
 }

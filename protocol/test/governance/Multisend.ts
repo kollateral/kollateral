@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { ecsign } from 'ethereumjs-util';
 
-import { governanceFixture } from '../fixtures';
+import { token } from '../fixtures';
 import { getEnv } from '../../libs/config';
 import { getEIP712DomainSeparator, getEIP712PermitDigest } from '../../libs/ethereum';
 
@@ -20,7 +20,7 @@ describe('Multisend', () => {
 	let SHA_2048: SignerWithAddress;
 
 	beforeEach(async () => {
-		const f = await governanceFixture();
+		const f = await token();
 		govToken = f.govToken;
 		multisend = f.multisend;
 		deployer = f.deployer;

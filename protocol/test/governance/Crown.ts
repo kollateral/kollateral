@@ -1,14 +1,12 @@
-import * as fs from 'fs';
-
 import { expect } from 'chai';
-import { ethers, network } from 'hardhat';
+import { ethers } from 'hardhat';
 import { ecsign } from 'ethereumjs-util';
 
-import { governanceFixture } from '../fixtures';
+import { governance } from '../fixtures';
 import { getEnv } from '../../libs/config';
 import { Contract } from 'ethers';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
-import { getEIP712DomainSeparator, getEIP712PermitDigest } from '../../libs/ethereum';
+import { getEIP712DomainSeparator, getEIP712PermitDigest, O_Address } from '../../libs/ethereum';
 
 const KINGMAKER_DEPLOYER_PK = getEnv('KINGMAKER_DEPLOYER_PK') || '0x';
 
@@ -24,10 +22,8 @@ describe('Crown', () => {
 	let lepidotteri: SignerWithAddress;
 	let SHA_2048: SignerWithAddress;
 
-	let ZERO_ADDRESS: string;
-
 	beforeEach(async () => {
-		const f = await governanceFixture();
+		const f = await governance();
 		govToken = f.govToken;
 		monastery = f.monastery;
 		crown = f.crown;
@@ -37,7 +33,6 @@ describe('Crown', () => {
 		admin = f.admin;
 		lepidotteri = f.lepidotteri;
 		SHA_2048 = f.SHA_2048;
-		ZERO_ADDRESS = f.ZERO_ADDRESS;
 	});
 
 	context('Pre-init', async () => {
@@ -58,7 +53,7 @@ describe('Crown', () => {
 		context('govToken', async () => {
 			it('returns the current KING token address', async () => {
 				expect(await crown.govToken()).to.eq(govToken.address);
-				expect(await crownImp.govToken()).to.eq(ZERO_ADDRESS);
+				expect(await crownImp.govToken()).to.eq(O_Address);
 			});
 		});
 
@@ -71,7 +66,7 @@ describe('Crown', () => {
 		context('sanctuaryContract', async () => {
 			it('returns the current monastery contract address', async () => {
 				expect(await crown.vestingContract()).to.eq(monastery.address);
-				expect(await crownImp.vestingContract()).to.eq(ZERO_ADDRESS);
+				expect(await crownImp.vestingContract()).to.eq(O_Address);
 			});
 		});
 
@@ -144,9 +139,7 @@ describe('Crown', () => {
 				const digest = getEIP712PermitDigest(domainSeparator, lepidotteri.address, crown.address, value, nonce, deadline);
 				const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
 
-				await expect(crown.stakeWithPermit(value, deadline, v, r, s)).to.revertedWith(
-					'revert KING::validateSig: invalid signature'
-				);
+				await expect(crown.stakeWithPermit(value, deadline, v, r, s)).to.revertedWith('revert KING::validateSig: invalid signature');
 			});
 
 			it('does not allow a user to stake more tokens than they have', async () => {

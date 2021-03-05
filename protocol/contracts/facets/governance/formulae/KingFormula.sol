@@ -1,5 +1,6 @@
 /*
 
+	Copyright (c) [2020] [Archer DAO]
     Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,25 +15,24 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-               *    .
-        '  +   ___    @    .
-            .-" __"-.   +
-    *      /:.'`__`'.\       '
-        . |:: .'_ `. :|   *
-   @      |:: '._' : :| .
-      +    \:'.__.' :/       '
-            /`-...-'\  '   +
-   '       /         \   .    @
-     *     `-.,___,.-'
 */
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.2;
 
-/**
- * @title Alchemist
- * @dev Allows for the initial distribution of the governance token and the bootstrapping of initial locked liquidity.
- *      See also Mines.sol
- */
-contract Alchemist {
+import "../../../interfaces/governance/IVotingPowerFormula.sol";
 
+/**
+ * @title KingFormula
+ * @dev Convert Kingmaker Crown governance token to its voting power equivalent to aid in gov calculations
+ */
+contract KingFormula is IVotingPowerFormula {
+	/**
+	 * @notice Convert KING amount to voting power
+	 * @dev Always converts 1-1
+	 * @param amount token amount
+	 * @return voting power amount
+	 */
+	function toVotingPower(uint256 amount) external pure override returns (uint256) {
+		return amount;
+	}
 }

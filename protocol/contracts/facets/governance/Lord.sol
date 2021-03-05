@@ -15,6 +15,28 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
+                   {}
+   ,   A           {}
+  / \, | ,        .--.
+ |    =|= >      /.--.\
+  \ /` | `       |====|
+   `   |         |`::`|
+       |     .-;`\..../`;_.-^-._
+      /\\/  /  |...::..|`   :   `|
+      |:'\ |   /'''::''|   .:.   |
+       \ /\;-,/\   ::  |...:::...|
+       |\ <` >  >._::_.| ':::::' |
+       | `""`  /   ^^  |   ':'   |
+       |       |       \    :    /
+       |       |        \   :   /
+       |       |___/\___|`-.:.-`
+       |        \_ || _/    `
+       |        <_ >< _>
+       |        |  ||  |
+       |        |  ||  |
+       |       _\.:||:./_
+       |      /____/\____\
+
 */
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.2;
@@ -29,11 +51,10 @@ import "../../libraries/access/AccessControl.sol";
 import "../../libraries/math/SafeMath.sol";
 
 /**
- * @title Bailiff (prev. LockManager)
- * @dev Manages voting power for stakes that are locked within the Kingmaker protocol contracts,
- * 	    but not in the Crown governance contracts themselves.
+ * @title Lord (prev. LockManager)
+ * @dev Manages voting power for stakes that are locked within the Kingmaker protocol contracts, but not into the Crown.
  */
-contract Bailiff is AccessControl {
+contract Lord is AccessControl {
 	using SafeMath for uint256;
 
 	/// @notice Admin role to create voting power from locked stakes
@@ -52,8 +73,8 @@ contract Bailiff is AccessControl {
 	IVotingPower public votingPower;
 
 	/// @notice modifier to restrict functions to only contracts that have been added as lockers
-	modifier onlyBailiff() {
-		require(hasRole(LOCKER_ROLE, msg.sender), "Bailiff::onlyBailiff: Caller must have LOCKER_ROLE role");
+	modifier onlyLords() {
+		require(hasRole(LOCKER_ROLE, msg.sender), "Lord::onlyLords: Caller must have LOCKER_ROLE role");
 		_;
 	}
 
@@ -101,13 +122,13 @@ contract Bailiff is AccessControl {
 	 */
 	function calculateVotingPower(address token, uint256 amount) public view returns (uint256) {
 		address registry = votingPower.tokenRegistry();
-		require(registry != address(0), "Bailiff::calculateVotingPower: registry not set");
+		require(registry != address(0), "Lord::calculateVotingPower: registry not set");
 
 		address tokenFormulaAddress = ITokenRegistry(registry).tokenFormula(token);
-		require(tokenFormulaAddress != address(0), "Bailiff::calculateVotingPower: token not supported");
+		require(tokenFormulaAddress != address(0), "Lord::calculateVotingPower: token not supported");
 
 		IVotingPowerFormula tokenFormula = IVotingPowerFormula(tokenFormulaAddress);
-		return tokenFormula.convertTokensToVotingPower(amount);
+		return tokenFormula.toVotingPower(amount);
 	}
 
 	/**
@@ -121,7 +142,7 @@ contract Bailiff is AccessControl {
 		address receiver,
 		address token,
 		uint256 tokenAmount
-	) public onlyBailiff returns (uint256 votingPowerGranted) {
+	) public onlyLords returns (uint256 votingPowerGranted) {
 		votingPowerGranted = calculateVotingPower(token, tokenAmount);
 		lockedStakes[receiver][token].amount = lockedStakes[receiver][token].amount.add(tokenAmount);
 		lockedStakes[receiver][token].votingPower = lockedStakes[receiver][token].votingPower.add(votingPowerGranted);
@@ -141,11 +162,8 @@ contract Bailiff is AccessControl {
 		address receiver,
 		address token,
 		uint256 tokenAmount
-	) public onlyBailiff returns (uint256 votingPowerRemoved) {
-		require(
-			lockedStakes[receiver][token].amount >= tokenAmount,
-			"Bailiff::removeVotingPower: not enough tokens staked"
-		);
+	) public onlyLords returns (uint256 votingPowerRemoved) {
+		require(lockedStakes[receiver][token].amount >= tokenAmount, "Lord::removeVotingPower: not enough tokens staked");
 
 		LockedStake memory s = getStake(receiver, token);
 		votingPowerRemoved = tokenAmount.mul(s.votingPower).div(s.amount);

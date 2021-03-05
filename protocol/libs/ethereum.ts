@@ -7,7 +7,7 @@ import { BigNumberish } from '@ethersproject/bignumber';
 import { Address } from 'hardhat-deploy/dist/types';
 
 export const O_Address = '0x0000000000000000000000000000000000000000';
-export const zeroAddress = '0x0000000000000000000000000000000000000000';
+export const zeroAddress = O_Address;
 
 export const tenPow18 = BigNumber.from(10).pow(18);
 

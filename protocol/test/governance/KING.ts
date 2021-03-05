@@ -5,13 +5,14 @@ import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { ecsign } from 'ethereumjs-util';
 
-import { governanceFixture } from '../fixtures';
+import { token } from '../fixtures';
 import { getEnv } from '../../libs/config';
 import {
 	getEIP712DomainSeparator,
 	getEIP712PermitDigest,
 	getEIP712ReceiveWithAuthDigest,
 	getEIP712TransferWithAuthDigest,
+	O_Address,
 } from '../../libs/ethereum';
 
 const KINGMAKER_DEPLOYER_PK = getEnv('KINGMAKER_DEPLOYER_PK') || '0x';
@@ -25,17 +26,14 @@ describe('KING', () => {
 	let SHA_2048: SignerWithAddress;
 	let Jester: SignerWithAddress;
 
-	let ZERO_ADDRESS: string;
-
 	beforeEach(async () => {
-		const f = await governanceFixture();
+		const f = await token();
 		govToken = f.govToken;
 		deployer = f.deployer;
 		admin = f.admin;
 		lepidotteri = f.lepidotteri;
 		SHA_2048 = f.SHA_2048;
 		Jester = f.Jester;
-		ZERO_ADDRESS = f.ZERO_ADDRESS;
 	});
 
 	context('setSupplyManager', async () => {
@@ -123,7 +121,7 @@ describe('KING', () => {
 		it('does not allow a transfer to the zero address', async () => {
 			const amount = 900;
 
-			await expect(govToken.transfer(ZERO_ADDRESS, amount)).to.revertedWith('KING::_transferTokens: cannot transfer to the zero address');
+			await expect(govToken.transfer(O_Address, amount)).to.revertedWith('KING::_transferTokens: cannot transfer to the zero address');
 		});
 	});
 
@@ -568,7 +566,7 @@ describe('KING', () => {
 		});
 
 		it('cannot mint to the zero address', async () => {
-			await expect(govToken.mint(ZERO_ADDRESS, 1)).to.revertedWith('revert KING::mint: cannot transfer to the zero address');
+			await expect(govToken.mint(O_Address, 1)).to.revertedWith('revert KING::mint: cannot transfer to the zero address');
 		});
 
 		it('cannot mint in excess of the mint cap', async () => {
@@ -606,7 +604,7 @@ describe('KING', () => {
 		});
 
 		it('cannot burn from the zero address', async () => {
-			await expect(govToken.burn(ZERO_ADDRESS, 1)).to.revertedWith('revert KING::burn: cannot transfer from the zero address');
+			await expect(govToken.burn(O_Address, 1)).to.revertedWith('revert KING::burn: cannot transfer from the zero address');
 		});
 
 		it('cannot burn before supply change allowed', async () => {

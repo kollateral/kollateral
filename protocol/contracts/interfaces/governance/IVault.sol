@@ -55,7 +55,7 @@ interface IVault {
 		bool grantVotingPower
 	) external;
 
-	// TODO: CompilerError: Stack too deep when compiling inline assembly: Variable headStart is 1 slot(s) too deep inside the stack.
+	// TODO: fix stack too deep when compiling inline assembly: "Variable 'var' is 1 slot(s) too deep inside the stack."
 	/*	function lockTokensWithPermit(
 		address token,
 		address locker,

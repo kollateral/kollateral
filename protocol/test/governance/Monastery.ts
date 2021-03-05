@@ -4,8 +4,9 @@ import { ethers, network } from 'hardhat';
 import { Contract } from 'ethers';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 
-import { governanceFixture } from '../fixtures';
+import { governance } from '../fixtures';
 import { Grant, grantees } from '../../libs/grants/utils';
+import { O_Address } from '../../libs/ethereum';
 
 async function sanityCheck_emptyGrant(emptyGrant: any) {
 	expect(emptyGrant[0]).to.eq(0);
@@ -28,10 +29,8 @@ describe('Monastery', () => {
 	let SHA_2048: SignerWithAddress;
 	let Jester: SignerWithAddress;
 
-	let ZERO_ADDRESS: string;
-
 	beforeEach(async () => {
-		const f = await governanceFixture();
+		const f = await governance();
 
 		govToken = f.govToken;
 		monastery = f.monastery;
@@ -43,7 +42,6 @@ describe('Monastery', () => {
 		lepidotteri = f.lepidotteri;
 		SHA_2048 = f.SHA_2048;
 		Jester = f.Jester;
-		ZERO_ADDRESS = f.ZERO_ADDRESS;
 
 		await crownPrism.setPendingProxyImplementation(crownImp.address);
 		await crownImp.become(crownPrism.address);
@@ -749,11 +747,11 @@ describe('Monastery', () => {
 					'revert Monastery::onlyTheChurch: not clergy'
 				);
 
-				expect(await monastery.votingPower()).to.eq(ZERO_ADDRESS);
+				expect(await monastery.votingPower()).to.eq(O_Address);
 			});
 
 			it('does not allow owner to set invalid voting power contract', async () => {
-				await expect(monastery.setVotingPowerContract(ZERO_ADDRESS)).to.revertedWith(
+				await expect(monastery.setVotingPowerContract(O_Address)).to.revertedWith(
 					'revert Monastery::setVotingPowerContract: not valid contract'
 				);
 				await expect(monastery.setVotingPowerContract(monastery.address)).to.revertedWith(
@@ -762,7 +760,7 @@ describe('Monastery', () => {
 				await expect(monastery.setVotingPowerContract(govToken.address)).to.revertedWith(
 					'revert Monastery::setVotingPowerContract: not valid contract'
 				);
-				expect(await monastery.votingPower()).to.eq(ZERO_ADDRESS);
+				expect(await monastery.votingPower()).to.eq(O_Address);
 			});
 		});
 
@@ -782,7 +780,7 @@ describe('Monastery', () => {
 			});
 
 			it('does not allow clergy to set invalid clergy', async () => {
-				await expect(monastery.changeClergy(ZERO_ADDRESS)).to.revertedWith('revert Monastery::changeClergy: not valid address');
+				await expect(monastery.changeClergy(O_Address)).to.revertedWith('revert Monastery::changeClergy: not valid address');
 				await expect(monastery.changeClergy(monastery.address)).to.revertedWith('revert Monastery::changeClergy: not valid address');
 				await expect(monastery.changeClergy(govToken.address)).to.revertedWith('revert Monastery::changeClergy: not valid address');
 

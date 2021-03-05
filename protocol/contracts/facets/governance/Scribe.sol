@@ -15,6 +15,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
+          __...--~~~~~-._   _.-~~~~~--...__
+        //               `V'               \\
+       //                 |                 \\
+      //__...--~~~~~~-._  |  _.-~~~~~~--...__\\
+     //__.....----~~~~._\ | /_.~~~~----.....__\\
+    ====================\\|//====================
+                        `---`
 */
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.2;

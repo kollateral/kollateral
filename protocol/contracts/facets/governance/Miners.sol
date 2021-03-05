@@ -15,6 +15,29 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
+        ▓▓▓▓▓▓▓▓▓▓
+      ▓▓▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓
+        ▓▓▓▓▓▓▓▓▒▒▒▒▒▒██
+                ▓▓▒▒▒▒▓▓
+              ▓▓▓▓██▒▒▒▒▓▓
+            ▓▓▒▒██  ▓▓▒▒▓▓
+          ▓▓▓▓██    ▓▓▒▒▓▓
+        ▓▓▒▒██      ▓▓▒▒▓▓
+      ▓▓▓▓██        ▓▓▒▒▓▓
+    ▓▓▒▒██            ▓▓
+  ▓▓▓▓██                          ████
+▓▓▒▒██                      ██████    ██
+▓▓██                  ██████            ██
+                ██████                    ██
+              ██░░                  ▒▒▒▒▒▒▒▒██
+              ██  ░░          ▒▒▒▒▒▒        ██
+              ██    ░░  ▒▒▒▒▒▒          ▒▒▒▒██
+              ██      ░░          ▒▒▒▒▒▒▒▒▒▒██
+              ██▒▒▒▒  ░░    ▒▒▒▒▒▒▒▒▒▒██████
+                ██▒▒░░░░▒▒▒▒▒▒▒▒██████
+                  ██▒▒░░▒▒██████
+                    ██████
+
 */
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.2;
@@ -28,7 +51,7 @@ import "../../libraries/math/SafeMath.sol";
 
 /**
  * @title Miners (prev. SupplyManager)
- * @dev Responsible for enacting decisions related to Crown governance token supply
+ * @dev Collective responsible for enacting decisions related to Crown governance token supply
  * @notice Decisions are made via a timelocked propose/accept scheme
  * @notice Initial proposal length (timelock) is 30 days
  */
