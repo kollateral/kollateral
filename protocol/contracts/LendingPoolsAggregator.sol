@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.1;
+pragma solidity ^0.8.2;
 
-import "./__oz__/math/SafeMath.sol";
-import "./__oz__/token/ERC20/IERC20.sol";
 import "erc3156/contracts/interfaces/IERC3156FlashLender.sol";
 import "erc3156/contracts/interfaces/IERC3156FlashBorrower.sol";
+import "./interfaces/token/ERC20/IERC20.sol";
 import "./LendingPool.sol";
 
 contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156FlashBorrower {

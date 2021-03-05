@@ -18,6 +18,7 @@
 		"test:governance": "echo REMEMBER TO COMPILE FIRST && mocha --exit --recursive \"test/governance/Treasury.ts\"",
 		"test:tokens": "echo REMEMBER TO COMPILE FIRST && mocha --exit --recursive \"test/tokens/**/*.ts\"",
 		"test:liquidity": "echo REMEMBER TO COMPILE FIRST && mocha --exit --recursive \"test/liquidity/*.ts\"",
+		"test:aggregator": "echo REMEMBER TO COMPILE FIRST && mocha --exit --recursive \"test/LendingPoolsAggregator.ts\"",
 		"coverage": "cross-env HARDHAT_DEPLOY_FIXTURE=true hardhat coverage",
 		"hardhat": "npx hardhat node --no-deploy --show-accounts",
 		"dev": "hardhat node --reset --watch --export contracts.json",

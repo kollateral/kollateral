@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2015, 2016, 2017 Dapphub
 // Adapted by Ethereum Community 2021
-pragma solidity 0.8.1;
+pragma solidity 0.8.2;
 
-import "../../__oz__/token/ERC20/IERC20.sol";
 import "./IERC2612.sol";
 import "erc3156/contracts/interfaces/IERC3156FlashLender.sol";
+import "../../interfaces/token/ERC20/IERC20.sol";
 
 /// @dev Wrapped Ether v10 (WETH10) is an Ether (ETH) ERC-20 wrapper. You can `deposit` ETH and obtain a WETH10 balance which can then be operated as an ERC-20 token. You can
 /// `withdraw` ETH from WETH10, which will then burn WETH10 token in your wallet. The amount of WETH10 token in any wallet is always identical to the

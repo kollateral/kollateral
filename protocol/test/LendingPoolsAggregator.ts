@@ -2,9 +2,11 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-wit
 import { Contract } from 'ethers';
 import { ethers } from 'hardhat';
 
-import { assert, expect } from 'chai';
+import { expect } from 'chai';
 
 const ETHER_TOKEN_ADDRESS = '0x0000000000000000000000000000000000000001';
+const DUMMY_ADDRESS = '0x0000000000000000000000000000000000000002';
+const DUMMY_CALL_DATA = '0x6c00000000000000000000000000000000000000000000000000000000000000';
 
 describe('LendingPoolsAggregator', () => {
 	let LendingPoolsAggregator: Contract;
@@ -25,33 +27,45 @@ describe('LendingPoolsAggregator', () => {
 			await LendingPoolsAggregator.deployed();
 		});
 
-		it('maxFlashLoan should return 0', async () => {
-			const maxAvailableLoan = await LendingPoolsAggregator.connect(user).maxFlashLoan(ETHER_TOKEN_ADDRESS);
-			expect(maxAvailableLoan).to.be.equal(0);
+		it('maxFlashLoan should return 0',   async () => {
+			expect(await LendingPoolsAggregator.connect(user).maxFlashLoan(ETHER_TOKEN_ADDRESS))
+				.to.be.equal(0);
 		});
 
-		it('flashFee should raise an exception', async () => {
-			try {
-				await LendingPoolsAggregator.connect(user).flashFee(ETHER_TOKEN_ADDRESS, 1000)
-				assert(false, "Should have failed");
-			} catch (e) {
-				expect(e.message === "LendingPoolsAggregator: Unsupported currency");
-			}
+		it('flashFee should raise an exception', () => {
+			expect(LendingPoolsAggregator.connect(user).flashFee(ETHER_TOKEN_ADDRESS, 1000))
+				.to.be.revertedWith("LendingPoolsAggregator: Unsupported currency");
 		});
 
-		it('flashLoan should raise an exception', async () => {
+		it('flashLoan should raise an exception',  () => {
 			const dummyCallData = ethers.utils.defaultAbiCoder.encode(['uint256'], [42]);
-			try {
-				await LendingPoolsAggregator.connect(user).flashLoan(
+			expect(
+				LendingPoolsAggregator.connect(user).flashLoan(
 					user.address,
 					ETHER_TOKEN_ADDRESS,
 					1000,
 					dummyCallData
-				);
-				assert(false, "Should have failed");
-			} catch (e) {
-				expect(e.message === "LendingPoolsAggregator: Unsupported currency");
-			}
+				)
+			).to.be.revertedWith("LendingPoolsAggregator: Liquidity is not sufficient for requested amount");
 		});
+
+		it('setPlatformFeeBips cannot be called by non owner address',  () => {
+			expect(LendingPoolsAggregator.connect(user).setPlatformFeeBips(100))
+				.to.be
+				.revertedWith("Ownable: caller is not the owner");
+		});
+
+		it('setPlatformFeeCollectionAddress cannot be called by non owner address',  () => {
+			expect(LendingPoolsAggregator.connect(user).setPlatformFeeCollectionAddress(DUMMY_ADDRESS))
+				.to.be
+				.revertedWith("Ownable: caller is not the owner");
+		});
+
+		it('setLenders cannot be called by non owner address',  () => {
+			expect(LendingPoolsAggregator.connect(user).setLenders(DUMMY_ADDRESS, DUMMY_CALL_DATA))
+				.to.be
+				.revertedWith("Ownable: caller is not the owner");
+		});
+
 	});
 });

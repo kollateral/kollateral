@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.1;
+pragma solidity ^0.8.2;
 
-import "./__oz__/access/Ownable.sol";
-import "./__oz__/math/SafeMath.sol";
 import "./__oz__/math/Math.sol";
 import "erc3156/contracts/interfaces/IERC3156FlashLender.sol";
+import "./libraries/access/Ownable.sol";
+import "./libraries/math/SafeMath.sol";
 
 contract LendingPool is Ownable {
 
@@ -23,11 +23,31 @@ contract LendingPool is Ownable {
 
 	constructor() {}
 
+	function platformFee() external view returns (uint256) {
+		return _platformFeeBips;
+	}
+
+	function platformFeeCollectionAddress() external view returns (address) {
+		return _platformFeeCollectionAddress;
+	}
+
+	function lenders(address tokenAddress) external view returns (Lender[] memory) {
+		return _lenders[tokenAddress];
+	}
+
+	function setPlatformFeeBips(uint256 bips) external onlyOwner {
+		_platformFeeBips = bips;
+	}
+
+	function setPlatformFeeCollectionAddress(address feeCollectionAddress) external onlyOwner {
+		_platformFeeCollectionAddress = feeCollectionAddress;
+	}
+
 	function setLenders(
 		address tokenAddress,
-		bytes calldata lenders
+		bytes calldata newLenders
 	) external onlyOwner {
-		(Lender[] memory items) = abi.decode(lenders, (Lender[]));
+		(Lender[] memory items) = abi.decode(newLenders, (Lender[]));
 		for (uint256 index = 0; index < items.length; index++) {
 			_lenders[tokenAddress][index] = items[index];
 		}
