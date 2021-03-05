@@ -19,9 +19,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.1;
 
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+
 import "./KToken.sol";
+
 import "../CollateralizedEther.sol";
-import "../../libraries/math/SafeMath.sol";
 
 contract KEther is KToken, CollateralizedEther {
 	constructor() CollateralizedEther() ERC20("Kingmaker/Ether", "kETH") {}

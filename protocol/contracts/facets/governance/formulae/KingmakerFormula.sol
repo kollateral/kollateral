@@ -22,10 +22,10 @@ pragma solidity ^0.8.2;
 import "../../../interfaces/governance/IVotingPowerFormula.sol";
 
 /**
- * @title KingFormula
+ * @title KingmakerFormula
  * @dev Convert Kingmaker Crown governance token to its voting power equivalent to aid in gov calculations
  */
-contract KingFormula is IVotingPowerFormula {
+contract KingmakerFormula is IVotingPowerFormula {
 	/**
 	 * @notice Convert KING amount to voting power
 	 * @dev Always converts 1-1

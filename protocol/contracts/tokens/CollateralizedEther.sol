@@ -19,8 +19,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.1;
 
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+
 import "./CollateralizedToken.sol";
-import "../libraries/math/SafeMath.sol";
+
 import "../common/utils/ExternalCaller.sol";
 
 abstract contract CollateralizedEther is CollateralizedToken, ExternalCaller {

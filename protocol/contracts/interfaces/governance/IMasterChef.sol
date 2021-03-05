@@ -19,7 +19,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.2;
 
-import "../token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // TODO: this should be modified to permanently lock liquidity (see https://github.com/ARM-Finance/kingmaker/issues/15)
 interface IMasterChef {

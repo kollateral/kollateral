@@ -18,7 +18,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.2;
 
-import "../libraries/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract ERC20Mock is ERC20("ERC20Mock", "MOCK") {
 	bool public transferFromCalled = false;

@@ -19,9 +19,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.1;
 
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+
 import "./UnlimitedApprovalERC20.sol";
-import "../libraries/math/SafeMath.sol";
-import "../libraries/security/ReentrancyGuard.sol";
+
 import "../common/utils/ExtendedMath.sol";
 
 abstract contract CollateralizedToken is ExtendedMath, ReentrancyGuard, UnlimitedApprovalERC20 {

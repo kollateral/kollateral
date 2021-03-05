@@ -39,12 +39,9 @@ pragma solidity ^0.8.2;
 
 import "hardhat/console.sol";
 
-import "../../interfaces/governance/ILockManager.sol";
-import "../../libraries/math/SafeMath.sol";
-import "../../interfaces/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "../../libraries/math/SafeMath.sol";
-import "../../libraries/token/ERC20/utils/SafeERC20.sol";
+import "../../interfaces/governance/ILockManager.sol";
 import "../../interfaces/governance/IVault.sol";
 
 /**
@@ -52,7 +49,6 @@ import "../../interfaces/governance/IVault.sol";
  * @dev Contract for locking up tokens for arbitrary time intervals, optionally providing voting power
  */
 contract Treasury is IVault {
-	using SafeMath for uint256;
 	using SafeERC20 for IERC20;
 
 	/// @notice lockManager contract
@@ -396,26 +392,25 @@ contract Treasury is IVault {
 		for (uint256 i; i < numLocks; i++) {
 			Lock memory tokenLock = tokenLocks[i];
 			if (tokenLock.token == token && tokenLock.amount != tokenLock.amountClaimed) {
-				balance.totalAmount = balance.totalAmount.add(tokenLock.amount);
-				balance.votingPower = balance.votingPower.add(tokenLock.votingPower);
+				balance.totalAmount = balance.totalAmount + tokenLock.amount;
+				balance.votingPower = balance.votingPower + tokenLock.votingPower;
 				if (block.timestamp > tokenLock.startTime) {
-					balance.claimedAmount = balance.claimedAmount.add(tokenLock.amountClaimed);
+					balance.claimedAmount = balance.claimedAmount + tokenLock.amountClaimed;
 
-					uint256 elapsedTime = block.timestamp.sub(tokenLock.startTime);
-					uint256 elapsedDays = elapsedTime.div(SECONDS_PER_DAY);
+					uint256 elapsedTime = block.timestamp - tokenLock.startTime;
+					uint256 elapsedDays = elapsedTime / SECONDS_PER_DAY;
 
 					if (elapsedDays >= tokenLock.cliffDurationInDays) {
 						if (elapsedDays >= tokenLock.vestingDurationInDays) {
-							balance.claimableAmount = balance.claimableAmount.add(tokenLock.amount).sub(
-								tokenLock.amountClaimed
-							);
+							balance.claimableAmount =
+								balance.claimableAmount +
+								tokenLock.amount -
+								tokenLock.amountClaimed;
 						} else {
-							uint256 vestingDurationInSecs = uint256(tokenLock.vestingDurationInDays).mul(SECONDS_PER_DAY);
-							uint256 vestingAmountPerSec = tokenLock.amount.div(vestingDurationInSecs);
-							uint256 amountVested = vestingAmountPerSec.mul(elapsedTime);
-							balance.claimableAmount = balance.claimableAmount.add(
-								amountVested.sub(tokenLock.amountClaimed)
-							);
+							uint256 vestingDurationInSecs = uint256(tokenLock.vestingDurationInDays) * SECONDS_PER_DAY;
+							uint256 vestingAmountPerSec = tokenLock.amount / vestingDurationInSecs;
+							uint256 amountVested = vestingAmountPerSec * elapsedTime;
+							balance.claimableAmount = balance.claimableAmount + amountVested - tokenLock.amountClaimed;
 						}
 					}
 				}
@@ -434,27 +429,25 @@ contract Treasury is IVault {
 		for (uint256 i; i < receiverLockIds.length; i++) {
 			Lock memory receiverLock = tokenLocks[receiverLockIds[i]];
 			if (receiverLock.token == token && receiverLock.amount != receiverLock.amountClaimed) {
-				balance.totalAmount = balance.totalAmount.add(receiverLock.amount);
-				balance.votingPower = balance.votingPower.add(receiverLock.votingPower);
+				balance.totalAmount = balance.totalAmount + receiverLock.amount;
+				balance.votingPower = balance.votingPower + receiverLock.votingPower;
 				if (block.timestamp > receiverLock.startTime) {
-					balance.claimedAmount = balance.claimedAmount.add(receiverLock.amountClaimed);
+					balance.claimedAmount = balance.claimedAmount + receiverLock.amountClaimed;
 
-					uint256 elapsedTime = block.timestamp.sub(receiverLock.startTime);
-					uint256 elapsedDays = elapsedTime.div(SECONDS_PER_DAY);
+					uint256 elapsedTime = block.timestamp - receiverLock.startTime;
+					uint256 elapsedDays = elapsedTime / SECONDS_PER_DAY;
 
 					if (elapsedDays >= receiverLock.cliffDurationInDays) {
 						if (elapsedDays >= receiverLock.vestingDurationInDays) {
-							balance.claimableAmount = balance.claimableAmount.add(receiverLock.amount).sub(
-								receiverLock.amountClaimed
-							);
+							balance.claimableAmount =
+								balance.claimableAmount +
+								receiverLock.amount -
+								receiverLock.amountClaimed;
 						} else {
-							uint256 vestingDurationInSecs =
-								uint256(receiverLock.vestingDurationInDays).mul(SECONDS_PER_DAY);
-							uint256 vestingAmountPerSec = receiverLock.amount.div(vestingDurationInSecs);
-							uint256 amountVested = vestingAmountPerSec.mul(elapsedTime);
-							balance.claimableAmount = balance.claimableAmount.add(
-								amountVested.sub(receiverLock.amountClaimed)
-							);
+							uint256 vestingDurationInSecs = uint256(receiverLock.vestingDurationInDays) * SECONDS_PER_DAY;
+							uint256 vestingAmountPerSec = receiverLock.amount / vestingDurationInSecs;
+							uint256 amountVested = vestingAmountPerSec * elapsedTime;
+							balance.claimableAmount = balance.claimableAmount + amountVested - receiverLock.amountClaimed;
 						}
 					}
 				}
@@ -487,20 +480,20 @@ contract Treasury is IVault {
 			return 0;
 		}
 
-		uint256 elapsedTime = block.timestamp.sub(lock.startTime);
-		uint256 elapsedDays = elapsedTime.div(SECONDS_PER_DAY);
+		uint256 elapsedTime = block.timestamp - lock.startTime;
+		uint256 elapsedDays = elapsedTime / SECONDS_PER_DAY;
 
 		if (elapsedDays < lock.cliffDurationInDays) {
 			return 0;
 		}
 
 		if (elapsedDays >= lock.vestingDurationInDays) {
-			return lock.amount.sub(lock.amountClaimed);
+			return lock.amount - lock.amountClaimed;
 		} else {
-			uint256 vestingDurationInSecs = uint256(lock.vestingDurationInDays).mul(SECONDS_PER_DAY);
-			uint256 vestingAmountPerSec = lock.amount.div(vestingDurationInSecs);
-			uint256 amountVested = vestingAmountPerSec.mul(elapsedTime);
-			return amountVested.sub(lock.amountClaimed);
+			uint256 vestingDurationInSecs = uint256(lock.vestingDurationInDays) * SECONDS_PER_DAY;
+			uint256 vestingAmountPerSec = lock.amount / vestingDurationInSecs;
+			uint256 amountVested = vestingAmountPerSec * elapsedTime;
+			return amountVested - lock.amountClaimed;
 		}
 	}
 
@@ -548,6 +541,7 @@ contract Treasury is IVault {
 		Lock storage lock = tokenLocks[lockId];
 		require(msg.sender == lock.receiver, "Treasury::extendLock: msg.sender must be receiver");
 		uint16 oldVestingDuration = lock.vestingDurationInDays;
+		console.log("Treasury::extendLock: got here?");
 		uint16 newVestingDuration =
 			_add16(oldVestingDuration, vestingDaysToAdd, "Treasury::extendLock: vesting max days exceeded");
 		uint16 oldCliffDuration = lock.cliffDurationInDays;
@@ -642,11 +636,11 @@ contract Treasury is IVault {
 		// Remove voting power, if exists
 		if (lock.votingPower > 0) {
 			votingPowerRemoved = lockManager.removeVotingPower(lock.receiver, lock.token, claimAmount);
-			lock.votingPower = lock.votingPower.sub(votingPowerRemoved);
+			lock.votingPower = lock.votingPower - votingPowerRemoved;
 		}
 
 		// Update claimed amount
-		lock.amountClaimed = lock.amountClaimed.add(claimAmount);
+		lock.amountClaimed = lock.amountClaimed + claimAmount;
 
 		// Release tokens
 		IERC20(lock.token).safeTransfer(lock.receiver, claimAmount);

@@ -19,10 +19,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.1;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+
 import "../CollateralizedToken.sol";
-import "../../libraries/access/Ownable.sol";
-import "../../libraries/math/SafeMath.sol";
-import "../../libraries/utils/Pausable.sol";
+
 import "../../common/invoke/IInvocationHook.sol";
 import "../../common/invoke/IInvokable.sol";
 

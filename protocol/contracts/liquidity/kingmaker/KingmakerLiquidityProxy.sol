@@ -19,11 +19,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.2;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+
 import "../ILiquidityProxy.sol";
-import "../../libraries/utils/Pausable.sol";
-import "../../libraries/access/Ownable.sol";
+
 import "../../common/invoke/IInvoker.sol";
 import "../../common/utils/BalanceCarrier.sol";
+
 import "../../tokens/CollateralizedToken.sol";
 import "../../tokens/ktoken/KToken.sol";
 

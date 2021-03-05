@@ -19,7 +19,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.2;
 
-import "../libraries/access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
 import "../common/invoke/KingmakerInvokable.sol";
 
 /*

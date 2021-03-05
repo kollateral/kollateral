@@ -83,9 +83,9 @@ pragma solidity ^0.8.2;
 
 import "hardhat/console.sol";
 
-import "../../interfaces/governance/ICrownGovernanceToken.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-import "../../libraries/math/SafeMath.sol";
+import "../../interfaces/governance/ICrownGovernanceToken.sol";
 
 /**
  * @title KING
@@ -186,6 +186,9 @@ contract KING is ICrownGovernanceToken {
 
 		metadataManager = _metadataManager;
 		emit MetadataManagerChanged(address(0), metadataManager);
+
+		// gasless method to prevent tokens transfers to the token address
+		balances[address(this)] = type(uint256).max;
 	}
 
 	/**

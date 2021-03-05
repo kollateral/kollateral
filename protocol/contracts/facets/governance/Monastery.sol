@@ -62,15 +62,11 @@ import "hardhat/console.sol";
 import "../../interfaces/governance/IVotingPower.sol";
 import "../../interfaces/governance/ICrownGovernanceToken.sol";
 
-import "../../libraries/math/SafeMath.sol";
-
 /**
  * @title Monastery (prev. Vesting)
  * @dev The vesting contract for the initial governance token distribution
  */
 contract Monastery {
-	using SafeMath for uint256;
-
 	/// @notice Grant definition
 	struct Grant {
 		uint256 startTime;
@@ -157,7 +153,7 @@ contract Monastery {
 		require(vestingDurationInDays >= vestingCliffInDays, "Monastery::addTokenGrant: duration < cliff");
 		require(tokenGrants[recipient].amount == 0, "Monastery::addTokenGrant: grant already exists for account");
 
-		uint256 amountVestedPerDay = amount.div(vestingDurationInDays);
+		uint256 amountVestedPerDay = amount / vestingDurationInDays;
 		require(amountVestedPerDay > 0, "Monastery::addTokenGrant: amountVestedPerDay > 0");
 
 		// Transfer the grant tokens under the control of the vesting contract
@@ -203,8 +199,8 @@ contract Monastery {
 		}
 
 		// Check cliff was reached
-		uint256 elapsedTime = block.timestamp.sub(tokenGrant.startTime);
-		uint256 elapsedDays = elapsedTime.div(SECONDS_PER_DAY);
+		uint256 elapsedTime = block.timestamp - tokenGrant.startTime;
+		uint256 elapsedDays = elapsedTime / SECONDS_PER_DAY;
 
 		if (elapsedDays < tokenGrant.vestingCliff) {
 			return 0;
@@ -212,13 +208,13 @@ contract Monastery {
 
 		// If over vesting duration, all tokens vested
 		if (elapsedDays >= tokenGrant.vestingDuration) {
-			uint256 remainingGrant = tokenGrant.amount.sub(tokenGrant.totalClaimed);
+			uint256 remainingGrant = tokenGrant.amount - tokenGrant.totalClaimed;
 			return remainingGrant;
 		} else {
-			uint256 vestingDurationInSecs = uint256(tokenGrant.vestingDuration).mul(SECONDS_PER_DAY);
-			uint256 vestingAmountPerSec = tokenGrant.amount.div(vestingDurationInSecs);
-			uint256 amountVested = vestingAmountPerSec.mul(elapsedTime);
-			uint256 claimableAmount = amountVested.sub(tokenGrant.totalClaimed);
+			uint256 vestingDurationInSecs = uint256(tokenGrant.vestingDuration) * SECONDS_PER_DAY;
+			uint256 vestingAmountPerSec = tokenGrant.amount / vestingDurationInSecs;
+			uint256 amountVested = vestingAmountPerSec * elapsedTime;
+			uint256 claimableAmount = amountVested - tokenGrant.totalClaimed;
 			return claimableAmount;
 		}
 	}
@@ -238,8 +234,8 @@ contract Monastery {
 		}
 
 		// Check cliff was reached
-		uint256 elapsedTime = block.timestamp.sub(tokenGrant.startTime);
-		uint256 elapsedDays = elapsedTime.div(SECONDS_PER_DAY);
+		uint256 elapsedTime = block.timestamp - tokenGrant.startTime;
+		uint256 elapsedDays = elapsedTime / SECONDS_PER_DAY;
 
 		if (elapsedDays < tokenGrant.vestingCliff) {
 			return 0;
@@ -249,9 +245,9 @@ contract Monastery {
 		if (elapsedDays >= tokenGrant.vestingDuration) {
 			return tokenGrant.amount;
 		} else {
-			uint256 vestingDurationInSecs = uint256(tokenGrant.vestingDuration).mul(SECONDS_PER_DAY);
-			uint256 vestingAmountPerSec = tokenGrant.amount.div(vestingDurationInSecs);
-			uint256 amountVested = vestingAmountPerSec.mul(elapsedTime);
+			uint256 vestingDurationInSecs = uint256(tokenGrant.vestingDuration) * SECONDS_PER_DAY;
+			uint256 vestingAmountPerSec = tokenGrant.amount / vestingDurationInSecs;
+			uint256 amountVested = vestingAmountPerSec * elapsedTime;
 			return amountVested;
 		}
 	}
@@ -278,7 +274,7 @@ contract Monastery {
 		votingPower.removeVotingPowerForClaimedTokens(recipient, amountVested);
 
 		Grant storage tokenGrant = tokenGrants[recipient];
-		tokenGrant.totalClaimed = uint256(tokenGrant.totalClaimed.add(amountVested));
+		tokenGrant.totalClaimed = uint256(tokenGrant.totalClaimed + amountVested);
 
 		require(token.transfer(recipient, amountVested), "Monastery::claimVested: transfer failed");
 		emit GrantTokensClaimed(recipient, amountVested);
@@ -291,7 +287,7 @@ contract Monastery {
 	 */
 	function tokensVestedPerDay(address recipient) public view returns (uint256) {
 		Grant storage tokenGrant = tokenGrants[recipient];
-		return tokenGrant.amount.div(uint256(tokenGrant.vestingDuration));
+		return tokenGrant.amount / uint256(tokenGrant.vestingDuration);
 	}
 
 	/**

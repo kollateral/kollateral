@@ -15,6 +15,7 @@
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
+
                                                                           ░░
                   ░░▓▓                                                  ░░░░▒▒                                                  ▓▓
   ░░              ░░▒▒▓▓░░                                              ░░  ░░░░                                              ▓▓▒▒░░            ░░░░
@@ -75,14 +76,14 @@ pragma solidity ^0.8.2;
 
 import "hardhat/console.sol";
 
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+
 import "../../interfaces/governance/IVotingPowerFormula.sol";
-import "../../interfaces/token/ERC20/IERC20.sol";
 
 import "../../libraries/governance/LibCrownStorage.sol";
 import "../../libraries/governance/PrismProxyImplementation.sol";
-import "../../libraries/math/SafeMath.sol";
 import "../../libraries/security/ReentrancyGuardUpgradeSafe.sol";
-import "../../libraries/token/ERC20/utils/SafeERC20.sol";
 
 /**
  * @title CrownCourt (prev. VotingPower)
