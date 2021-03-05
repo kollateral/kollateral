@@ -8,6 +8,8 @@ import {
 	MASTERCHEF_ADDRESS,
 	KING_REWARDS_PER_BLOCK,
 	KING_REWARDS_START_BLOCK,
+	SUSHI_LP_VP_CVR,
+	SUSHI_POOL_ADDRESS,
 } from '../libs/deploy';
 
 export const token = deployments.createFixture(async (hre: HardhatRuntimeEnvironment) => {
@@ -72,10 +74,10 @@ export const governance = deployments.createFixture(async (hre: HardhatRuntimeEn
 });
 
 export const rewards = deployments.createFixture(async (hre: HardhatRuntimeEnvironment) => {
-	const [deployer, lepidotteri, SHA_2048, feeCollector, King, Dragon] = await ethers.getSigners();
+	const [deployer, lepidotteri, SHA_2048, feeCollector, King, dragon] = await ethers.getSigners();
 	const admin = lepidotteri;
 	const liquidityProvider = King;
-	const treasurer = Dragon;
+	const treasurer = dragon;
 
 	// TODO: here it's missing a big logical chunk i.e. the steps undertaken by deployment scripts
 	// e.g. allocate token to "DAO" (Treasurer/Treasury)
@@ -83,9 +85,9 @@ export const rewards = deployments.createFixture(async (hre: HardhatRuntimeEnvir
 	const KING = await govTokenFactory.deploy(admin.address, deployer.address, FIRST_KING_SUPPLY_CHANGE);
 	await deployer.sendTransaction({ to: treasurer.address, value: ethers.utils.parseEther('1.0') });
 	const balanceOfDeployer = await KING.balanceOf(deployer.address);
-	console.log('$KING Balance of Deployer:', balanceOfDeployer.toString());
+
 	// so, for the sake of Treasury.sol test suites, we manually xfer entire deployer KING balance to the treasurer
-	await KING.connect(deployer).transfer(treasurer.address, ethers.BigNumber.from(balanceOfDeployer))
+	await KING.connect(deployer).transfer(treasurer.address, ethers.BigNumber.from(balanceOfDeployer));
 	await KING.connect(treasurer).transfer(admin.address, ethers.BigNumber.from(INITIAL_KING_REWARDS_BALANCE));
 	await KING.connect(treasurer).transfer(deployer.address, ethers.BigNumber.from(INITIAL_KING_REWARDS_BALANCE));
 	await KING.connect(treasurer).transfer(lepidotteri.address, ethers.BigNumber.from(INITIAL_KING_LIQUIDITY));
@@ -102,15 +104,28 @@ export const rewards = deployments.createFixture(async (hre: HardhatRuntimeEnvir
 	await CrownPrism.connect(deployer).setPendingProxyImplementation(CrownImp.address);
 	await CrownImp.connect(deployer).become(Crown.address);
 
+	const kingmakerFormulaFactory = await ethers.getContractFactory('KingmakerFormula');
+	const KingmakerFormula = await kingmakerFormulaFactory.deploy();
+	const SushiFormulaFactory = await ethers.getContractFactory('SushiLPFormula');
+	const SushiFormula = await SushiFormulaFactory.deploy(admin.address, SUSHI_LP_VP_CVR);
+	const scribeFactory = await ethers.getContractFactory('Scribe');
+	const Scribe = await scribeFactory.deploy(
+		admin.address,
+		[KING.address, SUSHI_POOL_ADDRESS],
+		[KingmakerFormula.address, SushiFormula.address]
+	);
+	await Crown.connect(deployer).setTokenRegistry(Scribe.address);
+
 	const lordFactory = await ethers.getContractFactory('Lord');
 	const Lord = await lordFactory.deploy(Crown.address, deployer.address);
 	await Crown.connect(deployer).setLockManager(Lord.address);
 
 	const treasuryFactory = await ethers.getContractFactory('Treasury');
 	const Treasury = await treasuryFactory.deploy(Lord.address);
-
-	const treasurerFactory = await ethers.getContractFactory('Treasurer');
-	const Treasurer = await treasurerFactory.deploy(
+	/*
+	// TODO: contract size too big! (Dragon + Treasurer)
+	const dragonFactory = await ethers.getContractFactory('Dragon');
+	const Dragon = await dragonFactory.deploy(
 		admin.address,
 		Lord.address,
 		Treasury.address,
@@ -120,11 +135,12 @@ export const rewards = deployments.createFixture(async (hre: HardhatRuntimeEnvir
 		KING_REWARDS_START_BLOCK,
 		KING_REWARDS_PER_BLOCK
 	);
-	await KING.connect(admin).approve(Treasurer.address, INITIAL_KING_REWARDS_BALANCE);
-
+	await KING.connect(admin).approve(Dragon.address, INITIAL_KING_REWARDS_BALANCE);
+*/
 	return {
 		admin: admin,
 		govToken: KING,
+		// dragon: Dragon,
 		treasury: Treasury,
 		treasurer: treasurer,
 		lord: Lord,

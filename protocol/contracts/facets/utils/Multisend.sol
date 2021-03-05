@@ -21,9 +21,9 @@ pragma solidity ^0.8.2;
 
 import "hardhat/console.sol";
 
-import "../../interfaces/governance/ICrownGovernanceToken.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-import "../../libraries/security/ReentrancyGuard.sol";
+import "../../interfaces/governance/ICrownGovernanceToken.sol";
 
 /**
  * @title Multisend

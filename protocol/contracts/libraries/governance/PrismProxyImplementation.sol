@@ -19,8 +19,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.1;
 
+import "@openzeppelin/contracts/utils/Initializable.sol";
+
 import "./PrismProxy.sol";
-import "../utils/Initializable.sol";
 
 contract PrismProxyImplementation is Initializable {
 	/**

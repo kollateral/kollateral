@@ -15,66 +15,21 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-                                                    ___
-                                                  .~))>>
-                                                 .~)>>
-                                               .~))))>>>
-                                             .~))>>             ___
-                                           .~))>>)))>>      .-~))>>
-                                         .~)))))>>       .-~))>>)>
-                                       .~)))>>))))>>  .-~)>>)>
-                   )                 .~))>>))))>>  .-~)))))>>)>
-                ( )@@*)             //)>))))))  .-~))))>>)>
-              ).@(@@               //))>>))) .-~))>>)))))>>)>
-            (( @.@).              //))))) .-~)>>)))))>>)>
-          ))  )@@*.@@ )          //)>))) //))))))>>))))>>)>
-       ((  ((@@@.@@             |/))))) //)))))>>)))>>)>
-      )) @@*. )@@ )   (\_(\-\b  |))>)) //)))>>)))))))>>)>
-    (( @@@(.@(@ .    _/`-`  ~|b |>))) //)>>)))))))>>)>
-     )* @@@ )@*     (@) (@)  /\b|))) //))))))>>))))>>
-   (( @. )@( @ .   _/       /  \b)) //))>>)))))>>>_._
-    )@@ (@@*)@@.  (6,   6) / ^  \b)//))))))>>)))>>   ~~-.
- ( @jgs@@. @@@.*@_ ~^~^~, /\  ^  \b/)>>))))>>      _.     `,
-  ((@@ @@@*.(@@ .   \^^^/' (  ^   \b)))>>        .'         `,
-   ((@@).*@@ )@ )    `-'   ((   ^  ~)_          /             `,
-     (@@. (@@ ).           (((   ^    `\        |               `.
-       (*.@*              / ((((        \        \      .         `.
-                         /   (((((  \    \    _.-~\     Y,         ;
-                        /   / (((((( \    \.-~   _.`" _.-~`,       ;
-                       /   /   `(((((()    )    (((((~      `,     ;
-                     _/  _/      `"""/   /'                  ;     ;
-                 _.-~_.-~           /  /'                _.-~   _.'
-               ((((~~              / /'              _.-~ __.--~
-                                  ((((          __.-~ _.-~
-                                              .'   .~~
-                                              :    ,'
-                                              ~~~~~
-
 */
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.2;
 
-import "hardhat/console.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
+import "../../libraries/governance/LibCrownStorage.sol";
 
 import "../../interfaces/governance/ILockManager.sol";
 import "../../interfaces/governance/IMasterChef.sol";
 import "../../interfaces/governance/IVault.sol";
 
-import "../../libraries/governance/LibCrownStorage.sol";
-import "../../libraries/math/SafeMath.sol";
-import "../../libraries/security/ReentrancyGuard.sol";
-import "../../libraries/token/ERC20/utils/SafeERC20.sol";
-
-/**
- * @title Treasurer (prev. RewardsManager)
- * @dev Oversees rewards distribution withing the Kingmaker ecosystem
- */
-contract Treasurer is ReentrancyGuard {
-	using SafeMath for uint256;
+abstract contract Treasurer is ReentrancyGuard {
 	using SafeERC20 for IERC20;
-
-	/// @notice Current owner of this contract
-	address public owner;
 
 	/// @notice Info of each user.
 	struct UserInfo {
@@ -143,12 +98,8 @@ contract Treasurer is ReentrancyGuard {
 	/// @notice The block number when rewards end.
 	uint256 public endBlock;
 
-	/// @notice restrict functions to just owner address
-	modifier onlyTheKing {
-		CrownStorage storage crown = LibCrownStorage.crownStorage();
-		require(crown.king == address(0) || msg.sender == crown.king, "Crown::onlyTheKing: not the king");
-		_;
-	}
+	/// @notice Current master of this contract
+	address public master;
 
 	/// @notice Event emitted when a user deposits funds in the rewards manager
 	event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
@@ -174,8 +125,8 @@ contract Treasurer is ReentrancyGuard {
 	/// @notice Event emitted when pool allocation points are updated
 	event PoolUpdated(uint256 indexed pid, uint256 oldAllocPoints, uint256 newAllocPoints, uint256 newTotalAllocPoints);
 
-	/// @notice Event emitted when the owner of the rewards manager contract is updated
-	event ChangedOwner(address indexed oldOwner, address indexed newOwner);
+	/// @notice Event emitted when the master of the rewards manager contract is updated
+	event ChangedMaster(address indexed oldMaster, address indexed newMaster);
 
 	/// @notice Event emitted when the amount of reward tokens per block is updated
 	event ChangedRewardTokensPerBlock(uint256 indexed oldRewardTokensPerBlock, uint256 indexed newRewardTokensPerBlock);
@@ -189,52 +140,11 @@ contract Treasurer is ReentrancyGuard {
 	/// @notice Event emitted when contract address is changed
 	event ChangedAddress(string indexed addressType, address indexed oldAddress, address indexed newAddress);
 
-	/**
-	 * @notice Create a new Rewards Manager contract
-	 * @param _owner owner of contract
-	 * @param _lockManager address of LockManager contract
-	 * @param _vault address of Vault contract
-	 * @param _rewardToken address of token that is being offered as a reward
-	 * @param _sushiToken address of SUSHI token
-	 * @param _masterChef address of SushiSwap MasterChef contract
-	 * @param _startBlock block number when rewards will start
-	 * @param _rewardTokensPerBlock *initial* amount of reward tokens to be distributed per block
-	 */
-	constructor(
-		address _owner,
-		address _lockManager,
-		address _vault,
-		address _rewardToken,
-		address _sushiToken,
-		address _masterChef,
-		uint256 _startBlock,
-		uint256 _rewardTokensPerBlock
-	) {
-		owner = _owner;
-		emit ChangedOwner(address(0), _owner);
-
-		lockManager = ILockManager(_lockManager);
-		emit ChangedAddress("LOCK_MANAGER", address(0), _lockManager);
-
-		vault = IVault(_vault);
-		emit ChangedAddress("VAULT", address(0), _vault);
-
-		rewardToken = IERC20(_rewardToken);
-		emit ChangedAddress("REWARD_TOKEN", address(0), _rewardToken);
-
-		sushiToken = IERC20(_sushiToken);
-		emit ChangedAddress("SUSHI_TOKEN", address(0), _sushiToken);
-
-		masterChef = IMasterChef(_masterChef);
-		emit ChangedAddress("MASTER_CHEF", address(0), _masterChef);
-
-		startBlock = _startBlock == 0 ? block.number : _startBlock;
-		emit SetRewardsStartBlock(startBlock);
-
-		rewardTokensPerBlock = _rewardTokensPerBlock;
-		emit ChangedRewardTokensPerBlock(0, _rewardTokensPerBlock);
-
-		rewardToken.safeIncreaseAllowance(address(vault), type(uint256).max);
+	/// @notice restrict functions to just master address
+	modifier onlyMaster {
+		CrownStorage storage crown = LibCrownStorage.crownStorage();
+		require(crown.king == address(0) || msg.sender == crown.king, "Crown::onlyMaster: not the king");
+		_;
 	}
 
 	/**
@@ -247,7 +157,7 @@ contract Treasurer is ReentrancyGuard {
 
 	/**
 	 * @notice Add a new reward token to the pool
-	 * @dev Can only be called by the owner. DO NOT add the same token more than once. Rewards will be messed up if you do.
+	 * @dev Can only be called by the master. DO NOT add the same token more than once. Rewards will be messed up if you do.
 	 * @param allocPoint Number of allocation points to allot to this token/pool
 	 * @param token The token that will be staked for rewards
 	 * @param vestingPercent The percentage of rewards from this pool that will vest
@@ -268,7 +178,7 @@ contract Treasurer is ReentrancyGuard {
 		uint256 sushiPid,
 		bool vpForDeposit,
 		bool vpForVesting
-	) external onlyTheKing {
+	) external onlyMaster {
 		if (withUpdate) {
 			massUpdatePools();
 		}
@@ -276,7 +186,7 @@ contract Treasurer is ReentrancyGuard {
 		if (totalAllocPoint == 0) {
 			_setRewardsEndBlock();
 		}
-		totalAllocPoint = totalAllocPoint.add(allocPoint);
+		totalAllocPoint = totalAllocPoint + allocPoint;
 		poolInfo.push(
 			PoolInfo({
 				token: IERC20(token),
@@ -310,7 +220,7 @@ contract Treasurer is ReentrancyGuard {
 
 	/**
 	 * @notice Update the given pool's allocation points
-	 * @dev Can only be called by the owner
+	 * @dev Can only be called by the master
 	 * @param pid The RewardManager pool id
 	 * @param allocPoint New number of allocation points for pool
 	 * @param withUpdate if specified, update all pools before setting allocation points
@@ -319,31 +229,13 @@ contract Treasurer is ReentrancyGuard {
 		uint256 pid,
 		uint256 allocPoint,
 		bool withUpdate
-	) external onlyTheKing {
+	) external onlyMaster {
 		if (withUpdate) {
 			massUpdatePools();
 		}
-		totalAllocPoint = totalAllocPoint.sub(poolInfo[pid].allocPoint).add(allocPoint);
+		totalAllocPoint = totalAllocPoint - poolInfo[pid].allocPoint + allocPoint;
 		emit PoolUpdated(pid, poolInfo[pid].allocPoint, allocPoint, totalAllocPoint);
 		poolInfo[pid].allocPoint = allocPoint;
-	}
-
-	/**
-	 * @notice Returns true if rewards are actively being accumulated
-	 */
-	function rewardsActive() public view returns (bool) {
-		return block.number >= startBlock && block.number <= endBlock && totalAllocPoint > 0 ? true : false;
-	}
-
-	/**
-	 * @notice Return reward multiplier over the given from to to block.
-	 * @param from From block number
-	 * @param to To block number
-	 * @return multiplier
-	 */
-	function getMultiplier(uint256 from, uint256 to) public view returns (uint256) {
-		uint256 toBlock = to > endBlock ? endBlock : to;
-		return toBlock > from ? toBlock.sub(from) : 0;
 	}
 
 	/**
@@ -359,17 +251,17 @@ contract Treasurer is ReentrancyGuard {
 		uint256 tokenSupply = pool.totalStaked;
 		if (block.number > pool.lastRewardBlock && tokenSupply != 0) {
 			uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-			uint256 totalReward = multiplier.mul(rewardTokensPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
-			accRewardsPerShare = accRewardsPerShare.add(totalReward.mul(1e12).div(tokenSupply));
+			uint256 totalReward = (multiplier * rewardTokensPerBlock * pool.allocPoint) / totalAllocPoint;
+			accRewardsPerShare = accRewardsPerShare + (totalReward * 1e12) / tokenSupply;
 		}
 
-		uint256 accumulatedRewards = user.amount.mul(accRewardsPerShare).div(1e12);
+		uint256 accumulatedRewards = (user.amount * accRewardsPerShare) / 1e12;
 
 		if (accumulatedRewards < user.rewardTokenDebt) {
 			return 0;
 		}
 
-		return accumulatedRewards.sub(user.rewardTokenDebt);
+		return accumulatedRewards - user.rewardTokenDebt;
 	}
 
 	/**
@@ -392,17 +284,17 @@ contract Treasurer is ReentrancyGuard {
 		uint256 lpSupply = sushiPool.lpToken.balanceOf(address(masterChef));
 		if (block.number > sushiPool.lastRewardBlock && lpSupply != 0) {
 			uint256 multiplier = masterChef.getMultiplier(sushiPool.lastRewardBlock, block.number);
-			uint256 sushiReward = multiplier.mul(sushiPerBlock).mul(sushiPool.allocPoint).div(totalSushiAllocPoint);
-			accSushiPerShare = accSushiPerShare.add(sushiReward.mul(1e12).div(lpSupply));
+			uint256 sushiReward = (multiplier * sushiPerBlock * sushiPool.allocPoint) / totalSushiAllocPoint;
+			accSushiPerShare = accSushiPerShare + (sushiReward * 1e12) / lpSupply;
 		}
 
-		uint256 accumulatedSushi = user.amount.mul(accSushiPerShare).div(1e12);
+		uint256 accumulatedSushi = (user.amount * accSushiPerShare) / 1e12;
 
 		if (accumulatedSushi < user.sushiRewardDebt) {
 			return 0;
 		}
 
-		return accumulatedSushi.sub(user.sushiRewardDebt);
+		return accumulatedSushi - user.sushiRewardDebt;
 	}
 
 	/**
@@ -431,13 +323,13 @@ contract Treasurer is ReentrancyGuard {
 			return;
 		}
 		uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-		uint256 totalReward = multiplier.mul(rewardTokensPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
-		pool.accRewardsPerShare = pool.accRewardsPerShare.add(totalReward.mul(1e12).div(tokenSupply));
+		uint256 totalReward = (multiplier * rewardTokensPerBlock * pool.allocPoint) / totalAllocPoint;
+		pool.accRewardsPerShare = pool.accRewardsPerShare + (totalReward * 1e12) / tokenSupply;
 		pool.lastRewardBlock = block.number;
 	}
 
 	/**
-	 * @notice Deposit tokens to Treasurer for rewards allocation.
+	 * @notice Deposit tokens to Dragon for rewards allocation.
 	 * @param pid pool id
 	 * @param amount number of tokens to deposit
 	 */
@@ -448,7 +340,7 @@ contract Treasurer is ReentrancyGuard {
 	}
 
 	/**
-	 * @notice Deposit tokens to Treasurer for rewards allocation, using permit for approval
+	 * @notice Deposit tokens to Dragon for rewards allocation, using permit for approval
 	 * @dev It is up to the frontend developer to ensure the pool token implements permit - otherwise this will fail
 	 * @param pid pool id
 	 * @param amount number of tokens to deposit
@@ -470,19 +362,79 @@ contract Treasurer is ReentrancyGuard {
 		// TODO: find the best way to provide a richer ERC20 interface here
 		// pool.token.permit(msg.sender, address(this), amount, deadline, v, r, s);
 		// _deposit(pid, amount, pool, user);
-		console.log("Treasurer::depositWithPermit: not supported atm");
+		console.log("Dragon::depositWithPermit: not supported atm");
 	}*/
 
 	/**
-	 * @notice Withdraw tokens from Treasurer, claiming rewards.
+	 * @notice Withdraw tokens from Dragon, claiming rewards.
 	 * @param pid pool id
 	 * @param amount number of tokens to withdraw
 	 */
 	function withdraw(uint256 pid, uint256 amount) external nonReentrant {
-		require(amount > 0, "Treasurer::withdraw: amount must be > 0");
+		require(amount > 0, "Dragon::withdraw: amount must be > 0");
 		PoolInfo storage pool = poolInfo[pid];
 		UserInfo storage user = userInfo[pid][msg.sender];
 		_withdraw(pid, amount, pool, user);
+	}
+
+	/**
+	 * @notice Set approvals for external addresses to use contract tokens
+	 * @dev Can only be called by the master
+	 * @param tokensToApprove the tokens to approve
+	 * @param approvalAmounts the token approval amounts
+	 * @param spender the address to allow spending of token
+	 */
+	function tokenAllow(
+		address[] memory tokensToApprove,
+		uint256[] memory approvalAmounts,
+		address spender
+	) external onlyMaster {
+		require(tokensToApprove.length == approvalAmounts.length, "Dragon::tokenAllow: not same length");
+		for (uint256 i = 0; i < tokensToApprove.length; i++) {
+			IERC20 token = IERC20(tokensToApprove[i]);
+			if (token.allowance(address(this), spender) != type(uint256).max) {
+				token.safeApprove(spender, approvalAmounts[i]);
+			}
+		}
+	}
+
+	/**
+	 * @notice Rescue (withdraw) tokens from the smart contract
+	 * @dev Can only be called by the master
+	 * @param tokens the tokens to withdraw
+	 * @param amounts the amount of each token to withdraw.  If zero, withdraws the maximum allowed amount for each token
+	 * @param receiver the address that will receive the tokens
+	 * @param updateRewardsEndBlock if true, update the rewards end block after performing transfers
+	 */
+	function rescueTokens(
+		address[] calldata tokens,
+		uint256[] calldata amounts,
+		address receiver,
+		bool updateRewardsEndBlock
+	) external onlyMaster {
+		require(tokens.length == amounts.length, "Dragon::rescueTokens: not same length");
+		for (uint256 i = 0; i < tokens.length; i++) {
+			IERC20 token = IERC20(tokens[i]);
+			uint256 withdrawalAmount;
+			uint256 tokenBalance = token.balanceOf(address(this));
+			uint256 tokenAllowance = token.allowance(address(this), receiver);
+			if (amounts[i] == 0) {
+				if (tokenBalance > tokenAllowance) {
+					withdrawalAmount = tokenAllowance;
+				} else {
+					withdrawalAmount = tokenBalance;
+				}
+			} else {
+				require(tokenBalance >= amounts[i], "Dragon::rescueTokens: contract balance too low");
+				require(tokenAllowance >= amounts[i], "Dragon::rescueTokens: increase token allowance");
+				withdrawalAmount = amounts[i];
+			}
+			token.safeTransferFrom(address(this), receiver, withdrawalAmount);
+		}
+
+		if (updateRewardsEndBlock) {
+			_setRewardsEndBlock();
+		}
 	}
 
 	/**
@@ -503,7 +455,7 @@ contract Treasurer is ReentrancyGuard {
 				lockManager.removeVotingPower(msg.sender, address(pool.token), user.amount);
 			}
 
-			pool.totalStaked = pool.totalStaked.sub(user.amount);
+			pool.totalStaked = pool.totalStaked - user.amount;
 			pool.token.safeTransfer(msg.sender, user.amount);
 
 			emit EmergencyWithdraw(msg.sender, pid, user.amount);
@@ -515,132 +467,11 @@ contract Treasurer is ReentrancyGuard {
 	}
 
 	/**
-	 * @notice Set approvals for external addresses to use contract tokens
-	 * @dev Can only be called by the owner
-	 * @param tokensToApprove the tokens to approve
-	 * @param approvalAmounts the token approval amounts
-	 * @param spender the address to allow spending of token
-	 */
-	function tokenAllow(
-		address[] memory tokensToApprove,
-		uint256[] memory approvalAmounts,
-		address spender
-	) external onlyTheKing {
-		require(tokensToApprove.length == approvalAmounts.length, "Treasurer::tokenAllow: not same length");
-		for (uint256 i = 0; i < tokensToApprove.length; i++) {
-			IERC20 token = IERC20(tokensToApprove[i]);
-			if (token.allowance(address(this), spender) != type(uint256).max) {
-				token.safeApprove(spender, approvalAmounts[i]);
-			}
-		}
-	}
-
-	/**
-	 * @notice Rescue (withdraw) tokens from the smart contract
-	 * @dev Can only be called by the owner
-	 * @param tokens the tokens to withdraw
-	 * @param amounts the amount of each token to withdraw.  If zero, withdraws the maximum allowed amount for each token
-	 * @param receiver the address that will receive the tokens
-	 * @param updateRewardsEndBlock if true, update the rewards end block after performing transfers
-	 */
-	function rescueTokens(
-		address[] calldata tokens,
-		uint256[] calldata amounts,
-		address receiver,
-		bool updateRewardsEndBlock
-	) external onlyTheKing {
-		require(tokens.length == amounts.length, "Treasurer::rescueTokens: not same length");
-		for (uint256 i = 0; i < tokens.length; i++) {
-			IERC20 token = IERC20(tokens[i]);
-			uint256 withdrawalAmount;
-			uint256 tokenBalance = token.balanceOf(address(this));
-			uint256 tokenAllowance = token.allowance(address(this), receiver);
-			if (amounts[i] == 0) {
-				if (tokenBalance > tokenAllowance) {
-					withdrawalAmount = tokenAllowance;
-				} else {
-					withdrawalAmount = tokenBalance;
-				}
-			} else {
-				require(tokenBalance >= amounts[i], "Treasurer::rescueTokens: contract balance too low");
-				require(tokenAllowance >= amounts[i], "Treasurer::rescueTokens: increase token allowance");
-				withdrawalAmount = amounts[i];
-			}
-			token.safeTransferFrom(address(this), receiver, withdrawalAmount);
-		}
-
-		if (updateRewardsEndBlock) {
-			_setRewardsEndBlock();
-		}
-	}
-
-	/**
-	 * @notice Set new rewards per block
-	 * @dev Can only be called by the owner
-	 * @param newRewardTokensPerBlock new amount of reward token to reward each block
-	 */
-	function setRewardsPerBlock(uint256 newRewardTokensPerBlock) external onlyTheKing {
-		emit ChangedRewardTokensPerBlock(rewardTokensPerBlock, newRewardTokensPerBlock);
-		rewardTokensPerBlock = newRewardTokensPerBlock;
-		_setRewardsEndBlock();
-	}
-
-	/**
-	 * @notice Set new reward token address
-	 * @param newToken address of new reward token
-	 * @param newRewardTokensPerBlock new amount of reward token to reward each block
-	 */
-	function setRewardToken(address newToken, uint256 newRewardTokensPerBlock) external onlyTheKing {
-		emit ChangedAddress("REWARD_TOKEN", address(rewardToken), newToken);
-		rewardToken = IERC20(newToken);
-		rewardTokensPerBlock = newRewardTokensPerBlock;
-		_setRewardsEndBlock();
-	}
-
-	/**
-	 * @notice Set new SUSHI token address
-	 * @dev Can only be called by the owner
-	 * @param newToken address of new SUSHI token
-	 */
-	function setSushiToken(address newToken) external onlyTheKing {
-		emit ChangedAddress("SUSHI_TOKEN", address(sushiToken), newToken);
-		sushiToken = IERC20(newToken);
-	}
-
-	/**
-	 * @notice Set new MasterChef address
-	 * @dev Can only be called by the owner
-	 * @param newAddress address of new MasterChef
-	 */
-	function setMasterChef(address newAddress) external onlyTheKing {
-		emit ChangedAddress("MASTER_CHEF", address(masterChef), newAddress);
-		masterChef = IMasterChef(newAddress);
-	}
-
-	/**
-	 * @notice Set new Vault address
-	 * @param newAddress address of new Vault
-	 */
-	function setVault(address newAddress) external onlyTheKing {
-		emit ChangedAddress("VAULT", address(vault), newAddress);
-		vault = IVault(newAddress);
-	}
-
-	/**
-	 * @notice Set new LockManager address
-	 * @param newAddress address of new LockManager
-	 */
-	function setLockManager(address newAddress) external onlyTheKing {
-		emit ChangedAddress("LOCK_MANAGER", address(lockManager), newAddress);
-		lockManager = ILockManager(newAddress);
-	}
-
-	/**
 	 * @notice Add rewards to contract
-	 * @dev Can only be called by the owner
+	 * @dev Can only be called by the master
 	 * @param amount amount of tokens to add
 	 */
-	function addRewardsBalance(uint256 amount) external onlyTheKing {
+	function addRewardsBalance(uint256 amount) external onlyMaster {
 		rewardToken.safeTransferFrom(msg.sender, address(this), amount);
 		_setRewardsEndBlock();
 	}
@@ -648,19 +479,26 @@ contract Treasurer is ReentrancyGuard {
 	/**
 	 * @notice Reset rewards end block manually based on new balances
 	 */
-	function resetRewardsEndBlock() external onlyTheKing {
+	function resetRewardsEndBlock() external onlyMaster {
 		_setRewardsEndBlock();
 	}
 
 	/**
-	 * @notice Change owner of vesting contract
-	 * @dev Can only be called by the owner
-	 * @param newOwner New owner address
+	 * @notice Returns true if rewards are actively being accumulated
 	 */
-	function changeOwner(address newOwner) external onlyTheKing {
-		require(newOwner != address(0) && newOwner != address(this), "Treasurer::changeOwner: not valid address");
-		emit ChangedOwner(owner, newOwner);
-		owner = newOwner;
+	function rewardsActive() public view returns (bool) {
+		return block.number >= startBlock && block.number <= endBlock && totalAllocPoint > 0 ? true : false;
+	}
+
+	/**
+	 * @notice Return reward multiplier over the given from to to block.
+	 * @param from From block number
+	 * @param to To block number
+	 * @return multiplier
+	 */
+	function getMultiplier(uint256 from, uint256 to) public view returns (uint256) {
+		uint256 toBlock = to > endBlock ? endBlock : to;
+		return toBlock > from ? toBlock - from : 0;
 	}
 
 	/**
@@ -682,7 +520,7 @@ contract Treasurer is ReentrancyGuard {
 		uint256 pendingSushiTokens = 0;
 
 		if (user.amount > 0) {
-			uint256 pendingRewards = user.amount.mul(pool.accRewardsPerShare).div(1e12).sub(user.rewardTokenDebt);
+			uint256 pendingRewards = (user.amount * pool.accRewardsPerShare) / 1e12 - user.rewardTokenDebt;
 
 			if (pendingRewards > 0) {
 				_distributeRewards(
@@ -697,20 +535,21 @@ contract Treasurer is ReentrancyGuard {
 
 			if (sushiPid != uint256(0)) {
 				masterChef.updatePool(sushiPid);
-				pendingSushiTokens = user.amount.mul(masterChef.poolInfo(sushiPid).accSushiPerShare).div(1e12).sub(
-					user.sushiRewardDebt
-				);
+				pendingSushiTokens =
+					(user.amount * masterChef.poolInfo(sushiPid).accSushiPerShare) /
+					1e12 -
+					user.sushiRewardDebt;
 			}
 		}
 
 		pool.token.safeTransferFrom(msg.sender, address(this), amount);
-		pool.totalStaked = pool.totalStaked.add(amount);
-		user.amount = user.amount.add(amount);
-		user.rewardTokenDebt = user.amount.mul(pool.accRewardsPerShare).div(1e12);
+		pool.totalStaked = pool.totalStaked + amount;
+		user.amount = user.amount + amount;
+		user.rewardTokenDebt = (user.amount * pool.accRewardsPerShare) / 1e12;
 
 		if (sushiPid != uint256(0)) {
 			masterChef.updatePool(sushiPid);
-			user.sushiRewardDebt = user.amount.mul(masterChef.poolInfo(sushiPid).accSushiPerShare).div(1e12);
+			user.sushiRewardDebt = (user.amount * masterChef.poolInfo(sushiPid).accSushiPerShare) / 1e12;
 			masterChef.deposit(sushiPid, amount);
 		}
 
@@ -738,7 +577,7 @@ contract Treasurer is ReentrancyGuard {
 		PoolInfo storage pool,
 		UserInfo storage user
 	) internal {
-		require(user.amount >= amount, "Treasurer::_withdraw: amount > user balance");
+		require(user.amount >= amount, "Dragon::_withdraw: amount > user balance");
 
 		updatePool(pid);
 
@@ -747,17 +586,17 @@ contract Treasurer is ReentrancyGuard {
 		if (sushiPid != uint256(0)) {
 			masterChef.updatePool(sushiPid);
 			uint256 pendingSushiTokens =
-				user.amount.mul(masterChef.poolInfo(sushiPid).accSushiPerShare).div(1e12).sub(user.sushiRewardDebt);
+				(user.amount * masterChef.poolInfo(sushiPid).accSushiPerShare) / 1e12 - user.sushiRewardDebt;
 			masterChef.withdraw(sushiPid, amount);
-			user.sushiRewardDebt = user.amount.sub(amount).mul(masterChef.poolInfo(sushiPid).accSushiPerShare).div(1e12);
+			user.sushiRewardDebt = user.amount - (amount * masterChef.poolInfo(sushiPid).accSushiPerShare) / 1e12;
 			if (pendingSushiTokens > 0) {
 				_safeSushiTransfer(msg.sender, pendingSushiTokens);
 			}
 		}
 
-		uint256 pendingRewards = user.amount.mul(pool.accRewardsPerShare).div(1e12).sub(user.rewardTokenDebt);
-		user.amount = user.amount.sub(amount);
-		user.rewardTokenDebt = user.amount.mul(pool.accRewardsPerShare).div(1e12);
+		uint256 pendingRewards = (user.amount * pool.accRewardsPerShare) / 1e12 - user.rewardTokenDebt;
+		user.amount = user.amount - amount;
+		user.rewardTokenDebt = (user.amount * pool.accRewardsPerShare) / 1e12;
 
 		if (pendingRewards > 0) {
 			_distributeRewards(
@@ -774,7 +613,7 @@ contract Treasurer is ReentrancyGuard {
 			lockManager.removeVotingPower(msg.sender, address(pool.token), amount);
 		}
 
-		pool.totalStaked = pool.totalStaked.sub(amount);
+		pool.totalStaked = pool.totalStaked - amount;
 		pool.token.safeTransfer(msg.sender, amount);
 
 		emit Withdraw(msg.sender, pid, amount);
@@ -799,7 +638,7 @@ contract Treasurer is ReentrancyGuard {
 	) internal {
 		uint256 rewardAmount =
 			amount > rewardToken.balanceOf(address(this)) ? rewardToken.balanceOf(address(this)) : amount;
-		uint256 vestingRewards = rewardAmount.mul(vestingPercent).div(1000000);
+		uint256 vestingRewards = (rewardAmount * vestingPercent) / 1000000;
 		vault.lockTokens(
 			address(rewardToken),
 			address(this),
@@ -810,7 +649,7 @@ contract Treasurer is ReentrancyGuard {
 			vestingCliff,
 			vestingVotingPower
 		);
-		_safeRewardsTransfer(msg.sender, rewardAmount.sub(vestingRewards));
+		_safeRewardsTransfer(msg.sender, rewardAmount - vestingRewards);
 	}
 
 	/**
@@ -848,7 +687,7 @@ contract Treasurer is ReentrancyGuard {
 	function _setRewardsEndBlock() internal {
 		if (rewardTokensPerBlock > 0) {
 			uint256 rewardFromBlock = block.number >= startBlock ? block.number : startBlock;
-			uint256 newEndBlock = rewardFromBlock.add(rewardToken.balanceOf(address(this)).div(rewardTokensPerBlock));
+			uint256 newEndBlock = rewardFromBlock + rewardToken.balanceOf(address(this)) / rewardTokensPerBlock;
 			if (newEndBlock > rewardFromBlock && newEndBlock != endBlock) {
 				emit ChangedRewardsEndBlock(endBlock, newEndBlock);
 				endBlock = newEndBlock;

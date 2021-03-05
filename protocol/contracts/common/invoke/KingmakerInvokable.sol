@@ -23,11 +23,7 @@ import "./IInvokable.sol";
 import "./IInvocationHook.sol";
 import "../utils/BalanceCarrier.sol";
 
-import "../../libraries/math/SafeMath.sol";
-
 abstract contract KingmakerInvokable is BalanceCarrier, IInvokable {
-	using SafeMath for uint256;
-
 	uint256 internal MAX_REWARD_BIPS = 100;
 
 	constructor() BalanceCarrier(address(1)) {}
@@ -60,7 +56,7 @@ abstract contract KingmakerInvokable is BalanceCarrier, IInvokable {
 	}
 
 	modifier repaymentSafeguard() {
-		uint256 effectiveReward = currentRepaymentAmount().sub(currentTokenAmount()).mul(10000).div(currentTokenAmount());
+		uint256 effectiveReward = ((currentRepaymentAmount() - currentTokenAmount()) * 10000) / currentTokenAmount();
 
 		require(effectiveReward <= MAX_REWARD_BIPS, "KingmakerInvokable: repayment reward too high");
 		_;

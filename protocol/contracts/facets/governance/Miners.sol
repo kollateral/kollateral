@@ -47,7 +47,6 @@ import "hardhat/console.sol";
 import "../../interfaces/governance/ICrownGovernanceToken.sol";
 
 import "../../libraries/governance/LibCrownStorage.sol";
-import "../../libraries/math/SafeMath.sol";
 
 /**
  * @title Miners (prev. SupplyManager)
@@ -56,8 +55,6 @@ import "../../libraries/math/SafeMath.sol";
  * @notice Initial proposal length (timelock) is 30 days
  */
 contract Miners {
-	using SafeMath for uint256;
-
 	/// @notice Crown Governance token
 	ICrownGovernanceToken public token;
 
@@ -233,14 +230,11 @@ contract Miners {
 	function proposeMint(address dst, uint256 amount) external onlyTheKing {
 		uint256 currentSupply = token.totalSupply();
 		require(dst != address(0), "Miners::proposeMint: cannot transfer to the zero address");
-		require(
-			amount <= currentSupply.mul(token.mintCap()).div(1000000),
-			"Miners::proposeMint: amount exceeds mint cap"
-		);
-		uint256 eta = block.timestamp.add(proposalLength);
+		require(amount <= (currentSupply * token.mintCap()) / 1000000, "Miners::proposeMint: amount exceeds mint cap");
+		uint256 eta = block.timestamp + proposalLength;
 		require(eta >= token.supplyChangeAllowedAfter(), "Miners::proposeMint: minting not allowed yet");
 		pendingMint = MintProposal(eta, dst, amount);
-		emit MintProposed(amount, dst, currentSupply, currentSupply.add(amount), eta);
+		emit MintProposed(amount, dst, currentSupply, currentSupply + amount, eta);
 	}
 
 	/**
@@ -263,7 +257,7 @@ contract Miners {
 		uint256 oldSupply = token.totalSupply();
 		pendingMint = MintProposal(0, address(0), 0);
 		require(token.mint(dst, amount), "Miners::acceptMint: unsuccessful");
-		emit MintAccepted(amount, dst, oldSupply, oldSupply.add(amount));
+		emit MintAccepted(amount, dst, oldSupply, oldSupply + amount);
 	}
 
 	/**
@@ -275,8 +269,8 @@ contract Miners {
 		require(src != address(0), "Miners::proposeBurn: cannot transfer from the zero address");
 		require(token.allowance(src, address(this)) >= amount, "Miners::proposeBurn: supplyManager approval < amount");
 		uint256 currentSupply = token.totalSupply();
-		uint256 newSupply = currentSupply.sub(amount);
-		uint256 eta = block.timestamp.add(proposalLength);
+		uint256 newSupply = currentSupply - amount;
+		uint256 eta = block.timestamp + proposalLength;
 		require(eta >= token.supplyChangeAllowedAfter(), "Miners::proposeBurn: burning not allowed yet");
 		pendingBurn = BurnProposal(eta, src, amount);
 		emit BurnProposed(amount, src, currentSupply, newSupply, eta);
@@ -302,7 +296,7 @@ contract Miners {
 		pendingBurn = BurnProposal(0, address(0), 0);
 		require(token.burn(src, amount), "Miners::acceptBurn: unsuccessful");
 		uint256 newSupply = token.totalSupply();
-		emit BurnAccepted(amount, src, newSupply.add(amount), newSupply);
+		emit BurnAccepted(amount, src, newSupply + amount, newSupply);
 	}
 
 	/**
@@ -310,7 +304,7 @@ contract Miners {
 	 * @param newCap The new mint cap in bips (10,000 bips = 1% of totalSupply)
 	 */
 	function proposeMintCap(uint32 newCap) external onlyTheKing {
-		uint256 eta = block.timestamp.add(proposalLength);
+		uint256 eta = block.timestamp + proposalLength;
 		pendingMintCap = MintCapProposal(eta, newCap);
 		emit MintCapProposed(token.mintCap(), newCap, eta);
 	}
@@ -342,7 +336,7 @@ contract Miners {
 	 * @param newPeriod new waiting period
 	 */
 	function proposeSupplyChangeWaitingPeriod(uint32 newPeriod) external onlyTheKing {
-		uint256 eta = block.timestamp.add(proposalLength);
+		uint256 eta = block.timestamp + proposalLength;
 		pendingWaitingPeriod = WaitingPeriodProposal(eta, newPeriod);
 		emit WaitingPeriodProposed(token.supplyChangeWaitingPeriod(), newPeriod, eta);
 	}
@@ -374,7 +368,7 @@ contract Miners {
 	 * @param newMiners new supply manager address
 	 */
 	function proposeMiners(address newMiners) external onlyTheKing {
-		uint256 eta = block.timestamp.add(proposalLength);
+		uint256 eta = block.timestamp + proposalLength;
 		pendingMiners = MinersProposal(eta, newMiners);
 		emit MinersProposed(token.supplyManager(), newMiners, eta);
 	}
@@ -407,7 +401,7 @@ contract Miners {
 	 */
 	function proposeNewProposalLength(uint32 newLength) external onlyTheKing {
 		require(newLength >= proposalLengthMinimum, "Miners::proposePL: length must be >= minimum");
-		uint256 eta = block.timestamp.add(proposalLength);
+		uint256 eta = block.timestamp + proposalLength;
 		pendingProposalLength = ProposalLengthProposal(eta, newLength);
 		emit ProposalLengthProposed(proposalLength, newLength, eta);
 	}
@@ -440,7 +434,7 @@ contract Miners {
 	 */
 	function proposeKing(address newKing) external onlyTheKing {
 		// ETA set to minimum to allow for quicker changes if necessary
-		uint256 eta = block.timestamp.add(proposalLengthMinimum);
+		uint256 eta = block.timestamp + proposalLengthMinimum;
 		pendingKing = RoyalDecree(eta, newKing);
 		emit KingProposed(king, newKing, eta);
 	}

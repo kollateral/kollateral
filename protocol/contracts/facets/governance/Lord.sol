@@ -43,20 +43,17 @@ pragma solidity ^0.8.2;
 
 import "hardhat/console.sol";
 
+import "@openzeppelin/contracts/access/AccessControl.sol";
+
 import "../../interfaces/governance/IVotingPower.sol";
 import "../../interfaces/governance/ITokenRegistry.sol";
 import "../../interfaces/governance/IVotingPowerFormula.sol";
-
-import "../../libraries/access/AccessControl.sol";
-import "../../libraries/math/SafeMath.sol";
 
 /**
  * @title Lord (prev. LockManager)
  * @dev Manages voting power for stakes that are locked within the Kingmaker protocol contracts, but not into the Crown.
  */
 contract Lord is AccessControl {
-	using SafeMath for uint256;
-
 	/// @notice Admin role to create voting power from locked stakes
 	bytes32 public constant LOCKER_ROLE = keccak256("LOCKER_ROLE");
 
@@ -144,8 +141,8 @@ contract Lord is AccessControl {
 		uint256 tokenAmount
 	) public onlyLords returns (uint256 votingPowerGranted) {
 		votingPowerGranted = calculateVotingPower(token, tokenAmount);
-		lockedStakes[receiver][token].amount = lockedStakes[receiver][token].amount.add(tokenAmount);
-		lockedStakes[receiver][token].votingPower = lockedStakes[receiver][token].votingPower.add(votingPowerGranted);
+		lockedStakes[receiver][token].amount = lockedStakes[receiver][token].amount + tokenAmount;
+		lockedStakes[receiver][token].votingPower = lockedStakes[receiver][token].votingPower + votingPowerGranted;
 		votingPower.addVotingPowerForLockedTokens(receiver, votingPowerGranted);
 
 		emit StakeLocked(receiver, token, tokenAmount, votingPowerGranted);
@@ -166,9 +163,9 @@ contract Lord is AccessControl {
 		require(lockedStakes[receiver][token].amount >= tokenAmount, "Lord::removeVotingPower: not enough tokens staked");
 
 		LockedStake memory s = getStake(receiver, token);
-		votingPowerRemoved = tokenAmount.mul(s.votingPower).div(s.amount);
-		lockedStakes[receiver][token].amount = lockedStakes[receiver][token].amount.sub(tokenAmount);
-		lockedStakes[receiver][token].votingPower = lockedStakes[receiver][token].votingPower.sub(votingPowerRemoved);
+		votingPowerRemoved = (tokenAmount * s.votingPower) / s.amount;
+		lockedStakes[receiver][token].amount = lockedStakes[receiver][token].amount - tokenAmount;
+		lockedStakes[receiver][token].votingPower = lockedStakes[receiver][token].votingPower - votingPowerRemoved;
 		votingPower.removeVotingPowerForUnlockedTokens(receiver, votingPowerRemoved);
 
 		emit StakeUnlocked(receiver, token, tokenAmount, votingPowerRemoved);

@@ -21,8 +21,6 @@ describe('Treasury', () => {
 	let lepidotteri: SignerWithAddress;
 	let SHA_2048: SignerWithAddress;
 
-	let ZERO_ADDRESS: string;
-
 	beforeEach(async () => {
 		const f = await rewards();
 		govToken = f.govToken;
@@ -31,7 +29,7 @@ describe('Treasury', () => {
 		deployer = f.deployer;
 		lepidotteri = f.lepidotteri;
 		SHA_2048 = f.SHA_2048;
-		ZERO_ADDRESS = O_Address;
+
 		await lord.grantRole(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('LOCKER_ROLE')), treasury.address);
 	});
 
@@ -169,7 +167,7 @@ describe('Treasury', () => {
 			expect(emptyLocks.length).to.eq(0);
 		});
 	});
-/* TODO: reinstate locking with permit in Treasury.sol#L164
+	/* TODO: reinstate locking with permit in Treasury.sol#L164
 	context('lockTokensWithPermit', async () => {
 		xit('creates valid lock of KING tokens', async () => {
 			const decimals = await govToken.decimals();
@@ -360,7 +358,7 @@ describe('Treasury', () => {
 
 			await treasury.lockTokens(govToken.address, deployer.address, SHA_2048.address, START_TIME, lockAmount, DURATION_IN_DAYS, 0, false);
 
-			const balance = await treasury.tokenBalance(ZERO_ADDRESS, SHA_2048.address);
+			const balance = await treasury.tokenBalance(O_Address, SHA_2048.address);
 			expect(balance.totalAmount).to.eq(0);
 			expect(balance.claimableAmount).to.eq(0);
 			expect(balance.claimedAmount).to.eq(0);
