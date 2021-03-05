@@ -27,10 +27,10 @@ import "../../interfaces/governance/ICrownGovernanceToken.sol";
 import "../../libraries/math/SafeMath.sol";
 
 /**
- * @title Sanctuary
+ * @title Monastery (prev. Vesting)
  * @dev The vesting contract for the initial governance token distribution
  */
-contract Sanctuary {
+contract Monastery {
 	using SafeMath for uint256;
 
 	/// @notice Grant definition
@@ -65,7 +65,7 @@ contract Sanctuary {
 
 	/// @notice only clergy can call function
 	modifier onlyTheChurch {
-		require(msg.sender == clergy, "Sanctuary::onlyTheChurch: not clergy");
+		require(msg.sender == clergy, "Monastery::onlyTheChurch: not clergy");
 		_;
 	}
 
@@ -92,7 +92,7 @@ contract Sanctuary {
 	 * @param _token Address of KING token
 	 */
 	constructor(address _token) {
-		require(_token != address(0), "Sanctuary::constructor: must be valid token address");
+		require(_token != address(0), "Monastery::constructor: must be valid token address");
 		token = ICrownGovernanceToken(_token);
 		clergy = msg.sender;
 	}
@@ -112,18 +112,18 @@ contract Sanctuary {
 		uint16 vestingDurationInDays,
 		uint16 vestingCliffInDays
 	) external onlyTheChurch {
-		require(address(votingPower) != address(0), "Sanctuary::addTokenGrant: Set Voting Power contract first");
-		require(vestingCliffInDays <= MAX_GRANT_CLIFF_DAYS, "Sanctuary::addTokenGrant: cliff more than 1 year");
-		require(vestingDurationInDays > 0, "Sanctuary::addTokenGrant: duration must be > 0");
-		require(vestingDurationInDays <= MAX_GRANT_VESTING_DAYS, "Sanctuary::addTokenGrant: duration more than 9 years");
-		require(vestingDurationInDays >= vestingCliffInDays, "Sanctuary::addTokenGrant: duration < cliff");
-		require(tokenGrants[recipient].amount == 0, "Sanctuary::addTokenGrant: grant already exists for account");
+		require(address(votingPower) != address(0), "Monastery::addTokenGrant: Set Voting Power contract first");
+		require(vestingCliffInDays <= MAX_GRANT_CLIFF_DAYS, "Monastery::addTokenGrant: cliff more than 1 year");
+		require(vestingDurationInDays > 0, "Monastery::addTokenGrant: duration must be > 0");
+		require(vestingDurationInDays <= MAX_GRANT_VESTING_DAYS, "Monastery::addTokenGrant: duration more than 9 years");
+		require(vestingDurationInDays >= vestingCliffInDays, "Monastery::addTokenGrant: duration < cliff");
+		require(tokenGrants[recipient].amount == 0, "Monastery::addTokenGrant: grant already exists for account");
 
 		uint256 amountVestedPerDay = amount.div(vestingDurationInDays);
-		require(amountVestedPerDay > 0, "Sanctuary::addTokenGrant: amountVestedPerDay > 0");
+		require(amountVestedPerDay > 0, "Monastery::addTokenGrant: amountVestedPerDay > 0");
 
 		// Transfer the grant tokens under the control of the vesting contract
-		require(token.transferFrom(clergy, address(this), amount), "Sanctuary::addTokenGrant: transfer failed");
+		require(token.transferFrom(clergy, address(this), amount), "Monastery::addTokenGrant: transfer failed");
 
 		uint256 grantStartTime = startTime == 0 ? block.timestamp : startTime;
 
@@ -236,13 +236,13 @@ contract Sanctuary {
 	 */
 	function claimVestedTokens(address recipient) external {
 		uint256 amountVested = calculateGrantClaim(recipient);
-		require(amountVested > 0, "Sanctuary::claimVested: amountVested is 0");
+		require(amountVested > 0, "Monastery::claimVested: amountVested is 0");
 		votingPower.removeVotingPowerForClaimedTokens(recipient, amountVested);
 
 		Grant storage tokenGrant = tokenGrants[recipient];
 		tokenGrant.totalClaimed = uint256(tokenGrant.totalClaimed.add(amountVested));
 
-		require(token.transfer(recipient, amountVested), "Sanctuary::claimVested: transfer failed");
+		require(token.transfer(recipient, amountVested), "Monastery::claimVested: transfer failed");
 		emit GrantTokensClaimed(recipient, amountVested);
 	}
 
@@ -263,11 +263,11 @@ contract Sanctuary {
 	function setVotingPowerContract(address newContract) external onlyTheChurch {
 		require(
 			newContract != address(0) && newContract != address(this) && newContract != address(token),
-			"Sanctuary::setVotingPowerContract: not valid contract"
+			"Monastery::setVotingPowerContract: not valid contract"
 		);
 		require(
 			IVotingPower(newContract).govToken() == address(token),
-			"Sanctuary::setVotingPowerContract: voting power not initialized"
+			"Monastery::setVotingPowerContract: voting power not initialized"
 		);
 
 		address oldContract = address(votingPower);
@@ -282,7 +282,7 @@ contract Sanctuary {
 	function changeClergy(address newOwner) external onlyTheChurch {
 		require(
 			newOwner != address(0) && newOwner != address(this) && newOwner != address(token),
-			"Sanctuary::changeClergy: not valid address"
+			"Monastery::changeClergy: not valid address"
 		);
 
 		address oldOwner = clergy;

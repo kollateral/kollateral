@@ -19,8 +19,8 @@ export const governanceFixture = deployments.createFixture(async ({ deployments,
 	const multisendFactory = await ethers.getContractFactory('Multisend');
 	const Multisend = await multisendFactory.deploy(KING.address);
 
-	const sanctuaryFactory = await ethers.getContractFactory('Sanctuary');
-	const Sanctuary = await sanctuaryFactory.deploy(KING.address);
+	const monasteryFactory = await ethers.getContractFactory('Monastery');
+	const Monastery = await monasteryFactory.deploy(KING.address);
 
 	const crownFactory = await ethers.getContractFactory('Crown');
 	const CrownImplementation = await crownFactory.deploy();
@@ -39,7 +39,7 @@ export const governanceFixture = deployments.createFixture(async ({ deployments,
 	return {
 		govToken: KING,
 		multisend: Multisend,
-		sanctuary: Sanctuary,
+		monastery: Monastery,
 		crownImp: CrownImplementation,
 		crown: Crown,
 		crownPrism: CrownPrism,

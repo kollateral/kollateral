@@ -14,7 +14,7 @@ const KINGMAKER_DEPLOYER_PK = getEnv('KINGMAKER_DEPLOYER_PK') || '0x';
 
 describe('Crown', () => {
 	let govToken: Contract;
-	let sanctuary: Contract;
+	let monastery: Contract;
 	let crown: Contract;
 	let crownPrism: Contract;
 	let crownImp: Contract;
@@ -29,7 +29,7 @@ describe('Crown', () => {
 	beforeEach(async () => {
 		const f = await governanceFixture();
 		govToken = f.govToken;
-		sanctuary = f.sanctuary;
+		monastery = f.monastery;
 		crown = f.crown;
 		crownPrism = f.crownPrism;
 		crownImp = f.crownImp;
@@ -52,7 +52,7 @@ describe('Crown', () => {
 		beforeEach(async () => {
 			await crownPrism.setPendingProxyImplementation(crownImp.address);
 			await crownImp.become(crownPrism.address);
-			await crown.initialize(govToken.address, sanctuary.address);
+			await crown.initialize(govToken.address, monastery.address);
 		});
 
 		context('govToken', async () => {
@@ -69,8 +69,8 @@ describe('Crown', () => {
 		});
 
 		context('sanctuaryContract', async () => {
-			it('returns the current sanctuary contract address', async () => {
-				expect(await crown.vestingContract()).to.eq(sanctuary.address);
+			it('returns the current monastery contract address', async () => {
+				expect(await crown.vestingContract()).to.eq(monastery.address);
 				expect(await crownImp.vestingContract()).to.eq(ZERO_ADDRESS);
 			});
 		});
@@ -170,7 +170,7 @@ describe('Crown', () => {
 				);
 			});
 
-			it('does not allow addresses other than the sanctuary contract to add voting power', async () => {
+			it('does not allow addresses other than the monastery contract to add voting power', async () => {
 				await expect(crown.addVotingPowerForVestingTokens(lepidotteri.address, 1000)).to.revertedWith(
 					'revert Crown::addVPforVT: only Sanctuary contract'
 				);
@@ -184,7 +184,7 @@ describe('Crown', () => {
 				);
 			});
 
-			it('does not allow addresses other than the sanctuary contract to remove voting power', async () => {
+			it('does not allow addresses other than the monastery contract to remove voting power', async () => {
 				await expect(crown.removeVotingPowerForClaimedTokens(lepidotteri.address, 1000)).to.revertedWith(
 					'revert Crown::removeVPforCT: only Sanctuary contract'
 				);
@@ -236,9 +236,9 @@ describe('Crown', () => {
 
 				await govToken.approve(crown.address, 1000);
 				await crown['stake(uint256)'](1000);
-				await sanctuary.setVotingPowerContract(crown.address);
-				await govToken.approve(sanctuary.address, ethers.constants.MaxUint256);
-				await sanctuary.addTokenGrant(deployer.address, START_TIME, grantAmount, VESTING_DURATION_IN_DAYS, VESTING_CLIFF_IN_DAYS);
+				await monastery.setVotingPowerContract(crown.address);
+				await govToken.approve(monastery.address, ethers.constants.MaxUint256);
+				await monastery.addTokenGrant(deployer.address, START_TIME, grantAmount, VESTING_DURATION_IN_DAYS, VESTING_CLIFF_IN_DAYS);
 
 				await expect(crown['withdraw(uint256)'](2000)).to.revertedWith('revert Crown::_withdraw: not enough tokens staked');
 			});
