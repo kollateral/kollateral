@@ -16,7 +16,7 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.1;
+pragma solidity ^0.8.2;
 
 import "../../interfaces/governance/ICrownGovernanceToken.sol";
 import "../../interfaces/governance/IVesting.sol";
@@ -30,7 +30,7 @@ struct CrownStorage {
 	ICrownGovernanceToken govToken;
 	// Vesting contract
 	IVesting vesting;
-	// Voting Power owner
+	// Crown owner
 	address king;
 	// lockManager contract
 	address lockManager;

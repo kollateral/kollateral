@@ -57,7 +57,7 @@ interface IVotingPower {
 	function become(PrismProxy prism) external;
 
 	// TODO: should be able to trim around here, if used as Facet in a Diamond
-	function initialize(address _archToken, address _vestingContract) external;
+	function initialize(address _govToken, address _vestingContract) external;
 
 	function owner() external view returns (address);
 

@@ -19,19 +19,20 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.2;
 
-interface ITokenRegistry {
-	/// @notice Event emitted when a new token is supported
-	event TokenFormulaAdded(address indexed token, address indexed formula);
-	/// @notice Event emitted when a token formula is updated
-	event TokenFormulaUpdated(address indexed token, address indexed formula);
-	/// @notice Event emitted when a supported token is removed
-	event TokenFormulaRemoved(address indexed token);
+import "../../interfaces/governance/IVotingPowerFormula.sol";
 
-	function tokenFormula(address) external view returns (address);
-
-	function setTokenFormula(address token, address formula) external;
-
-	function removeToken(address token) external;
-
-	function changeOwner(address newOwner) external;
+/**
+ * @title KingmakerFormula
+ * @dev Convert Kingmaker Crown governance token to its voting power equivalent to aid in gov calculations
+ */
+contract KingmakerFormula is IVotingPowerFormula {
+	/**
+	 * @notice Convert KING amount to voting power
+	 * @dev Always converts 1-1
+	 * @param amount token amount
+	 * @return voting power amount
+	 */
+	function toVotingPower(uint256 amount) external pure override returns (uint256) {
+		return amount;
+	}
 }
