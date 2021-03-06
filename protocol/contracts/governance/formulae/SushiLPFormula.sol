@@ -19,7 +19,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.2;
 
-import "../../../interfaces/governance/IVotingPowerFormula.sol";
+import "../../interfaces/governance/IVotingPowerFormula.sol";
 
 /**
  * @title SushiLPFormula

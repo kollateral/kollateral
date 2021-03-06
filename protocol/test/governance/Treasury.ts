@@ -5,6 +5,9 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-wit
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { ecsign } from 'ethereumjs-util';
+import { ecdsaSign } from 'ethereum-cryptography/secp256k1';
+import * as secp from 'noble-secp256k1';
+import { concatSig, encrypt, recoverPersonalSignature, recoverTypedSignatureLegacy, recoverTypedSignature } from 'eth-sig-util'
 
 import { rewards } from '../fixtures';
 import { getEIP712DomainSeparator, getEIP712PermitDigest } from '../../libs/ethereum';
@@ -21,7 +24,8 @@ describe('Treasury', () => {
 	let lepidotteri: SignerWithAddress;
 	let SHA_2048: SignerWithAddress;
 
-	beforeEach(async () => {
+	beforeEach(async function () {
+		this.timeout(18000);
 		const f = await rewards();
 		govToken = f.govToken;
 		treasury = f.treasury;
@@ -167,9 +171,8 @@ describe('Treasury', () => {
 			expect(emptyLocks.length).to.eq(0);
 		});
 	});
-	/* TODO: reinstate locking with permit in Treasury.sol#L164
 	context('lockTokensWithPermit', async () => {
-		xit('creates valid lock of KING tokens', async () => {
+		it('creates valid lock of KING tokens', async () => {
 			const decimals = await govToken.decimals();
 			const START_TIME = parseInt(String(Date.now() / 1000)) + 21600;
 			const DURATION_IN_DAYS = 4;
@@ -181,6 +184,7 @@ describe('Treasury', () => {
 			const digest = getEIP712PermitDigest(domainSeparator, deployer.address, treasury.address, lockAmount, nonce, deadline);
 
 			const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
+			const recoveredSig = concatSig(v, r, s);
 
 			await treasury.lockTokensWithPermit(
 				govToken.address,
@@ -192,10 +196,9 @@ describe('Treasury', () => {
 				0,
 				false,
 				deadline,
-				v,
-				r,
-				s
+				recoveredSig
 			);
+
 			const activeLocks = await treasury.activeLocks(lepidotteri.address);
 			const newLock = activeLocks[0];
 			expect(newLock[0]).to.eq(govToken.address);
@@ -210,7 +213,7 @@ describe('Treasury', () => {
 			expect(await govToken.balanceOf(treasury.address)).to.eq(totalLocked);
 		});
 
-		xit('does not allow a lock with a duration of 0', async () => {
+		it('does not allow a lock with a duration of 0', async () => {
 			const decimals = await govToken.decimals();
 			const START_TIME = parseInt(String(Date.now() / 1000)) + 21600;
 			const DURATION_IN_DAYS = 0;
@@ -222,6 +225,7 @@ describe('Treasury', () => {
 			const digest = getEIP712PermitDigest(domainSeparator, deployer.address, treasury.address, lockAmount, nonce, deadline);
 
 			const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
+			const recoveredSig = concatSig(v, r, s);
 
 			await expect(
 				treasury.lockTokensWithPermit(
@@ -234,9 +238,7 @@ describe('Treasury', () => {
 					0,
 					false,
 					deadline,
-					v,
-					r,
-					s
+					recoveredSig
 				)
 			).to.revertedWith('revert Treasury::lockTokensWithPermit: vesting duration must be > 0');
 			expect(await govToken.balanceOf(treasury.address)).to.eq(totalLocked);
@@ -244,7 +246,7 @@ describe('Treasury', () => {
 			expect(emptyLocks.length).to.eq(0);
 		});
 
-		xit('does not allow a lock with a duration of > 50 years', async () => {
+		it('does not allow a lock with a duration of > 50 years', async () => {
 			const decimals = await govToken.decimals();
 			const START_TIME = parseInt(String(Date.now() / 1000)) + 21600;
 			const DURATION_IN_DAYS = 55 * 365;
@@ -254,7 +256,9 @@ describe('Treasury', () => {
 			const nonce = await govToken.nonces(deployer.address);
 			const deadline = ethers.constants.MaxUint256;
 			const digest = getEIP712PermitDigest(domainSeparator, deployer.address, treasury.address, lockAmount, nonce, deadline);
+
 			const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
+			const recoveredSig = concatSig(v, r, s);
 
 			await expect(
 				treasury.lockTokensWithPermit(
@@ -267,9 +271,7 @@ describe('Treasury', () => {
 					0,
 					false,
 					deadline,
-					v,
-					r,
-					s
+					recoveredSig
 				)
 			).to.revertedWith('revert Treasury::lockTokensWithPermit: vesting duration more than 50 years');
 			expect(await govToken.balanceOf(treasury.address)).to.eq(totalLocked);
@@ -277,7 +279,7 @@ describe('Treasury', () => {
 			expect(emptyLocks.length).to.eq(0);
 		});
 
-		xit('does not allow a lock of 0', async () => {
+		it('does not allow a lock of 0', async () => {
 			const START_TIME = parseInt(String(Date.now() / 1000)) + 21600;
 			const DURATION_IN_DAYS = 4;
 			const totalLocked = await govToken.balanceOf(treasury.address);
@@ -286,7 +288,9 @@ describe('Treasury', () => {
 			const nonce = await govToken.nonces(deployer.address);
 			const deadline = ethers.constants.MaxUint256;
 			const digest = getEIP712PermitDigest(domainSeparator, deployer.address, treasury.address, lockAmount, nonce, deadline);
+
 			const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
+			const recoveredSig = concatSig(v, r, s);
 
 			await expect(
 				treasury.lockTokensWithPermit(
@@ -299,9 +303,7 @@ describe('Treasury', () => {
 					0,
 					false,
 					deadline,
-					v,
-					r,
-					s
+					recoveredSig
 				)
 			).to.revertedWith('revert Treasury::lockTokensWithPermit: amount not > 0');
 
@@ -310,7 +312,7 @@ describe('Treasury', () => {
 			expect(emptyLocks.length).to.eq(0);
 		});
 
-		xit('does not allow a lock when locker has insufficient balance', async () => {
+		it('does not allow a lock when locker has insufficient balance', async () => {
 			const decimals = await govToken.decimals();
 			const START_TIME = parseInt(String(Date.now() / 1000)) + 21600;
 			const DURATION_IN_DAYS = 4;
@@ -320,7 +322,9 @@ describe('Treasury', () => {
 			const nonce = await govToken.nonces(deployer.address);
 			const deadline = ethers.constants.MaxUint256;
 			const digest = getEIP712PermitDigest(domainSeparator, deployer.address, treasury.address, lockAmount, nonce, deadline);
+
 			const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
+			const recoveredSig = concatSig(v, r, s);
 
 			await govToken.transfer(SHA_2048.address, await govToken.balanceOf(deployer.address));
 
@@ -335,9 +339,7 @@ describe('Treasury', () => {
 					0,
 					false,
 					deadline,
-					v,
-					r,
-					s
+					recoveredSig
 				)
 			).to.revertedWith('revert KING::_transferTokens: transfer exceeds from balance');
 			expect(await govToken.balanceOf(treasury.address)).to.eq(totalLocked);
@@ -345,7 +347,7 @@ describe('Treasury', () => {
 			expect(emptyLocks.length).to.eq(0);
 		});
 	});
-*/
+
 	context('tokenBalance', async () => {
 		it('returns 0 if locked token balance does not exist', async () => {
 			await govToken.approve(treasury.address, ethers.constants.MaxUint256);
@@ -840,7 +842,7 @@ describe('Treasury', () => {
 			const { timestamp } = await ethers.provider.getBlock('latest');
 			const START_TIME = timestamp + 21600;
 			const ORIGINAL_DURATION_IN_DAYS = 4;
-			const lockAmount = ethers.BigNumber.from(1000).mul(ethers.BigNumber.from(10).pow(decimals));
+			const lockAmount = ethers.BigNumber.from(9).mul(ethers.BigNumber.from(10).pow(decimals));
 
 			await treasury.lockTokens(
 				govToken.address,

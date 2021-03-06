@@ -63,8 +63,8 @@ describe('Crown', () => {
 			});
 		});
 
-		context('sanctuaryContract', async () => {
-			it('returns the current monastery contract address', async () => {
+		context('vestingContract', async () => {
+			it('returns the current vesting contract address', async () => {
 				expect(await crown.vestingContract()).to.eq(monastery.address);
 				expect(await crownImp.vestingContract()).to.eq(O_Address);
 			});
@@ -165,7 +165,7 @@ describe('Crown', () => {
 
 			it('does not allow addresses other than the monastery contract to add voting power', async () => {
 				await expect(crown.addVotingPowerForVestingTokens(lepidotteri.address, 1000)).to.revertedWith(
-					'revert Crown::addVPforVT: only Sanctuary contract'
+					'revert Crown::addVPforVT: only Monastery contract'
 				);
 			});
 		});
@@ -177,9 +177,9 @@ describe('Crown', () => {
 				);
 			});
 
-			it('does not allow addresses other than the monastery contract to remove voting power', async () => {
+			it('does not allow addresses other than the vesting contract to remove voting power', async () => {
 				await expect(crown.removeVotingPowerForClaimedTokens(lepidotteri.address, 1000)).to.revertedWith(
-					'revert Crown::removeVPforCT: only Sanctuary contract'
+					'revert Crown::removeVPforCT: only Monastery contract'
 				);
 			});
 		});

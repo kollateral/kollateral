@@ -16,7 +16,9 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.2;
+pragma solidity ^0.8.1;
+
+import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 import "./libraries/diamond/LibDiamond.sol";
 import "./libraries/diamond/LibDiamondOwnership.sol";
@@ -24,7 +26,6 @@ import "./libraries/diamond/LibDiamondOwnership.sol";
 import "./interfaces/diamond/IDiamondLoupe.sol";
 import "./interfaces/diamond/IDiamondCut.sol";
 import "./interfaces/access/IERC173.sol";
-import "./interfaces/introspection/IERC165.sol";
 
 contract Kingmaker {
 	// more arguments are added to this struct

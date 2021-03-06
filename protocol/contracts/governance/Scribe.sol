@@ -28,12 +28,14 @@ pragma solidity ^0.8.2;
 
 import "hardhat/console.sol";
 
+import "../interfaces/governance/ITokenRegistry.sol";
+
 /**
  * @title Scribe (prev. TokenRegistry)
  * @dev Maintains the official registry of tokens (along with their respective conversion formulae)
  * 		counted by the Crown and Bailiff in voting power calculations
  */
-contract Scribe {
+contract Scribe is ITokenRegistry {
 	/// @notice Current owner of this contract
 	address public clergy;
 
@@ -43,15 +45,9 @@ contract Scribe {
 	/// @notice Event emitted when the owner of the contract is updated
 	event ApostolicSuccession(address indexed oldOwner, address indexed newOwner);
 
-	/// @notice Event emitted when a token formula is updated
-	event TokenFormulaUpdated(address indexed token, address indexed formula);
-
-	/// @notice Event emitted when a supported token is removed
-	event TokenRemoved(address indexed token);
-
 	/// @notice only clergy can call function
-	modifier onlyTheChurch {
-		require(msg.sender == clergy, "Scribe::onlyTheChurch: not clergy");
+	modifier onlyChurch {
+		require(msg.sender == clergy, "Scribe::onlyChurch: not clergy");
 		_;
 	}
 
@@ -59,20 +55,46 @@ contract Scribe {
 	 * @notice Construct a new token registry contract
 	 * @param _owner contract owner
 	 * @param _tokens initially supported tokens
-	 * @param _formulas formula contracts for initial tokens
+	 * @param _formulae respective formulae contracts for initial tokens
 	 */
 	constructor(
 		address _owner,
 		address[] memory _tokens,
-		address[] memory _formulas
+		address[] memory _formulae
 	) {
-		require(_tokens.length == _formulas.length, "Scribe::constructor: not same length");
+		require(_tokens.length == _formulae.length, "Scribe::constructor: tokens and formulae have different lengths");
 		for (uint256 i = 0; i < _tokens.length; i++) {
-			tokenFormulae[_tokens[i]] = _formulas[i];
-			emit TokenFormulaUpdated(_tokens[i], _formulas[i]);
+			tokenFormulae[_tokens[i]] = _formulae[i];
+			emit TokenFormulaUpdated(_tokens[i], _formulae[i]);
 		}
 		clergy = _owner;
 		emit ApostolicSuccession(address(0), clergy);
+	}
+
+	/**
+	 * @notice Address of owner
+	 * @return Address of owner
+	 */
+	function owner() public view returns (address) {
+		return clergy;
+	}
+
+	/**
+	 * @notice Change owner of token registry contract
+	 * @param newOwner New owner address
+	 */
+	function changeOwner(address newOwner) external override onlyChurch {
+		emit ApostolicSuccession(clergy, newOwner);
+		clergy = newOwner;
+	}
+
+	/**
+	 * @notice Looks up token formula in contract storage mapping of tokens-to-formulae
+	 * @param token The token to retrieve its formula for
+	 * @return the formula address
+	 */
+	function tokenFormula(address token) external view override returns (address) {
+		return tokenFormulae[token];
 	}
 
 	/**
@@ -80,26 +102,22 @@ contract Scribe {
 	 * @param token token for formula
 	 * @param formula address of formula contract
 	 */
-	function setTokenFormula(address token, address formula) external onlyTheChurch {
-		tokenFormulae[token] = formula;
-		emit TokenFormulaUpdated(token, formula);
+	function setTokenFormula(address token, address formula) external override onlyChurch {
+		if (tokenFormulae[token] == address(0)) {
+			tokenFormulae[token] = formula;
+			emit TokenFormulaAdded(token, formula);
+		} else {
+			tokenFormulae[token] = formula;
+			emit TokenFormulaUpdated(token, formula);
+		}
 	}
 
 	/**
 	 * @notice Remove conversion formula address for token
 	 * @param token token address to remove
 	 */
-	function removeToken(address token) external onlyTheChurch {
+	function removeToken(address token) external override onlyChurch {
 		tokenFormulae[token] = address(0);
-		emit TokenRemoved(token);
-	}
-
-	/**
-	 * @notice Change owner of token registry contract
-	 * @param newOwner New owner address
-	 */
-	function changeOwner(address newOwner) external onlyTheChurch {
-		emit ApostolicSuccession(clergy, newOwner);
-		clergy = newOwner;
+		emit TokenFormulaRemoved(token);
 	}
 }

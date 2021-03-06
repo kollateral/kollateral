@@ -20,9 +20,10 @@ pragma solidity ^0.8.2;
 
 import "hardhat/console.sol";
 
+import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+
 import "../../interfaces/diamond/IDiamondCut.sol";
 import "../../interfaces/diamond/IDiamondLoupe.sol";
-import "../../interfaces/introspection/IERC165.sol";
 
 import "../../libraries/diamond/LibDiamondStorage.sol";
 

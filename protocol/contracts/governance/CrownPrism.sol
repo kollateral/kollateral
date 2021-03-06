@@ -21,7 +21,7 @@ pragma solidity ^0.8.2;
 
 import "hardhat/console.sol";
 
-import "../../libraries/governance/PrismProxy.sol";
+import "../libraries/governance/PrismProxy.sol";
 
 /**
  * @title CrownPrism (prev. VotingPowerPrism)

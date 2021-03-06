@@ -79,13 +79,14 @@
 */
 /* solhint-enable max-line-length */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.2;
+pragma solidity ^0.8.1;
 
 import "hardhat/console.sol";
 
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-import "../../interfaces/governance/ICrownGovernanceToken.sol";
+import "../interfaces/governance/ICrownGovernanceToken.sol";
 
 /**
  * @title KING
@@ -93,6 +94,7 @@ import "../../interfaces/governance/ICrownGovernanceToken.sol";
  * @notice ERC-20 with supply controls + add-ons to allow for offchain signing (see EIP-712, EIP-2612, and EIP-3009)
  */
 contract KING is ICrownGovernanceToken {
+	using ECDSA for *;
 	using SafeMath for uint256;
 
 	/// @notice EIP-20 token name for this token
@@ -525,8 +527,8 @@ contract KING is ICrownGovernanceToken {
 		bytes32 r,
 		bytes32 s
 	) internal view {
-		bytes32 digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), encodeData));
-		address recoveredAddress = ecrecover(digest, v, r, s);
+		bytes32 dataHash = ECDSA.toTypedDataHash(getDomainSeparator(), encodeData);
+		address recoveredAddress = ECDSA.recover(dataHash, v, r, s);
 
 		// Explicitly disallow authorizations for address(0) as ecrecover returns address(0) on malformed messages
 		require(recoveredAddress != address(0) && recoveredAddress == signer, "KING::validateSig: invalid signature");

@@ -55,12 +55,12 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.2;
+pragma solidity ^0.8.1;
 
 import "hardhat/console.sol";
 
-import "../../interfaces/governance/IVotingPower.sol";
-import "../../interfaces/governance/ICrownGovernanceToken.sol";
+import "../interfaces/governance/IVotingPower.sol";
+import "../interfaces/governance/ICrownGovernanceToken.sol";
 
 /**
  * @title Monastery (prev. Vesting)

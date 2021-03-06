@@ -1,5 +1,8 @@
 {
 	"require": "ts-node/register/files",
-	"ignore": ["test/fixtures.js"],
-	"timeout": 6000
+	"ignore": [
+		"test/fixtures.ts",
+		"test/helpers.ts"
+	],
+	"timeout": 9000
 }

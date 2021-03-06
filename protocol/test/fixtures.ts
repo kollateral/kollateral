@@ -96,24 +96,22 @@ export const rewards = deployments.createFixture(async (hre: HardhatRuntimeEnvir
 	await deployer.sendTransaction({ to: SHA_2048.address, value: ethers.utils.parseEther('1.0') });
 	// end of manual reconciliation
 
+	const monasteryFactory = await ethers.getContractFactory('Monastery');
+	const Monastery = await monasteryFactory.deploy(KING.address);
+
 	const crownFactory = await ethers.getContractFactory('Crown');
-	const CrownImp = await crownFactory.deploy();
+	const CrownImplementation = await crownFactory.deploy();
 	const crownPrismFactory = await ethers.getContractFactory('CrownPrism');
 	const CrownPrism = await crownPrismFactory.deploy(deployer.address);
-	const Crown = new ethers.Contract(CrownPrism.address, CrownImp.interface, deployer);
-	await CrownPrism.connect(deployer).setPendingProxyImplementation(CrownImp.address);
-	await CrownImp.connect(deployer).become(Crown.address);
+	const Crown = new ethers.Contract(CrownPrism.address, CrownImplementation.interface, deployer);
+	await CrownPrism.setPendingProxyImplementation(CrownImplementation.address);
+	await CrownImplementation.become(CrownPrism.address);
+	await Crown.initialize(KING.address, Monastery.address);
 
 	const kingmakerFormulaFactory = await ethers.getContractFactory('KingmakerFormula');
 	const KingmakerFormula = await kingmakerFormulaFactory.deploy();
-	const SushiFormulaFactory = await ethers.getContractFactory('SushiLPFormula');
-	const SushiFormula = await SushiFormulaFactory.deploy(admin.address, SUSHI_LP_VP_CVR);
 	const scribeFactory = await ethers.getContractFactory('Scribe');
-	const Scribe = await scribeFactory.deploy(
-		admin.address,
-		[KING.address, SUSHI_POOL_ADDRESS],
-		[KingmakerFormula.address, SushiFormula.address]
-	);
+	const Scribe = await scribeFactory.deploy(deployer.address, [KING.address], [KingmakerFormula.address]);
 	await Crown.connect(deployer).setTokenRegistry(Scribe.address);
 
 	const lordFactory = await ethers.getContractFactory('Lord');

@@ -20,11 +20,12 @@
 pragma solidity ^0.8.2;
 
 interface ITokenRegistry {
-	event ChangedOwner(address indexed oldOwner, address indexed newOwner);
-	event TokenAdded(address indexed token, address indexed formula);
-	event TokenRemoved(address indexed token);
-
-	function owner() external view returns (address);
+	/// @notice Event emitted when a new token is supported
+	event TokenFormulaAdded(address indexed token, address indexed formula);
+	/// @notice Event emitted when a token formula is updated
+	event TokenFormulaUpdated(address indexed token, address indexed formula);
+	/// @notice Event emitted when a supported token is removed
+	event TokenFormulaRemoved(address indexed token);
 
 	function tokenFormula(address) external view returns (address);
 

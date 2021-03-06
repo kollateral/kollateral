@@ -79,11 +79,11 @@ import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-import "../../interfaces/governance/IVotingPowerFormula.sol";
+import "../interfaces/governance/IVotingPowerFormula.sol";
 
-import "../../libraries/governance/LibCrownStorage.sol";
-import "../../libraries/governance/PrismProxyImplementation.sol";
-import "../../libraries/security/ReentrancyGuardUpgradeSafe.sol";
+import "../libraries/governance/LibCrownStorage.sol";
+import "../libraries/governance/PrismProxyImplementation.sol";
+import "../libraries/security/ReentrancyGuardUpgradeSafe.sol";
 
 /**
  * @title CrownCourt (prev. VotingPower)
@@ -106,12 +106,12 @@ contract Crown is PrismProxyImplementation, ReentrancyGuardUpgradeSafe {
 	event VotingPowerChanged(address indexed voter, uint256 indexed previousBalance, uint256 indexed newBalance);
 
 	/// @notice Event emitted when the owner of the voting power contract is updated
-	event RoyalSuccession(address indexed oldOwner, address indexed newOwner);
+	event RoyalSuccession(address indexed oldKing, address indexed newKing);
 
 	/// @notice restrict functions to just king (diamond owner) address
-	modifier onlyTheKing {
+	modifier onlyKing {
 		CrownStorage storage crown = LibCrownStorage.crownStorage();
-		require(crown.king == address(0) || msg.sender == crown.king, "Crown::onlyTheKing: not the king");
+		require(crown.king == address(0) || msg.sender == crown.king, "Crown::onlyKing: not the king");
 		_;
 	}
 
@@ -185,7 +185,7 @@ contract Crown is PrismProxyImplementation, ReentrancyGuardUpgradeSafe {
 	 * @notice Sets token registry address
 	 * @param registry Address of token registry
 	 */
-	function setTokenRegistry(address registry) public onlyTheKing {
+	function setTokenRegistry(address registry) public onlyKing {
 		CrownStorage storage crown = LibCrownStorage.crownStorage();
 		crown.tokenRegistry = ITokenRegistry(registry);
 	}
@@ -194,20 +194,20 @@ contract Crown is PrismProxyImplementation, ReentrancyGuardUpgradeSafe {
 	 * @notice Sets lockManager address
 	 * @param newLockManager Address of lockManager
 	 */
-	function setLockManager(address newLockManager) public onlyTheKing {
+	function setLockManager(address newLockManager) public onlyKing {
 		CrownStorage storage crown = LibCrownStorage.crownStorage();
 		crown.lockManager = newLockManager;
 	}
 
 	/**
 	 * @notice Change owner of vesting contract
-	 * @param newOwner New owner address
+	 * @param newKing New owner address
 	 */
-	function changeOwner(address newOwner) external onlyTheKing {
-		require(newOwner != address(0) && newOwner != address(this), "Crown::changeOwner: not valid address");
+	function succeed(address newKing) external onlyKing {
+		require(newKing != address(0) && newKing != address(this), "Crown::succeed: not valid address");
 		CrownStorage storage crown = LibCrownStorage.crownStorage();
-		emit RoyalSuccession(crown.king, newOwner);
-		crown.king = newOwner;
+		emit RoyalSuccession(crown.king, newKing);
+		crown.king = newKing;
 	}
 
 	/**
@@ -281,7 +281,7 @@ contract Crown is PrismProxyImplementation, ReentrancyGuardUpgradeSafe {
 	function addVotingPowerForVestingTokens(address account, uint256 amount) external nonReentrant {
 		CrownStorage storage crown = LibCrownStorage.crownStorage();
 		require(amount > 0, "Crown::addVPforVT: cannot add 0 voting power");
-		require(msg.sender == address(crown.vesting), "Crown::addVPforVT: only Sanctuary contract");
+		require(msg.sender == address(crown.vesting), "Crown::addVPforVT: only Monastery contract");
 
 		_increaseVotingPower(account, amount);
 	}
@@ -294,7 +294,7 @@ contract Crown is PrismProxyImplementation, ReentrancyGuardUpgradeSafe {
 	function removeVotingPowerForClaimedTokens(address account, uint256 amount) external nonReentrant {
 		CrownStorage storage crown = LibCrownStorage.crownStorage();
 		require(amount > 0, "Crown::removeVPforCT: cannot remove 0 voting power");
-		require(msg.sender == address(crown.vesting), "Crown::removeVPforCT: only Sanctuary contract");
+		require(msg.sender == address(crown.vesting), "Crown::removeVPforCT: only Monastery contract");
 
 		_decreaseVotingPower(account, amount);
 	}

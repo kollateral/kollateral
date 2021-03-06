@@ -23,7 +23,7 @@ import "hardhat/console.sol";
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-import "../../interfaces/governance/ICrownGovernanceToken.sol";
+import "../interfaces/governance/ICrownGovernanceToken.sol";
 
 /**
  * @title Multisend

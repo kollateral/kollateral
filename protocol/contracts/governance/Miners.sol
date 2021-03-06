@@ -44,9 +44,9 @@ pragma solidity ^0.8.2;
 
 import "hardhat/console.sol";
 
-import "../../interfaces/governance/ICrownGovernanceToken.sol";
+import "../interfaces/governance/ICrownGovernanceToken.sol";
 
-import "../../libraries/governance/LibCrownStorage.sol";
+import "../libraries/governance/LibCrownStorage.sol";
 
 /**
  * @title Miners (prev. SupplyManager)

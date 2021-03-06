@@ -56,12 +56,12 @@ pragma solidity ^0.8.2;
 
 import "hardhat/console.sol";
 
-import "../../interfaces/governance/ILockManager.sol";
-import "../../interfaces/governance/IMasterChef.sol";
-import "../../interfaces/governance/IVault.sol";
+import "../interfaces/governance/ILockManager.sol";
+import "../interfaces/governance/IMasterChef.sol";
+import "../interfaces/governance/IVault.sol";
 
-import "../../libraries/governance/LibCrownStorage.sol";
-import "../../libraries/governance/Treasurer.sol";
+import "../libraries/governance/LibCrownStorage.sol";
+import "../libraries/governance/Treasurer.sol";
 
 /**
  * @title Dragon (prev. RewardsManager)

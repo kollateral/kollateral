@@ -45,9 +45,9 @@ import "hardhat/console.sol";
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
-import "../../interfaces/governance/IVotingPower.sol";
-import "../../interfaces/governance/ITokenRegistry.sol";
-import "../../interfaces/governance/IVotingPowerFormula.sol";
+import "../interfaces/governance/IVotingPower.sol";
+import "../interfaces/governance/ITokenRegistry.sol";
+import "../interfaces/governance/IVotingPowerFormula.sol";
 
 /**
  * @title Lord (prev. LockManager)
@@ -67,7 +67,7 @@ contract Lord is AccessControl {
 	mapping(address => mapping(address => LockedStake)) lockedStakes;
 
 	/// @notice Voting power contract
-	IVotingPower public votingPower;
+	IVotingPower public crown;
 
 	/// @notice modifier to restrict functions to only contracts that have been added as lockers
 	modifier onlyLords() {
@@ -87,7 +87,7 @@ contract Lord is AccessControl {
 	 * @param _roleManager address that is in charge of assigning roles
 	 */
 	constructor(address _votingPower, address _roleManager) {
-		votingPower = IVotingPower(_votingPower);
+		crown = IVotingPower(_votingPower);
 		_setupRole(DEFAULT_ADMIN_ROLE, _roleManager);
 	}
 
@@ -118,7 +118,7 @@ contract Lord is AccessControl {
 	 * @return resulting voting power
 	 */
 	function calculateVotingPower(address token, uint256 amount) public view returns (uint256) {
-		address registry = votingPower.tokenRegistry();
+		address registry = crown.tokenRegistry();
 		require(registry != address(0), "Lord::calculateVotingPower: registry not set");
 
 		address tokenFormulaAddress = ITokenRegistry(registry).tokenFormula(token);
@@ -143,7 +143,7 @@ contract Lord is AccessControl {
 		votingPowerGranted = calculateVotingPower(token, tokenAmount);
 		lockedStakes[receiver][token].amount = lockedStakes[receiver][token].amount + tokenAmount;
 		lockedStakes[receiver][token].votingPower = lockedStakes[receiver][token].votingPower + votingPowerGranted;
-		votingPower.addVotingPowerForLockedTokens(receiver, votingPowerGranted);
+		crown.addVotingPowerForLockedTokens(receiver, votingPowerGranted);
 
 		emit StakeLocked(receiver, token, tokenAmount, votingPowerGranted);
 	}
@@ -166,7 +166,7 @@ contract Lord is AccessControl {
 		votingPowerRemoved = (tokenAmount * s.votingPower) / s.amount;
 		lockedStakes[receiver][token].amount = lockedStakes[receiver][token].amount - tokenAmount;
 		lockedStakes[receiver][token].votingPower = lockedStakes[receiver][token].votingPower - votingPowerRemoved;
-		votingPower.removeVotingPowerForUnlockedTokens(receiver, votingPowerRemoved);
+		crown.removeVotingPowerForUnlockedTokens(receiver, votingPowerRemoved);
 
 		emit StakeUnlocked(receiver, token, tokenAmount, votingPowerRemoved);
 	}

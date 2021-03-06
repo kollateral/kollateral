@@ -17,7 +17,7 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.2;
+pragma solidity ^0.8.1;
 
 /**
  * A loupe is akin to a small magnifying glass used to look at diamonds and their facets.

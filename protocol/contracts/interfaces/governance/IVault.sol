@@ -55,8 +55,7 @@ interface IVault {
 		bool grantVotingPower
 	) external;
 
-	// TODO: fix stack too deep when compiling inline assembly: "Variable 'var' is 1 slot(s) too deep inside the stack."
-	/*	function lockTokensWithPermit(
+	function lockTokensWithPermit(
 		address token,
 		address locker,
 		address receiver,
@@ -64,12 +63,10 @@ interface IVault {
 		uint256 amount,
 		uint16 lockDurationInDays,
 		uint16 cliffDurationInDays,
-		bool grantVoting,
+		bool grantVotingPower,
 		uint256 deadline,
-		uint8 v,
-		bytes32 r,
-		bytes32 s
-	) external;*/
+		bytes memory signature // Prevents CompilerError: Stack too deep when having more than 11 function parameters
+	) external;
 
 	function claimUnlockedTokenAmounts(uint256[] memory lockIds, uint256[] memory amounts) external;
 

@@ -15,9 +15,9 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 	log(italic(cyanBright(`1) Kingmaker Crown Governance Token`)));
 
 	// Deploy KING.sol contract
-	const deployResult = await deploy('CrownGovernanceToken', {
+	const deployResult = await deploy('KING', {
 		from: deployer,
-		contract: 'CrownGovernanceToken',
+		contract: 'KING',
 		gasLimit: 9696969, // 9,696,969 out of 12,500,000 max gas units
 		args: [lepidotteri, lepidotteri, firstSupplyChangeAllowed],
 		skipIfAlreadyDeployed: true,

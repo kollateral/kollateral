@@ -39,10 +39,11 @@ pragma solidity ^0.8.2;
 
 import "hardhat/console.sol";
 
+import "@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "../../interfaces/governance/ILockManager.sol";
-import "../../interfaces/governance/IVault.sol";
+import "../interfaces/governance/ILockManager.sol";
+import "../interfaces/governance/IVault.sol";
 
 /**
  * @title Treasury (prev. Vault)
@@ -129,6 +130,7 @@ contract Treasury is IVault {
 		require(vestingDurationInDays <= 50 * 365, "Treasury::lockTokens: vesting duration more than 50 years");
 		require(vestingDurationInDays >= cliffDurationInDays, "Treasury::lockTokens: vesting duration < cliff");
 		require(amount > 0, "Treasury::lockTokens: amount not > 0");
+
 		_lockTokens(
 			token,
 			locker,
@@ -143,7 +145,7 @@ contract Treasury is IVault {
 
 	/**
 	 * @notice Lock tokens, using permit for approval
-	 * @dev It is up to the frontend developer to ensure the token implements permit - otherwise this will fail
+	 * @dev It is up to the frontend developer to ensure the token implements permit - **otherwise this will fail**
 	 * @param token Address of token to lock
 	 * @param locker The account that is locking tokens
 	 * @param receiver The account that will be able to retrieve unlocked tokens
@@ -153,10 +155,9 @@ contract Treasury is IVault {
 	 * @param cliffDurationInDays The lock cliff duration in days
 	 * @param grantVotingRights if true, give user voting power from tokens
 	 * @param deadline The time at which to expire the signature
-	 * @param v The recovery byte of the signature
-	 * @param r Half of the ECDSA signature pair
-	 * @param s Half of the ECDSA signature pair
-
+	 * @param signature The `signature` that signed a hashed message (used to retrieve v,r,s separately and avoid
+	 *		  stack too deep errors
+	 */
 	function lockTokensWithPermit(
 		address token,
 		address locker,
@@ -167,21 +168,36 @@ contract Treasury is IVault {
 		uint16 cliffDurationInDays,
 		bool grantVotingRights,
 		uint256 deadline,
-		uint8 v,
-		bytes32 r,
-		bytes32 s
-	)
-	external override
-	{
+		bytes memory signature
+	) external override {
 		require(vestingDurationInDays > 0, "Treasury::lockTokensWithPermit: vesting duration must be > 0");
-		require(vestingDurationInDays <= 25 * 365, "Treasury::lockTokensWithPermit: vesting duration more than 25 years");
+		require(vestingDurationInDays <= 50 * 365, "Treasury::lockTokensWithPermit: vesting duration more than 50 years");
 		require(vestingDurationInDays >= cliffDurationInDays, "Treasury::lockTokensWithPermit: duration < cliff");
 		require(amount > 0, "Treasury::lockTokensWithPermit: amount not > 0");
 
-		// TODO: Set approval using permit signature
-		IERC20(token).permit(locker, address(this), amount, deadline, v, r, s);
-		_lockTokens(token, locker, receiver, startTime, amount, vestingDurationInDays, cliffDurationInDays, grantVotingRights);
-	}*/
+		// ecrecover takes the signature parameters, and the only way to get them currently is to use assembly
+		uint8 v;
+		bytes32 r;
+		bytes32 s;
+		// solhint-disable-next-line no-inline-assembly
+		assembly {
+			r := mload(add(signature, 0x20))
+			s := mload(add(signature, 0x40))
+			v := byte(0, mload(add(signature, 0x60)))
+		}
+
+		IERC20Permit(token).permit(locker, address(this), amount, deadline, v, r, s);
+		_lockTokens(
+			token,
+			locker,
+			receiver,
+			startTime,
+			amount,
+			vestingDurationInDays,
+			cliffDurationInDays,
+			grantVotingRights
+		);
+	}
 
 	/**
 	 * @notice Get all active token lock ids
@@ -520,6 +536,7 @@ contract Treasury is IVault {
 	 */
 	function claimUnlockedTokenAmounts(uint256[] memory locks, uint256[] memory amounts) external override {
 		require(locks.length == amounts.length, "Treasury::claimUnlockedTokenAmounts: arrays must be same length");
+
 		for (uint256 i = 0; i < locks.length; i++) {
 			uint256 claimableAmount = claimableBalance(locks[i]);
 			require(claimableAmount >= amounts[i], "Treasury::claimUnlockedTokenAmounts: claimableAmount < amount");
@@ -540,17 +557,21 @@ contract Treasury is IVault {
 	) external override {
 		Lock storage lock = tokenLocks[lockId];
 		require(msg.sender == lock.receiver, "Treasury::extendLock: msg.sender must be receiver");
+
 		uint16 oldVestingDuration = lock.vestingDurationInDays;
-		console.log("Treasury::extendLock: got here?");
 		uint16 newVestingDuration =
 			_add16(oldVestingDuration, vestingDaysToAdd, "Treasury::extendLock: vesting max days exceeded");
+
 		uint16 oldCliffDuration = lock.cliffDurationInDays;
 		uint16 newCliffDuration =
 			_add16(oldCliffDuration, cliffDaysToAdd, "Treasury::extendLock: cliff max days exceeded");
+
+		require(newVestingDuration >= newCliffDuration, "Treasury::extendLock: duration < cliff");
 		require(newCliffDuration <= 10 * 365, "Treasury::extendLock: cliff more than 10 years");
 		require(newVestingDuration <= 25 * 365, "Treasury::extendLock: vesting duration more than 25 years");
-		require(newVestingDuration >= newCliffDuration, "Treasury::extendLock: duration < cliff");
+
 		lock.vestingDurationInDays = newVestingDuration;
+
 		emit LockExtended(
 			lockId,
 			oldVestingDuration,
@@ -659,8 +680,10 @@ contract Treasury is IVault {
 		uint16 b,
 		string memory errorMessage
 	) internal pure returns (uint16) {
-		uint16 c = a + b;
-		require(c >= a, errorMessage);
-		return c;
+		unchecked {
+			uint16 c = a + b;
+			require(c >= a, errorMessage);
+			return c;
+		}
 	}
 }
