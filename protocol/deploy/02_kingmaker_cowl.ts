@@ -3,7 +3,9 @@ import { DeployFunction } from 'hardhat-deploy/types';
 
 import { underline, greenBright, italic, magenta, cyanBright } from 'colorette';
 
-const skip: DeployFunction = async (hre: HardhatRuntimeEnvironment): Promise<boolean> => {
+import { O_Address } from '../libs/ethereum';
+
+export async function skip(hre: HardhatRuntimeEnvironment): Promise<boolean> {
 	const { deployments, getNamedAccounts, ethers } = hre;
 	const { log } = deployments;
 	const { deployer } = await getNamedAccounts();
@@ -13,14 +15,14 @@ const skip: DeployFunction = async (hre: HardhatRuntimeEnvironment): Promise<boo
 		contractName: 'Cowl',
 	};
 	const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-	if (ZERO_ADDRESS) {
+	if (ZERO_ADDRESS == O_Address) {
 		// @ts-ignore
 		log(`   - Skipping deployment for ${magenta(cowl.contractName)}.sol`);
 		return true;
 	} else {
 		return false;
 	}
-};
+}
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 	const { deployments, getNamedAccounts } = hre;
@@ -31,12 +33,12 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
 	await diamond.deploy('Cowl', {
 		from: deployer,
-		facets: ['CrownGovernanceFacet'],
+		facets: [],
 		log: false,
 	});
 
-	const greeting = await read('Cowl', { from: deployer }, 'govern', 'The King');
-	log(`   - Governance is: ${underline(greenBright(greeting))}`);
+	// const greeting = await read('Cowl', { from: deployer }, 'govern', 'The King');
+	// log(`   - Governance is: ${underline(greenBright(greeting))}`);
 };
 
 export default func;

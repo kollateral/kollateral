@@ -67,7 +67,7 @@ export function getEIP712PermitDigest(
 	spender: Address,
 	value: BigNumberish,
 	nonce: BigNumberish,
-	deadline: BigNumberish,
+	deadline: BigNumberish
 ): string {
 	return ethers.utils.keccak256(
 		ethers.utils.solidityPack(

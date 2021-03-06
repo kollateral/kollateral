@@ -185,7 +185,7 @@ contract Treasury is IVault {
 			s := mload(add(signature, 0x40))
 			v := byte(0, mload(add(signature, 0x60)))
 		}
-		console.logUint(v); console.logBytes32(r); console.logBytes32(s);
+
 		IERC20Permit(token).permit(locker, address(this), amount, deadline, v, r, s);
 		_lockTokens(
 			token,
@@ -202,7 +202,7 @@ contract Treasury is IVault {
 	/**
 	 * @notice Get all active token lock ids
 	 * @return the lock ids
-
+	 */
 	function allActiveLockIds() external view override returns (uint256[] memory) {
 		uint256 activeCount;
 
@@ -227,7 +227,7 @@ contract Treasury is IVault {
 			}
 		}
 		return result;
-	}*/
+	}
 
 	/**
 	 * @notice Get all active token locks

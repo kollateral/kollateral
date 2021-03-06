@@ -72,7 +72,7 @@ interface IVault {
 
 	function claimAllUnlockedTokens(uint256[] memory lockIds) external;
 
-	//function allActiveLockIds() external view returns (uint256[] memory);
+	function allActiveLockIds() external view returns (uint256[] memory);
 
 	function allActiveLocks() external view returns (Lock[] memory);
 
