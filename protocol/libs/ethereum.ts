@@ -6,6 +6,8 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-wit
 import { BigNumberish } from '@ethersproject/bignumber';
 import { Address } from 'hardhat-deploy/dist/types';
 
+export const ETH_Address = '0x0000000000000000000000000000000000000001'
+export const etherAddress = ETH_Address;
 export const O_Address = '0x0000000000000000000000000000000000000000';
 export const zeroAddress = O_Address;
 

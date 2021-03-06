@@ -1,8 +1,10 @@
 node_modules
 
 # Hardhat
-cache
 artifacts
+cache
+coverage
+coverage.json
 
 # TypeChain
 typechain

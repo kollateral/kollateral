@@ -3,8 +3,8 @@ import { Contract } from 'ethers';
 import { ethers } from 'hardhat';
 
 import { expect } from 'chai';
+import {ETH_Address} from "../../libs/ethereum";
 
-const ETHER_TOKEN_ADDRESS = '0x0000000000000000000000000000000000000001';
 const DUMMY_ADDRESS = '0x0000000000000000000000000000000000000002';
 const DUMMY_CALL_DATA = '0x6c00000000000000000000000000000000000000000000000000000000000000';
 
@@ -28,12 +28,12 @@ describe('LendingPoolsAggregator', () => {
 		});
 
 		it('maxFlashLoan should return 0',   async () => {
-			expect(await LendingPoolsAggregator.connect(user).maxFlashLoan(ETHER_TOKEN_ADDRESS))
+			expect(await LendingPoolsAggregator.connect(user).maxFlashLoan(ETH_Address))
 				.to.be.equal(0);
 		});
 
 		it('flashFee should raise an exception', () => {
-			expect(LendingPoolsAggregator.connect(user).flashFee(ETHER_TOKEN_ADDRESS, 1000))
+			expect(LendingPoolsAggregator.connect(user).flashFee(ETH_Address, 1000))
 				.to.be.revertedWith("LendingPoolsAggregator: Unsupported currency");
 		});
 
@@ -42,7 +42,7 @@ describe('LendingPoolsAggregator', () => {
 			expect(
 				LendingPoolsAggregator.connect(user).flashLoan(
 					user.address,
-					ETHER_TOKEN_ADDRESS,
+					ETH_Address,
 					1000,
 					dummyCallData
 				)
@@ -66,6 +66,5 @@ describe('LendingPoolsAggregator', () => {
 				.to.be
 				.revertedWith("Ownable: caller is not the owner");
 		});
-
 	});
 });

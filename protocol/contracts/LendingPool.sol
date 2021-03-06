@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.2;
 
-import "./__oz__/math/Math.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
+
 import "erc3156/contracts/interfaces/IERC3156FlashLender.sol";
-import "./libraries/access/Ownable.sol";
-import "./libraries/math/SafeMath.sol";
 
 contract LendingPool is Ownable {
-
-	using SafeMath for uint256;
 
 	struct Lender {
 		address _address;
@@ -63,11 +61,10 @@ contract LendingPool is Ownable {
 	}
 
 	function calculatePoolFee(uint256 tokenAmount, Lender memory lender) internal pure returns (uint256) {
-		return tokenAmount.mul(lender._feeBips).div(10000);
+		return tokenAmount * lender._feeBips / 10000;
 	}
 
 	function calculatePlatformFee(uint256 tokenAmount) internal view returns (uint256) {
-		return tokenAmount.mul(_platformFeeBips).div(10000);
+		return tokenAmount * _platformFeeBips / 10000;
 	}
-
 }
