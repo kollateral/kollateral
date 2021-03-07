@@ -4,6 +4,7 @@ pragma solidity ^0.8.2;
 import "erc3156/contracts/interfaces/IERC3156FlashLender.sol";
 import "erc3156/contracts/interfaces/IERC3156FlashBorrower.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./LendingPool.sol";
 
 contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156FlashBorrower {
@@ -178,6 +179,23 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 		);
 
 		IERC20(token).transfer(_platformFeeCollectionAddress, platformFees);
+	}
+
+	function loanableAmount(
+		IERC3156FlashLender lender,
+		address token,
+		uint256 maxAmount
+	) internal view returns (uint256) {
+		uint256 maxLoan = lender.maxFlashLoan(token);
+		return Math.min(maxLoan, maxAmount);
+	}
+
+	function calculatePoolFee(uint256 tokenAmount, Lender memory lender) internal pure returns (uint256) {
+		return tokenAmount * lender._feeBips / 10000;
+	}
+
+	function calculatePlatformFee(uint256 tokenAmount) internal view returns (uint256) {
+		return tokenAmount * _platformFeeBips / 10000;
 	}
 
 }

@@ -2,9 +2,6 @@
 pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/Math.sol";
-
-import "erc3156/contracts/interfaces/IERC3156FlashLender.sol";
 
 contract LendingPool is Ownable {
 
@@ -21,7 +18,7 @@ contract LendingPool is Ownable {
 
 	constructor() {}
 
-	function platformFee() external view returns (uint256) {
+	function platformFeeBips() external view returns (uint256) {
 		return _platformFeeBips;
 	}
 
@@ -43,28 +40,11 @@ contract LendingPool is Ownable {
 
 	function setLenders(
 		address tokenAddress,
-		bytes calldata newLenders
+		Lender[] memory newLenders
 	) external onlyOwner {
-		(Lender[] memory items) = abi.decode(newLenders, (Lender[]));
-		for (uint256 index = 0; index < items.length; index++) {
-			_lenders[tokenAddress][index] = items[index];
+		for (uint256 index = 0; index < newLenders.length; index++) {
+			_lenders[tokenAddress].push(newLenders[index]);
 		}
 	}
 
-	function loanableAmount(
-		IERC3156FlashLender lender,
-		address token,
-		uint256 maxAmount
-	) internal view returns (uint256) {
-		uint256 maxLoan = lender.maxFlashLoan(token);
-		return Math.min(maxLoan, maxAmount);
-	}
-
-	function calculatePoolFee(uint256 tokenAmount, Lender memory lender) internal pure returns (uint256) {
-		return tokenAmount * lender._feeBips / 10000;
-	}
-
-	function calculatePlatformFee(uint256 tokenAmount) internal view returns (uint256) {
-		return tokenAmount * _platformFeeBips / 10000;
-	}
 }
