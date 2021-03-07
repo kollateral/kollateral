@@ -42,6 +42,7 @@ contract LendingPool is Ownable {
 		address tokenAddress,
 		Lender[] memory newLenders
 	) external onlyOwner {
+		delete _lenders[tokenAddress];
 		for (uint256 index = 0; index < newLenders.length; index++) {
 			_lenders[tokenAddress].push(newLenders[index]);
 		}

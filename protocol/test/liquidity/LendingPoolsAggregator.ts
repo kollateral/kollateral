@@ -82,6 +82,38 @@ describe('LendingPoolsAggregator', () => {
 			expect(aggregatedMax).to.be.equal(wethPoolMax);
 		});
 
+		it('flashFee should ignore lenders with no liquidity', async () => {
+
+			const LenderWithNoLiquidityFactory = await ethers.getContractFactory('LenderWithNoLiquidity');
+			let LenderWithNoLiquidity = await LenderWithNoLiquidityFactory.connect(owner).deploy();
+			await LenderWithNoLiquidity.deployed();
+
+			await LendingPoolsAggregator.connect(owner).setLenders(
+				WETH10.address,
+				[
+					{
+						_address: LenderWithNoLiquidity.address,
+						_feeCollectionAddress: feeCollector.address,
+						_feeBips: 10
+					},
+					{
+						_address: WETH10.address,
+						_feeCollectionAddress: feeCollector.address,
+						_feeBips: 10
+					}
+				]
+			)
+
+			expect(LendingPoolsAggregator.connect(user).flashFee(WETH10.address, BigNumber.from(100)))
+				.to.not.be.reverted
+		});
+
+		it('flashFee should revert if requested amount is more than available liquidity', async () => {
+			let aggregatedMax = await LendingPoolsAggregator.connect(user).maxFlashLoan(WETH10.address);
+			expect(LendingPoolsAggregator.connect(user).flashFee(WETH10.address, aggregatedMax.add(1)))
+				.to.be.revertedWith('LendingPoolsAggregator: Liquidity is not sufficient for requested amount')
+		});
+
 		it('flashFee should correctly include lender, pool and platform fees', async () => {
 
 			let aggregatedMax = await LendingPoolsAggregator.connect(user).maxFlashLoan(WETH10.address);

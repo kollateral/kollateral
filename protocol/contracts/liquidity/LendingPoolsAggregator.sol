@@ -187,10 +187,9 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 	function loanableAmount(
 		IERC3156FlashLender lender,
 		address token,
-		uint256 maxAmount
+		uint256 amount
 	) internal view returns (uint256) {
-		uint256 maxLoan = lender.maxFlashLoan(token);
-		return Math.min(maxLoan, maxAmount);
+		return Math.min(lender.maxFlashLoan(token), amount);
 	}
 
 	function calculatePoolFee(uint256 tokenAmount, Lender memory lender) internal pure returns (uint256) {
