@@ -59,16 +59,19 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 		uint256 remainingLoanBalance = amount;
 
 		for (uint256 i = 0; i < _lenders[token].length && remainingLoanBalance > 0; i++) {
-			IERC3156FlashLender lender = IERC3156FlashLender(_lenders[token][i]._address);
+			Lender memory lenderPool = _lenders[token][i];
+			IERC3156FlashLender lender = IERC3156FlashLender(lenderPool._address);
 			uint256 loanAmount = loanableAmount(lender, token, remainingLoanBalance);
 
 			if (loanAmount > 0) {
 				remainingLoanBalance = remainingLoanBalance - loanAmount;
-				loanFee = loanFee + lender.flashFee(token, loanAmount);
+				loanFee = loanFee +
+						  lender.flashFee(token, loanAmount) +
+				          calculatePoolFee(loanAmount, lenderPool);
 			}
 		}
 
-		return loanFee;
+		return loanFee + calculatePlatformFee(amount);
 	}
 
 	function flashLoan(

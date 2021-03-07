@@ -1,5 +1,5 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
-import {Contract} from 'ethers';
+import {BigNumber, Contract} from 'ethers';
 import { ethers } from 'hardhat';
 
 import { expect } from 'chai';
@@ -9,11 +9,13 @@ describe('LendingPoolsAggregator', () => {
 	let LendingPoolsAggregator: Contract;
 	let owner: SignerWithAddress;
 	let user: SignerWithAddress;
+	let feeCollector: SignerWithAddress;
 
 	before(async () => {
-		const [addr1, addr2] = await ethers.getSigners();
+		const [addr1, addr2, add3] = await ethers.getSigners();
 		owner = addr1;
 		user = addr2;
+		feeCollector = add3;
 	});
 
 	beforeEach(async () => {
@@ -44,6 +46,52 @@ describe('LendingPoolsAggregator', () => {
 					dummyCallData
 				)
 			).to.be.revertedWith("LendingPoolsAggregator: Liquidity is not sufficient for requested amount");
+		});
+
+	});
+
+	describe("when aggregator has one available pool", () => {
+
+		let WETH10: Contract;
+
+		beforeEach(async () => {
+			const WETH10Factory = await ethers.getContractFactory('WETH10');
+			WETH10 = await WETH10Factory.connect(owner).deploy();
+			await WETH10.deployed();
+
+			await LendingPoolsAggregator.connect(owner).setPlatformFeeBips(100);
+			await LendingPoolsAggregator.connect(owner).setPlatformFeeCollectionAddress(feeCollector.address);
+
+			await LendingPoolsAggregator.connect(owner).setLenders(
+				WETH10.address,
+				[
+					{
+						_address: WETH10.address,
+						_feeCollectionAddress: feeCollector.address,
+						_feeBips: 10
+					}
+				]
+			)
+		});
+
+		it('maxFlashLoan should return max available supply in pool', async () => {
+
+			let aggregatedMax = await LendingPoolsAggregator.connect(user).maxFlashLoan(WETH10.address);
+			let wethPoolMax = await WETH10.connect(user).maxFlashLoan(WETH10.address);
+
+			expect(aggregatedMax).to.be.equal(wethPoolMax);
+		});
+
+		it('flashFee should correctly include lender, pool and platform fees', async () => {
+
+			let aggregatedMax = await LendingPoolsAggregator.connect(user).maxFlashLoan(WETH10.address);
+			let fee = await LendingPoolsAggregator.connect(user).flashFee(WETH10.address, aggregatedMax);
+
+			let wethFee = await WETH10.connect(user).flashFee(WETH10.address, aggregatedMax);
+			let platformFee = aggregatedMax.mul(100).div(10000);
+			let poolFee = aggregatedMax.mul(10).div(10000);
+
+			expect(fee).to.be.equal(wethFee.add(poolFee).add(platformFee));
 		});
 
 	});
