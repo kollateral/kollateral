@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <a href="https://kingmaker.dev"><img src="https://docs.kingmaker.dev/public/favicon.png" alt="Kingmaker" width="200"></a>
+  <a href="https://kingmaker.dev"><img src="https://kingmaker.dev/favicon.png" alt="Kingmaker" width="256"></a>
   <br>
   Kingmaker
   <br>
