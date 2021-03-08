@@ -85,5 +85,27 @@ describe('LendingPool', () => {
 			expect(storedLender[0][2]).to.be.equal(BigNumber.from(lender._feeBips));
 		});
 
+		it('setLenders should always override previous list',  async () => {
+			let previousLender = {
+				_address: DUMMY_ADDRESS,
+				_feeCollectionAddress: DUMMY_ADDRESS.replace("2", "3"),
+				_feeBips: 10
+			};
+			await LendingPoolsAggregator.connect(owner).setLenders(DUMMY_ADDRESS, [previousLender]);
+
+
+			let currentLender = {
+				_address: DUMMY_ADDRESS.replace('2','4'),
+				_feeCollectionAddress: DUMMY_ADDRESS.replace("2", "5"),
+				_feeBips: 100
+			};
+			await LendingPoolsAggregator.connect(owner).setLenders(DUMMY_ADDRESS, [currentLender]);
+			let storedLender = await LendingPoolsAggregator.connect(user).lenders(DUMMY_ADDRESS);
+
+			expect(storedLender[0][0]).to.be.equal(currentLender._address);
+			expect(storedLender[0][1]).to.be.equal(currentLender._feeCollectionAddress);
+			expect(storedLender[0][2]).to.be.equal(BigNumber.from(currentLender._feeBips));
+		});
+
 	});
 });
