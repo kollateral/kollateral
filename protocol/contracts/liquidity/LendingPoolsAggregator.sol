@@ -87,7 +87,7 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 		);
 
 		BorrowerData memory borrower = BorrowerData(data, amount, address(receiver));
-		FlashStepLoadData memory stepData = FlashStepLoadData(borrower, amount, 0, 0);
+		FlashStepLoadData memory stepData = FlashStepLoadData(borrower, 0, amount, 0);
 
 		return executeFlashLoanStep(token, stepData);
 	}
@@ -132,10 +132,11 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 
 		if (stepData.remainingAmount > 0) {
 			executeNextFlashLoanStep(token, stepData);
-			IERC20(token).transfer(lender._feeCollectionAddress, poolFee);
 		} else {
 			concludeFlashLoan(stepData, token);
 		}
+
+		IERC20(token).transfer(lender._feeCollectionAddress, poolFee);
 
 		return CALLBACK_SUCCESS;
 	}
@@ -152,6 +153,7 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 		FlashStepLoadData memory stepData,
 		address token
 	) internal {
+
 		require(
 			IERC20(token).transfer(address(stepData.borrower.receiver), stepData.borrower.originalAmount),
 			"FlashLender: Transfer failed"

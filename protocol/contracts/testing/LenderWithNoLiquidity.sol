@@ -9,14 +9,14 @@ contract LenderWithNoLiquidity is IERC3156FlashLender {
 
 	function maxFlashLoan(
 		address token
-	) external view override returns (uint256) {
+	) external pure override returns (uint256) {
 		return 0;
 	}
 
 	function flashFee(
 		address token,
 		uint256 amount
-	) external view override returns (uint256) {
+	) external pure override returns (uint256) {
 
 		require(
 			false,
