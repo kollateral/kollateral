@@ -64,6 +64,10 @@ describe('LendingPoolsAggregator', () => {
 			Lender = await LenderFactory.connect(owner).deploy();
 			await Lender.deployed();
 
+			const BorrowerFactory = await ethers.getContractFactory('Borrower');
+			Borrower = await BorrowerFactory.connect(owner).deploy(LendingPoolsAggregator.address);
+			await Borrower.deployed();
+
 			const supply = 1000000
 			await TestToken.mint(supply);
 
@@ -146,10 +150,6 @@ describe('LendingPoolsAggregator', () => {
 			});
 
 			it ('flashLoan should succeed and ignore the pool with no liquidity', async () => {
-				const BorrowerFactory = await ethers.getContractFactory('Borrower');
-				Borrower = await BorrowerFactory.connect(owner).deploy(LendingPoolsAggregator.address);
-				await Borrower.deployed();
-
 				await TestToken.transfer(Borrower.address, 120);
 				await Borrower.borrow(TestToken.address, 10000);
 
@@ -158,6 +158,47 @@ describe('LendingPoolsAggregator', () => {
 				expect(await TestToken.balanceOf(feeCollector.address)).to.be.equal(110);
 				expect(await TestToken.balanceOf(Lender.address)).to.be.equal(10010);
 
+			});
+
+		});
+
+		describe("when aggregator has several pools with liquidity", () => {
+
+			let Lender2: Contract;
+
+			beforeEach(async () => {
+				const LenderWithLiquidityFactory = await ethers.getContractFactory('LenderWithLiquidity');
+				Lender2 = await LenderWithLiquidityFactory.connect(owner).deploy();
+				await Lender2.deployed();
+
+				await TestToken.transfer(Lender2.address, 10000);
+				await TestToken.transfer(Borrower.address, 1000);
+
+				await LendingPoolsAggregator.connect(owner).setLenders(
+					TestToken.address,
+					[
+						{
+							_address: Lender.address,
+							_feeCollectionAddress: feeCollector.address,
+							_feeBips: 10
+						},
+						{
+							_address: Lender2.address,
+							_feeCollectionAddress: feeCollector.address,
+							_feeBips: 10
+						}
+					]
+				)
+			});
+
+			it("Flash loan should be sourced with combined liquidity from available pools", async () => {
+				await Borrower.borrow(TestToken.address, 15000);
+
+				expect(await TestToken.balanceOf(Borrower.address)).to.be.equal(820);
+				expect(await TestToken.balanceOf(LendingPoolsAggregator.address)).to.be.equal(0);
+				expect(await TestToken.balanceOf(feeCollector.address)).to.be.equal(165);
+				expect(await TestToken.balanceOf(Lender.address)).to.be.equal(10010);
+				expect(await TestToken.balanceOf(Lender2.address)).to.be.equal(10005);
 			});
 
 		});
