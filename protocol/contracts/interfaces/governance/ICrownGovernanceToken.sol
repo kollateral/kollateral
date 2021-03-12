@@ -20,8 +20,9 @@
 pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IERC20Permit } from "@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
 
-interface ICrownGovernanceToken is IERC20 {
+interface ICrownGovernanceToken is IERC20, IERC20Permit {
 	/// @notice An event that's emitted when the mintCap is changed
 	event MintCapChanged(uint32 indexed oldMintCap, uint32 indexed newMintCap);
 	/// @notice An event that's emitted when the supplyManager address is changed
@@ -40,16 +41,6 @@ interface ICrownGovernanceToken is IERC20 {
 	function symbol() external view returns (string memory);
 
 	function decimals() external view returns (uint8);
-
-	function permit(
-		address owner,
-		address spender,
-		uint256 value,
-		uint256 deadline,
-		uint8 v,
-		bytes32 r,
-		bytes32 s
-	) external;
 
 	function mint(address dst, uint256 amount) external returns (bool);
 

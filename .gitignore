@@ -1,6 +1,15 @@
+# IntelliJ IDE
 .idea
-*.iml
+
+# local env variables
 .env
+
+# macOS
 .DS_Store
+
+# Logs
 logs
+*.log
+
+# Dependency directory
 **/node_modules

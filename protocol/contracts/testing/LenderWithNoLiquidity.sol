@@ -4,24 +4,14 @@ pragma solidity ^0.8.2;
 import "erc3156/contracts/interfaces/IERC3156FlashLender.sol";
 
 contract LenderWithNoLiquidity is IERC3156FlashLender {
-
 	constructor() {}
 
-	function maxFlashLoan(
-		address token
-	) external pure override returns (uint256) {
+	function maxFlashLoan(address token) external pure override returns (uint256) {
 		return 0;
 	}
 
-	function flashFee(
-		address token,
-		uint256 amount
-	) external pure override returns (uint256) {
-
-		require(
-			false,
-			"LendingPoolsAggregator: Unsupported currency"
-		);
+	function flashFee(address token, uint256 amount) external pure override returns (uint256) {
+		require(false, "LendingPoolsAggregator: Unsupported currency");
 
 		return 0;
 	}
@@ -34,5 +24,4 @@ contract LenderWithNoLiquidity is IERC3156FlashLender {
 	) external override returns (bool) {
 		return false;
 	}
-
 }

@@ -3,6 +3,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-wit
 
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
+// @ts-ignore
 import { ecsign } from 'ethereumjs-util';
 
 import { token } from '../fixtures';

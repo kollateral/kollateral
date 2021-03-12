@@ -156,7 +156,7 @@ contract Monastery {
 		uint256 amountVestedPerDay = amount / vestingDurationInDays;
 		require(amountVestedPerDay > 0, "Monastery::addTokenGrant: amountVestedPerDay > 0");
 
-		// Transfer the grant tokens under the control of the vesting contract
+		// Transfer the grant tokens into the vesting contract
 		require(token.transferFrom(clergy, address(this), amount), "Monastery::addTokenGrant: transfer failed");
 
 		uint256 grantStartTime = startTime == 0 ? block.timestamp : startTime;
