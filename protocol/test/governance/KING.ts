@@ -3,6 +3,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-wit
 
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
+// @ts-ignore
 import { ecsign } from 'ethereumjs-util';
 
 import { token } from '../fixtures';
@@ -34,6 +35,14 @@ describe('KING', () => {
 		lepidotteri = f.lepidotteri;
 		SHA_2048 = f.SHA_2048;
 		Jester = f.Jester;
+	});
+
+	context('symbol', async () => {
+		it('should not be the unicode symbol ♚', async () => {
+			const symbol = await govToken.symbol();
+			expect(symbol).to.equal('KING');
+			expect(symbol).to.not.equal('♚');
+		});
 	});
 
 	context('setSupplyManager', async () => {

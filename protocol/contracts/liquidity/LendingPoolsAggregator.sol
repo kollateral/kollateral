@@ -8,7 +8,6 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./LendingPool.sol";
 
 contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156FlashBorrower {
-
 	bytes32 public immutable CALLBACK_SUCCESS = keccak256("ERC3156FlashBorrower.onFlashLoan");
 
 	struct BorrowerData {
@@ -26,10 +25,7 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 
 	constructor() {}
 
-	function maxFlashLoan(
-		address token
-	) external view override returns (uint256) {
-
+	function maxFlashLoan(address token) external view override returns (uint256) {
 		uint256 maxBalance = 0;
 
 		for (uint256 i = 0; i < _lenders[token].length; i++) {
@@ -40,15 +36,8 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 		return maxBalance;
 	}
 
-	function flashFee(
-		address token,
-		uint256 amount
-	) external view override returns (uint256) {
-
-		require(
-			_lenders[token].length > 0,
-			"LendingPoolsAggregator: Unsupported currency"
-		);
+	function flashFee(address token, uint256 amount) external view override returns (uint256) {
+		require(_lenders[token].length > 0, "LendingPoolsAggregator: Unsupported currency");
 
 		require(
 			amount <= this.maxFlashLoan(token),
@@ -65,9 +54,7 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 
 			if (loanAmount > 0) {
 				remainingLoanBalance = remainingLoanBalance - loanAmount;
-				loanFee = loanFee +
-						  lender.flashFee(token, loanAmount) +
-				          calculatePoolFee(loanAmount, lenderPool);
+				loanFee = loanFee + lender.flashFee(token, loanAmount) + calculatePoolFee(loanAmount, lenderPool);
 			}
 		}
 
@@ -80,7 +67,6 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 		uint256 amount,
 		bytes calldata data
 	) external override returns (bool) {
-
 		require(
 			amount <= this.maxFlashLoan(token),
 			"LendingPoolsAggregator: Liquidity is not sufficient for requested amount"
@@ -92,11 +78,7 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 		return executeFlashLoanStep(token, stepData);
 	}
 
-	function executeFlashLoanStep(
-		address token,
-		FlashStepLoadData memory stepData
-	) internal returns (bool) {
-
+	function executeFlashLoanStep(address token, FlashStepLoadData memory stepData) internal returns (bool) {
 		IERC3156FlashLender lender = IERC3156FlashLender(_lenders[token][stepData.step]._address);
 		uint256 loanAmount = loanableAmount(lender, token, stepData.remainingAmount);
 
@@ -117,10 +99,9 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 		uint256 fee,
 		bytes calldata data
 	) external override returns (bytes32) {
-
 		require(initiator == address(this), "Initiator must be LendingPoolAggregator");
 
-		(FlashStepLoadData memory stepData) = abi.decode(data, (FlashStepLoadData));
+		FlashStepLoadData memory stepData = abi.decode(data, (FlashStepLoadData));
 		require(stepData.step < _lenders[token].length, "Incorrect flash loan step id");
 
 		Lender memory lender = _lenders[token][stepData.step];
@@ -141,19 +122,12 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 		return CALLBACK_SUCCESS;
 	}
 
-	function executeNextFlashLoanStep(
-		address token,
-		FlashStepLoadData memory stepData
-	) internal returns (bool) {
+	function executeNextFlashLoanStep(address token, FlashStepLoadData memory stepData) internal returns (bool) {
 		stepData.step = stepData.step + 1;
 		return executeFlashLoanStep(token, stepData);
 	}
 
-	function concludeFlashLoan(
-		FlashStepLoadData memory stepData,
-		address token
-	) internal {
-
+	function concludeFlashLoan(FlashStepLoadData memory stepData, address token) internal {
 		require(
 			IERC20(token).transfer(address(stepData.borrower.receiver), stepData.borrower.originalAmount),
 			"FlashLender: Transfer failed"
@@ -175,11 +149,7 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 		);
 
 		require(
-			IERC20(token).transferFrom(
-				address(receiver),
-				address(this),
-				stepData.borrower.originalAmount + totalFees
-			),
+			IERC20(token).transferFrom(address(receiver), address(this), stepData.borrower.originalAmount + totalFees),
 			"FlashLender: Repay failed"
 		);
 
@@ -195,11 +165,10 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 	}
 
 	function calculatePoolFee(uint256 tokenAmount, Lender memory lender) internal pure returns (uint256) {
-		return tokenAmount * lender._feeBips / 10000;
+		return (tokenAmount * lender._feeBips) / 10000;
 	}
 
 	function calculatePlatformFee(uint256 tokenAmount) internal view returns (uint256) {
-		return tokenAmount * _platformFeeBips / 10000;
+		return (tokenAmount * _platformFeeBips) / 10000;
 	}
-
 }

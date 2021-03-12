@@ -11,20 +11,18 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
 	// Friday, December 31, 2021 11:59:59 PM (GMT)
 	const firstSupplyChangeAllowed = 1640995199;
-	log(bold(blueBright(`\n【】GOVERNANCE`)));
-	log(italic(cyanBright(`1) Kingmaker Crown Governance Token`)));
+	log(italic(cyanBright(`1] Crown Token (KING)`)));
 
 	// Deploy KING.sol contract
 	const deployResult = await deploy('KING', {
 		from: deployer,
 		contract: 'KING',
-		gasLimit: 9696969, // 9,696,969 out of 12,500,000 max gas units
+		gasLimit: 11500000, // 11,500,000 out of 12,500,000 max gas units
 		args: [lepidotteri, lepidotteri, firstSupplyChangeAllowed],
 		skipIfAlreadyDeployed: true,
 	});
 	logDeployResult(deployResult, log);
 };
 
-export const tags = ['1', 'governance', 'CrownGovernanceToken'];
-export const dependencies = ['Crown'];
+export const tags = ['1', 'governance', 'KING'];
 export default func;

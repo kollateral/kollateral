@@ -2,13 +2,15 @@ import { Contract } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DeployFunction, Receipt } from 'hardhat-deploy/types';
 
-import { italic, cyanBright, red, bold, yellow, underline, greenBright, green } from 'colorette';
+import { italic, cyanBright, red, bold, yellow, underline, greenBright, green, blueBright } from 'colorette';
 
 import { logDeployResult } from '../../libs/deploy';
 import { O_Address } from '../../libs/ethereum';
 import { FacetCutAction, getDiamondFacet, getSelectors } from '../../libs/diamond/utils';
 
-export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
+export const func: DeployFunction = async ({ deployments }) => {
+	const { log } = deployments;
+
 	/*
 	const { deployments, getNamedAccounts, ethers } = hre;
 	const { deploy, log, read, execute, rawTx } = deployments;
@@ -59,13 +61,14 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 	*/
 };
 
-export async function skip(hre: HardhatRuntimeEnvironment): Promise<boolean> {
+func.skip = async (hre: HardhatRuntimeEnvironment): Promise<boolean> => {
 	const { deployments, getNamedAccounts, ethers } = hre;
 	const { log } = deployments;
-	log(italic(cyanBright(`2.1) Cutting CrownGovernanceFacet into the Crown`)));
+	log(bold(blueBright(`\n【】GOVERNANCE`)));
+	log(italic(cyanBright(`0] Cutting CrownGovernanceFacet into the Crown`)));
 	// Hardhat-deploy execute/read methods failed to perform the cut
 	log(
-		red(
+		yellow(
 			bold(
 				'   - Skipping step: hardhat-deploy was forced to skip the cut which would have been performed with its built-in support for Diamonds.'
 			)
@@ -73,8 +76,8 @@ export async function skip(hre: HardhatRuntimeEnvironment): Promise<boolean> {
 	);
 	log(italic(yellow(`   -> TODO: https://github.com/wighawag/hardhat-deploy/issues/72`)));
 	return true;
-}
+};
 
-export const tags = ['2', 'governance', 'CrownGovernanceFacet'];
-export const dependencies = ['Crown', 'DiamondCutFacet', 'CrownGovernanceToken'];
+export const tags = ['0', 'governance', 'CrownGovernanceFacet'];
+export const dependencies = ['Kingmaker', 'DiamondCutFacet', 'CrownGovernanceToken'];
 export default func;

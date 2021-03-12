@@ -79,7 +79,7 @@
 */
 /* solhint-enable max-line-length */
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.1;
+pragma solidity ^0.8.2;
 
 import "hardhat/console.sol";
 
@@ -101,7 +101,7 @@ contract KING is ICrownGovernanceToken {
 	string public override name = "Kingmaker Crown Governance Token";
 
 	/// @notice EIP-20 token symbol for this token
-	string public override symbol = "KING";
+	string public override symbol = "KING"; // or unicode"♚" ?
 
 	/// @notice EIP-20 token decimals for this token
 	uint8 public constant override decimals = 18;
@@ -135,7 +135,8 @@ contract KING is ICrownGovernanceToken {
 
 	/// @notice The EIP-712 typehash for the contract's domain
 	/// keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)")
-	bytes32 public constant DOMAIN_TYPEHASH = 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f;
+	bytes32 public constant override DOMAIN_SEPARATOR =
+		0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f;
 
 	/// @notice The EIP-712 version hash
 	/// keccak256("1");
@@ -158,7 +159,7 @@ contract KING is ICrownGovernanceToken {
 		0xd099cc98ef71107a616c4f0f941f04c322d8e254fe26b3c6668db87aae413de8;
 
 	/// @notice A record of states for signing / validating signatures
-	mapping(address => uint256) public nonces;
+	mapping(address => uint256) public override nonces;
 
 	/// @dev authorizer address > nonce > state (true = used / false = unused)
 	mapping(address => mapping(bytes32 => bool)) public authorizationState;
@@ -509,7 +510,8 @@ contract KING is ICrownGovernanceToken {
 	 * @return Separator
 	 */
 	function getDomainSeparator() public view returns (bytes32) {
-		return keccak256(abi.encode(DOMAIN_TYPEHASH, keccak256(bytes(name)), VERSION_HASH, _getChainId(), address(this)));
+		return
+			keccak256(abi.encode(DOMAIN_SEPARATOR, keccak256(bytes(name)), VERSION_HASH, _getChainId(), address(this)));
 	}
 
 	/**

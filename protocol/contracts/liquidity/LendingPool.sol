@@ -4,7 +4,6 @@ pragma solidity ^0.8.2;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract LendingPool is Ownable {
-
 	struct Lender {
 		address _address;
 		address _feeCollectionAddress;
@@ -38,14 +37,10 @@ contract LendingPool is Ownable {
 		_platformFeeCollectionAddress = feeCollectionAddress;
 	}
 
-	function setLenders(
-		address tokenAddress,
-		Lender[] memory newLenders
-	) external onlyOwner {
+	function setLenders(address tokenAddress, Lender[] memory newLenders) external onlyOwner {
 		delete _lenders[tokenAddress];
 		for (uint256 index = 0; index < newLenders.length; index++) {
 			_lenders[tokenAddress].push(newLenders[index]);
 		}
 	}
-
 }

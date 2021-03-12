@@ -11,50 +11,48 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 	const { deploy, log } = deployments;
 	const { deployer, lepidotteri } = await getNamedAccounts();
 
-	log(bold(blueBright(`\n【】Kingmaker Protocol Smart Contracts`)));
-	log(italic(cyanBright(`1) Kingmaker Diamond`)));
-
+	log(italic(cyanBright(`1] Kingmaker Diamond`)));
 	// Deploy DiamondCutFacet.sol contract
-	const cutFacet: DeployResult = await deploy('DiamondCutFacet', {
+	const DiamondCutFacet: DeployResult = await deploy('DiamondCutFacet', {
 		from: deployer,
 		contract: 'DiamondCutFacet',
 		args: [],
 		skipIfAlreadyDeployed: true,
 	});
-	logDeployResult(cutFacet, log);
+	logDeployResult(DiamondCutFacet, log);
 
 	// Deploy DiamondLoupeFacet.sol contract
-	const loupeFacet: DeployResult = await deploy('DiamondLoupeFacet', {
+	const DiamondLoupeFacet: DeployResult = await deploy('DiamondLoupeFacet', {
 		from: deployer,
 		contract: 'DiamondLoupeFacet',
 		args: [],
 		skipIfAlreadyDeployed: true,
 	});
-	logDeployResult(loupeFacet, log);
+	logDeployResult(DiamondLoupeFacet, log);
 
 	// Deploy OwnershipFacet.sol contract
-	const ownershipFacet: DeployResult = await deploy('OwnershipFacet', {
+	const OwnershipFacet: DeployResult = await deploy('OwnershipFacet', {
 		from: deployer,
 		contract: 'OwnershipFacet',
 		args: [],
 		skipIfAlreadyDeployed: true,
 	});
-	logDeployResult(ownershipFacet, log);
+	logDeployResult(OwnershipFacet, log);
 
 	const diamondCut = [
-		[cutFacet.address, FacetCutAction.Add, getSelectors(cutFacet.abi)],
-		[loupeFacet.address, FacetCutAction.Add, getSelectors(loupeFacet.abi)],
-		[ownershipFacet.address, FacetCutAction.Add, getSelectors(ownershipFacet.abi)],
+		[DiamondCutFacet.address, FacetCutAction.Add, getSelectors(DiamondCutFacet.abi)],
+		[DiamondLoupeFacet.address, FacetCutAction.Add, getSelectors(DiamondLoupeFacet.abi)],
+		[OwnershipFacet.address, FacetCutAction.Add, getSelectors(OwnershipFacet.abi)],
 	];
 
 	// Deploy Kingmaker.sol contract
-	const crown: DeployResult = await deploy('Kingmaker', {
+	const Kingmaker: DeployResult = await deploy('Kingmaker', {
 		from: deployer,
 		contract: 'Kingmaker',
 		args: [diamondCut, [lepidotteri]],
 		skipIfAlreadyDeployed: true,
 	});
-	logDeployResult(crown, log);
+	logDeployResult(Kingmaker, log);
 };
 
 export const tags = ['1', 'Kingmaker'];

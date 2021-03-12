@@ -26,7 +26,7 @@ const config: HardhatUserConfig = {
 	networks: {
 		hardhat: {
 			blockGasLimit: 11500000,
-			allowUnlimitedContractSize: true,
+			allowUnlimitedContractSize: false,
 			hardfork: 'muirGlacier',
 			accounts: kingmakerAccounts,
 			forking: {

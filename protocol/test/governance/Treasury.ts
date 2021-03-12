@@ -4,10 +4,9 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-wit
 
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
+// @ts-ignore
 import { ecsign } from 'ethereumjs-util';
-import { ecdsaSign } from 'ethereum-cryptography/secp256k1';
-import * as secp from 'noble-secp256k1';
-import { concatSig, encrypt, recoverPersonalSignature, recoverTypedSignatureLegacy, recoverTypedSignature } from 'eth-sig-util'
+import { concatSig } from 'eth-sig-util';
 
 import { rewards } from '../fixtures';
 import { getEIP712DomainSeparator, getEIP712PermitDigest } from '../../libs/ethereum';
