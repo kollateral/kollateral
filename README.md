@@ -24,8 +24,7 @@
 
 
 # Kingmaker
-A Flash Liquidity Protocol
-
+Kingmaker is a protocol and a library for sourcing flash liquidity from the deepest Ethereum liquidity pools and for surfacing it to developers, through a simple API, in exchange for a fee.
 
 ## Risks
 Though we make our best efforts to provide thorough test coverage, Kingmaker is as of yet unaudited. We appreciate your interest in building on Kingmaker, so please consider this alpha software and use at your own risk.

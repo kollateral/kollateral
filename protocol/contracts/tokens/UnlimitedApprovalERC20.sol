@@ -19,8 +19,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.1;
 
-import "../__oz__/token/ERC20/ERC20.sol";
-import "../__oz__/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 abstract contract UnlimitedApprovalERC20 is ERC20 {
 	function transferFrom(

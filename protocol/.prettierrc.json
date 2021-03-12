@@ -3,6 +3,7 @@
 	"singleQuote": true,
 	"bracketSpacing": true,
 	"arrowParens": "avoid",
+	"semi": true,
 	"overrides": [
 		{
 			"files": "*.sol",
