@@ -14,7 +14,7 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 	const Miners = await deploy('Miners', {
 		from: deployer,
 		contract: 'Miners',
-		gasLimit: 11500000, // 11,500,000 out of 12,500,000 max gas units
+		gasLimit: 9500000, // 9,500,000 out of 12,500,000 max gas units
 		args: [KING.address, lepidotteri],
 		skipIfAlreadyDeployed: true,
 	});

@@ -19,7 +19,7 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 		const CrownPrism = await deploy('CrownPrism', {
 			from: deployer,
 			contract: 'CrownPrism',
-			gasLimit: 11500000, // 11,500,000 out of 12,500,000 max gas units
+			gasLimit: 9500000, // 9,500,000 out of 12,500,000 max gas units
 			args: [lepidotteri],
 			skipIfAlreadyDeployed: true,
 		});
@@ -30,7 +30,7 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 		const CrownImplementation = await deploy('Crown', {
 			from: deployer,
 			contract: 'Crown',
-			gasLimit: 11500000, // 11,500,000 out of 12,500,000 max gas units
+			gasLimit: 9500000, // 11,500,000 out of 12,500,000 max gas units
 			skipIfAlreadyDeployed: false,
 		});
 		logDeployResult(CrownImplementation, log);
@@ -52,11 +52,11 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 		log(`   - Accepted pending voting power implementation of contract at ${magenta(CrownImplementation.address)}`);
 
 		// Initialize voting power contract
-		await Crown.initialize(KING.address, Monastery.address);
+		await execute('Crown', { from: lepidotteri, gasLimit: 555000 }, 'initialize', KING.address, Monastery.address);
 		log(`   - Initialized voting power at ${magenta(CrownImplementation.address)} via prism at ${magenta(CrownPrism.address)}`);
 
 		// Set voting power address in vesting contract
-		await execute('Monastery', { from: deployer }, 'setVotingPowerContract', CrownPrism.address);
+		await execute('Monastery', { from: deployer, gasLimit: 555000 }, 'setVotingPowerContract', CrownPrism.address);
 		log(`   - Set voting power address in vesting contract at ${magenta(Monastery.address)} to prism at ${magenta(CrownPrism.address)}`);
 	} else {
 		log(`   - Prism invalid. Please address issues before trying to redeploy`);

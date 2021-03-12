@@ -16,7 +16,7 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 	const Multisend = await deploy('Multisend', {
 		from: deployer,
 		contract: 'Multisend',
-		gasLimit: 11500000, // 11,500,000 out of 12,500,000 max gas units
+		gasLimit: 9500000, // 9,500,000 out of 12,500,000 max gas units
 		args: [KING.address],
 		skipIfAlreadyDeployed: true,
 	});
