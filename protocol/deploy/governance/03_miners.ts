@@ -15,13 +15,13 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 		from: deployer,
 		contract: 'Miners',
 		gasLimit: 9500000, // 9,500,000 out of 12,500,000 max gas units
-		args: [KING.address, lepidotteri],
+		args: [KING.address, lepidotteri], // assign ownership right away in constructor to avoid timelocks
 		skipIfAlreadyDeployed: true,
 	});
 	logDeployResult(Miners, log);
 
 	// Set KING supply manager to deployed Miners contract
-	await execute('KING', { from: lepidotteri }, 'setSupplyManager', Miners.address);
+	await execute('KING', { from: deployer }, 'setSupplyManager', Miners.address);
 	log(italic(`   - Set Miners contract as KING supply manager (SM)`));
 };
 

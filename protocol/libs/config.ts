@@ -3,7 +3,7 @@ import chalk from 'chalk';
 export function getEnv(key: string): string | undefined {
 	const variable = process.env[key];
 	if (variable === undefined) {
-		printWarning('ALCHEMY_PROJECT_ID');
+		printWarning(key);
 		return undefined;
 	}
 	return variable.trim();
@@ -14,7 +14,6 @@ export function printWarning(env: string): void {
 }
 
 const deployerPK = getEnv('KINGMAKER_DEPLOYER_PK') || '0xDEAD';
-const deployerAddr = getEnv('KINGMAKER_DEPLOYER_ADDR') || '0xC0DE';
 
 const deployer = {
 	privateKey: deployerPK,

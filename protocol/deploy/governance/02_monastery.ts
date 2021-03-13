@@ -1,11 +1,11 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DeployFunction } from 'hardhat-deploy/types';
 
-import { bold, italic, cyanBright, blueBright, magenta } from 'colorette';
+import { italic, cyanBright, magenta } from 'colorette';
 import { logDeployResult } from '../../libs/deploy';
 
 export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
-	const { deployments, getNamedAccounts } = hre;
+	const { deployments, getNamedAccounts, ethers } = hre;
 	const { deploy, log, execute } = deployments;
 	const { deployer, lepidotteri } = await getNamedAccounts();
 	const KING = await deployments.get('KING');
@@ -20,6 +20,10 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 		skipIfAlreadyDeployed: true,
 	});
 	logDeployResult(Monastery, log);
+
+	// Set max approval for vesting contract to transfer deployer's tokens (used in grants distribution)
+	await execute('KING', { from: deployer }, 'approve', Monastery.address, ethers.constants.MaxUint256);
+	log(`   - Set max approval for vesting contract at ${magenta(Monastery.address)} for deployer: ${magenta(deployer)}`);
 };
 
 export const tags = ['2', 'governance', 'Monastery'];
