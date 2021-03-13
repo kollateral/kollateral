@@ -62,32 +62,28 @@ const config: HardhatUserConfig = {
 		deployer: {
 			default: 0, // here this will by default take the first account as deployer
 			0: 0, // similarly on mainnet it will take the first account as deployer. Note though that depending on how hardhat network are configured, the account 0 on one network can be different than on another
-			1: 0, // same on ropsten
 			4: 0, // same on rinkeby
 			localhost: '0xfEeDc0DE1EBE0A72f52590Df786101e1c3944545', // it can also specify the network name and literal address
 		},
 		lepidotteri: {
 			default: 1, // will by default take the second account
-			0: 1,
-			1: 1,
+			mainnet: 1,
 			4: 1,
 		},
 		SHA_2048: {
 			default: 2, // will by default take the third account
 			0: 2,
-			1: 2,
 			rinkeby: 2,
 		},
 		feeCollector: {
 			default: 3, // here this will, by default, take the fourth account
-			ropsten: 3, // on the mainnet the feeCollector could be (e.g.) a multi sig
 			rinkeby: 3, // on rinkeby it must be the same account as well
 		},
+		Treasury: {
+			default: 8
+		},
 		King: {
-			default: 4,
-			mainnet: 4,
-			ropsten: 4,
-			rinkeby: 4,
+			default: 9
 		},
 	},
 	solidity: {

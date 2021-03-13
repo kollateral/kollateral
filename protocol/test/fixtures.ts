@@ -1,18 +1,11 @@
-import { ethers, deployments, getNamedAccounts, getUnnamedAccounts } from 'hardhat';
-import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { ethers, deployments} from 'hardhat';
 import {
 	FIRST_KING_SUPPLY_CHANGE,
 	INITIAL_KING_REWARDS_BALANCE,
 	INITIAL_KING_LIQUIDITY,
-	SUSHI_ADDRESS,
-	MASTERCHEF_ADDRESS,
-	KING_REWARDS_PER_BLOCK,
-	KING_REWARDS_START_BLOCK,
-	SUSHI_LP_VP_CVR,
-	SUSHI_POOL_ADDRESS,
 } from '../libs/deploy';
 
-export const token = deployments.createFixture(async (hre: HardhatRuntimeEnvironment) => {
+export const token = deployments.createFixture(async () => {
 	const [deployer, lepidotteri, SHA_2048, Jester] = await ethers.getSigners();
 	const admin = lepidotteri;
 
@@ -33,7 +26,7 @@ export const token = deployments.createFixture(async (hre: HardhatRuntimeEnviron
 	};
 });
 
-export const governance = deployments.createFixture(async (hre: HardhatRuntimeEnvironment) => {
+export const governance = deployments.createFixture(async () => {
 	const [deployer, lepidotteri, SHA_2048, King, Bishop, Jester] = await ethers.getSigners();
 	const admin = lepidotteri;
 
@@ -73,7 +66,7 @@ export const governance = deployments.createFixture(async (hre: HardhatRuntimeEn
 	};
 });
 
-export const rewards = deployments.createFixture(async (hre: HardhatRuntimeEnvironment) => {
+export const rewards = deployments.createFixture(async () => {
 	const [deployer, lepidotteri, SHA_2048, feeCollector, King, dragon] = await ethers.getSigners();
 	const admin = lepidotteri;
 	const liquidityProvider = King;
