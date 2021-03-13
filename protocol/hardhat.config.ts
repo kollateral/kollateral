@@ -80,10 +80,10 @@ const config: HardhatUserConfig = {
 			rinkeby: 3, // on rinkeby it must be the same account as well
 		},
 		Treasury: {
-			default: 8
+			default: 8,
 		},
 		King: {
-			default: 9
+			default: 9,
 		},
 	},
 	solidity: {

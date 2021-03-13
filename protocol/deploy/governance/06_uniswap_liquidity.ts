@@ -48,8 +48,10 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 		const receipt = await ethers.provider.waitForTransaction(result.hash);
 		if (receipt.status === 1) {
 			const { ethLiquidity, tokenLiquidity } = await WETH_LiquidityFor(KING.address);
-			log(`   - Created Uniswap market (WETH: ${greenBright(ethLiquidity.div(wdMultiplier).toString())}, KING: ${greenBright(
-					tokenLiquidity.div(kdMultiplier).toString())})`
+			log(
+				`   - Created Uniswap market (WETH: ${greenBright(ethLiquidity.div(wdMultiplier).toString())}, KING: ${greenBright(
+					tokenLiquidity.div(kdMultiplier).toString()
+				)})`
 			);
 		} else {
 			log(`   - Error creating Uniswap market. Tx: ${redBright(receipt.transactionHash)}`);

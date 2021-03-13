@@ -50,9 +50,7 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 	});
 	// Send remaining KING balance to Treasury to fund LP and other activities
 	await execute('KING', { from: deployer }, 'transfer', treasury.address, INITIAL_KING_LIQUIDITY);
-	log(
-		`   - Transferred ${greenBright(etherAmount)}Ξ to Treasury address: ${magenta(treasury.address)}`
-	);
+	log(`   - Transferred ${greenBright(etherAmount)}Ξ to Treasury address: ${magenta(treasury.address)}`);
 };
 
 func.skip = async ({ deployments, ethers, network }) => {

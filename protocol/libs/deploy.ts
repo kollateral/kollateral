@@ -20,11 +20,11 @@ export const SUSHI_LP_VP_CVR = '3500000';
 export const MASTERCHEF_POOL_ID = '68';
 
 export const KING_REWARDS_START_BLOCK = '0';
-export const KING_REWARDS_PER_BLOCK       = '9000000000000000000';	  // 9    KING
+export const KING_REWARDS_PER_BLOCK = '9000000000000000000'; // 9    KING
 export const INITIAL_KING_REWARDS_BALANCE = '9000000000000000000000'; // 9000 KING
-export const INITIAL_KING_LIQUIDITY       = '900000000000000000000';  // 900  KING
-export const TARGET_WETH_LIQUIDITY 		  = '10000000000000000000';   // 10   ETH
-export const TARGET_KING_LIQUIDITY 		  = '90000000000000000000';	  // 90   KING
+export const INITIAL_KING_LIQUIDITY = '900000000000000000000'; // 900  KING
+export const TARGET_WETH_LIQUIDITY = '10000000000000000000'; // 10   ETH
+export const TARGET_KING_LIQUIDITY = '90000000000000000000'; // 90   KING
 
 export async function deployContract(name: string, args?: Array<any>): Promise<Contract> {
 	const factory: ContractFactory = await ethers.getContractFactory(name);

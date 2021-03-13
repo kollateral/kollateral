@@ -1,9 +1,5 @@
-import { ethers, deployments} from 'hardhat';
-import {
-	FIRST_KING_SUPPLY_CHANGE,
-	INITIAL_KING_REWARDS_BALANCE,
-	INITIAL_KING_LIQUIDITY,
-} from '../libs/deploy';
+import { ethers, deployments } from 'hardhat';
+import { FIRST_KING_SUPPLY_CHANGE, INITIAL_KING_REWARDS_BALANCE, INITIAL_KING_LIQUIDITY } from '../libs/deploy';
 
 export const token = deployments.createFixture(async () => {
 	const [deployer, lepidotteri, SHA_2048, Jester] = await ethers.getSigners();
