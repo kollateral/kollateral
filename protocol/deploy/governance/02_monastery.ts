@@ -7,7 +7,7 @@ import { logDeployResult } from '../../libs/deploy';
 export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 	const { deployments, getNamedAccounts, ethers } = hre;
 	const { deploy, log, execute } = deployments;
-	const { deployer, lepidotteri } = await getNamedAccounts();
+	const { deployer } = await getNamedAccounts();
 	const KING = await deployments.get('KING');
 
 	log(italic(cyanBright(`2] Monastery (KING Vesting)`)));

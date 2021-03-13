@@ -26,7 +26,7 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 	log(`   - ` + bold(bgWhiteBright(gray(`All grants have been distributed per instructions`))));
 
 	// Handed vesting contract administration to lepidotteri
-	await execute('Monastery', { from: deployer }, 'changeClergy', lepidotteri);
+	await execute('Monastery', { from: deployer }, 'conversion', lepidotteri);
 	log(italic(`   - Handed vesting contract admin to ${magenta(lepidotteri)}`));
 
 	log(cyanBright(`   5.2] Distributing Unlocked KING tokens`));

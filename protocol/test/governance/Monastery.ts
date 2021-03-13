@@ -132,7 +132,7 @@ describe('Monastery', () => {
 					monastery
 						.connect(SHA_2048)
 						.addTokenGrant(lepidotteri.address, START_TIME, grantAmount, VESTING_DURATION_IN_DAYS, VESTING_CLIFF_IN_DAYS)
-				).to.revertedWith('revert Monastery::onlyTheChurch: not clergy');
+				).to.revertedWith('revert Monastery::onlyChurch: not clergy');
 				expect(await crown.votingPowerOf(lepidotteri.address)).to.eq(userVotesBefore);
 				expect(await govToken.balanceOf(monastery.address)).to.eq(totalVested);
 
@@ -744,7 +744,7 @@ describe('Monastery', () => {
 
 			it('does not allow non-clergy to set voting power contract', async () => {
 				await expect(monastery.connect(Jester).setVotingPowerContract(crown.address)).to.revertedWith(
-					'revert Monastery::onlyTheChurch: not clergy'
+					'revert Monastery::onlyChurch: not clergy'
 				);
 
 				expect(await monastery.votingPower()).to.eq(O_Address);
@@ -764,25 +764,25 @@ describe('Monastery', () => {
 			});
 		});
 
-		context('changeClergy', async () => {
+		context('conversion', async () => {
 			it('allows clergy to set new valid clergy', async () => {
-				await monastery.changeClergy(lepidotteri.address);
+				await monastery.conversion(lepidotteri.address);
 
 				expect(await monastery.clergy()).to.eq(lepidotteri.address);
 			});
 
 			it('does not allow non-clergy to change clergy', async () => {
-				await expect(monastery.connect(Jester).changeClergy(SHA_2048.address)).to.revertedWith(
-					'revert Monastery::onlyTheChurch: not clergy'
+				await expect(monastery.connect(Jester).conversion(SHA_2048.address)).to.revertedWith(
+					'revert Monastery::onlyChurch: not clergy'
 				);
 
 				expect(await monastery.clergy()).to.eq(deployer.address);
 			});
 
 			it('does not allow clergy to set invalid clergy', async () => {
-				await expect(monastery.changeClergy(O_Address)).to.revertedWith('revert Monastery::changeClergy: not valid address');
-				await expect(monastery.changeClergy(monastery.address)).to.revertedWith('revert Monastery::changeClergy: not valid address');
-				await expect(monastery.changeClergy(govToken.address)).to.revertedWith('revert Monastery::changeClergy: not valid address');
+				await expect(monastery.conversion(O_Address)).to.revertedWith('revert Monastery::conversion: not valid address');
+				await expect(monastery.conversion(monastery.address)).to.revertedWith('revert Monastery::conversion: not valid address');
+				await expect(monastery.conversion(govToken.address)).to.revertedWith('revert Monastery::conversion: not valid address');
 
 				expect(await monastery.clergy()).to.eq(deployer.address);
 			});

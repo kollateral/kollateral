@@ -21,7 +21,7 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 			contract: 'CrownPrism',
 			gasLimit: 9500000, // 9,500,000 out of 12,500,000 max gas units
 			args: [deployer],
-			skipIfAlreadyDeployed: true,
+			skipIfAlreadyDeployed: false,
 		});
 		logDeployResult(CrownPrism, log);
 
@@ -31,7 +31,7 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 			from: deployer,
 			contract: 'Crown',
 			gasLimit: 9500000, // 9,500,000 out of 12,500,000 max gas units
-			skipIfAlreadyDeployed: true,
+			skipIfAlreadyDeployed: false,
 		});
 		logDeployResult(CrownImp, log);
 
@@ -40,7 +40,7 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 		const Monastery = await deployments.get('Monastery');
 		const Crown = new ethers.Contract(CrownPrism.address, CrownImp.abi, deployerSigner);
 		// Set pending implementation for voting power prism
-		await execute('CrownPrism', { from: deployer }, 'setPendingProxyImplementation', CrownImp.address);
+		await execute('CrownPrism', { from: deployer, gasLimit: 555000 }, 'setPendingProxyImplementation', CrownImp.address);
 		log(
 			`   - Set pending voting power implementation for prism at ${magenta(CrownPrism.address)} to contract at ${magenta(
 				CrownImp.address
@@ -48,7 +48,7 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 		);
 
 		// Accept voting power implementation
-		await execute('Crown', { from: deployer }, 'become', CrownPrism.address);
+		await execute('Crown', { from: deployer, gasLimit: 555000 }, 'become', CrownPrism.address);
 		log(`   - Accepted pending voting power implementation of contract at ${magenta(CrownImp.address)}`);
 
 		// Initialize voting power contract
@@ -60,7 +60,7 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 		log(`   - Set voting power address in vesting contract at ${magenta(Monastery.address)} to prism at ${magenta(CrownPrism.address)}`);
 
 		// Set pending admin for voting power
-		await execute('CrownPrism', { from: deployer }, 'setPendingProxyAdmin', lepidotteri);
+		await execute('CrownPrism', { from: deployer, gasLimit: 555000 }, 'setPendingProxyAdmin', lepidotteri);
 		log(`   - Set pending voting power admin for prism at ${magenta(CrownPrism.address)} to ${magenta(lepidotteri)}`);
 		log(`   - ${magenta(lepidotteri)} may now call 'acceptAdmin' via prism to become the proxy admin`);
 	} else {

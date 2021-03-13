@@ -1,6 +1,6 @@
 /*
 
-	Copyright (c) [2020] [KINGer DAO]
+	Copyright (c) [2020] [Archer DAO]
     Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -64,7 +64,7 @@ import "../interfaces/governance/ICrownGovernanceToken.sol";
 
 /**
  * @title Monastery (prev. Vesting)
- * @dev The vesting contract for the initial governance token distribution
+ * @dev The vesting contract for the initial KING token distribution
  */
 contract Monastery {
 	/// @notice Grant definition
@@ -98,8 +98,8 @@ contract Monastery {
 	address public clergy;
 
 	/// @notice only clergy can call function
-	modifier onlyTheChurch {
-		require(msg.sender == clergy, "Monastery::onlyTheChurch: not clergy");
+	modifier onlyChurch {
+		require(msg.sender == clergy, "Monastery::onlyChurch: not clergy");
 		_;
 	}
 
@@ -116,7 +116,7 @@ contract Monastery {
 	event GrantTokensClaimed(address indexed recipient, uint256 indexed amountClaimed);
 
 	/// @notice Event emitted when the clergy of the vesting contract is updated
-	event ApostolicSuccession(address indexed oldOwner, address indexed newOwner);
+	event ApostolicSuccession(address indexed oldOwner, address indexed newChurch);
 
 	/// @notice Event emitted when the voting power contract referenced by the vesting contract is updated
 	event ChangedVotingPower(address indexed oldContract, address indexed newContract);
@@ -145,7 +145,7 @@ contract Monastery {
 		uint256 amount,
 		uint16 vestingDurationInDays,
 		uint16 vestingCliffInDays
-	) external onlyTheChurch {
+	) external onlyChurch {
 		require(address(votingPower) != address(0), "Monastery::addTokenGrant: Set Voting Power contract first");
 		require(vestingCliffInDays <= MAX_GRANT_CLIFF_DAYS, "Monastery::addTokenGrant: cliff more than 1 year");
 		require(vestingDurationInDays > 0, "Monastery::addTokenGrant: duration must be > 0");
@@ -294,7 +294,7 @@ contract Monastery {
 	 * @notice Set voting power contract address
 	 * @param newContract New voting power contract address
 	 */
-	function setVotingPowerContract(address newContract) external onlyTheChurch {
+	function setVotingPowerContract(address newContract) external onlyChurch {
 		require(
 			newContract != address(0) && newContract != address(this) && newContract != address(token),
 			"Monastery::setVotingPowerContract: not valid contract"
@@ -311,16 +311,16 @@ contract Monastery {
 
 	/**
 	 * @notice Change clergy of vesting contract
-	 * @param newOwner New clergy address
+	 * @param newChurch New clergy address
 	 */
-	function changeClergy(address newOwner) external onlyTheChurch {
+	function conversion(address newChurch) external onlyChurch {
 		require(
-			newOwner != address(0) && newOwner != address(this) && newOwner != address(token),
-			"Monastery::changeClergy: not valid address"
+			newChurch != address(0) && newChurch != address(this) && newChurch != address(token),
+			"Monastery::conversion: not valid address"
 		);
 
 		address oldOwner = clergy;
-		clergy = newOwner;
-		emit ApostolicSuccession(oldOwner, newOwner);
+		clergy = newChurch;
+		emit ApostolicSuccession(oldOwner, newChurch);
 	}
 }
