@@ -37,22 +37,8 @@ const config: HardhatUserConfig = {
 			saveDeployments: true,
 			tags: ['test', 'local'],
 		},
-		ropsten: {
-			url: 'https://eth-ropsten.alchemyapi.io/v2/' + getEnv('ALCHEMY_PROJECT_ID'),
-			accounts: realAccounts,
-			live: true,
-			saveDeployments: true,
-			tags: ['ropsten'],
-		},
 		rinkeby: {
 			url: 'https://eth-rinkeby.alchemyapi.io/v2/' + getEnv('ALCHEMY_PROJECT_ID'),
-			accounts: realAccounts,
-			live: true,
-			saveDeployments: true,
-			tags: ['staging'],
-		},
-		kovan: {
-			url: 'https://eth-kovan.alchemyapi.io/v2/' + getEnv('ALCHEMY_PROJECT_ID'),
 			accounts: realAccounts,
 			live: true,
 			saveDeployments: true,
