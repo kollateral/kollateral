@@ -74,9 +74,9 @@ describe('LendingPoolsAggregator', () => {
 			beforeEach(async () => {
 				await LendingPoolsAggregator.connect(owner).setLenders(TestToken.address, [
 					{
-						_address: Lender.address,
-						_feeCollectionAddress: feeCollector.address,
-						_feeBips: 10,
+						pool: Lender.address,
+						feeCollectionAddress: feeCollector.address,
+						feeBips: 10,
 					},
 				]);
 			});
@@ -115,14 +115,14 @@ describe('LendingPoolsAggregator', () => {
 
 				await LendingPoolsAggregator.connect(owner).setLenders(TestToken.address, [
 					{
-						_address: LenderWithNoLiquidity.address,
-						_feeCollectionAddress: feeCollector.address,
-						_feeBips: 10,
+						pool: LenderWithNoLiquidity.address,
+						feeCollectionAddress: feeCollector.address,
+						feeBips: 10,
 					},
 					{
-						_address: Lender.address,
-						_feeCollectionAddress: feeCollector.address,
-						_feeBips: 10,
+						pool: Lender.address,
+						feeCollectionAddress: feeCollector.address,
+						feeBips: 10,
 					},
 				]);
 			});
@@ -155,14 +155,14 @@ describe('LendingPoolsAggregator', () => {
 
 				await LendingPoolsAggregator.connect(owner).setLenders(TestToken.address, [
 					{
-						_address: Lender.address,
-						_feeCollectionAddress: feeCollector.address,
-						_feeBips: 10,
+						pool: Lender.address,
+						feeCollectionAddress: feeCollector.address,
+						feeBips: 10,
 					},
 					{
-						_address: Lender2.address,
-						_feeCollectionAddress: feeCollector.address,
-						_feeBips: 10,
+						pool: Lender2.address,
+						feeCollectionAddress: feeCollector.address,
+						feeBips: 10,
 					},
 				]);
 			});
