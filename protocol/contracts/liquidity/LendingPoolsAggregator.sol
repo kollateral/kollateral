@@ -133,7 +133,6 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 	}
 
 	function concludeFlashLoan(FlashStepLoadData memory _stepData, address _token) internal {
-
 		require(
 			IERC20(_token).transfer(address(_stepData.borrower.receiver), _stepData.borrower.originalAmount),
 			"FlashLender: Transfer failed"
