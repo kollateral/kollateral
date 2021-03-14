@@ -4,43 +4,45 @@ pragma solidity ^0.8.2;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract LendingPool is Ownable {
+
 	struct Lender {
-		address _address;
-		address _feeCollectionAddress;
-		uint256 _feeBips;
+		address pool;
+		address feeCollectionAddress;
+		uint256 feeBips;
 	}
 
-	mapping(address => Lender[]) internal _lenders;
+	mapping(address => Lender[]) internal lenders;
 
-	uint256 internal _platformFeeBips;
-	address internal _platformFeeCollectionAddress;
+	uint256 internal platformFeeBips;
+
+	address internal platformFeeCollectionAddress;
 
 	constructor() {}
 
-	function platformFeeBips() external view returns (uint256) {
-		return _platformFeeBips;
+	function getPlatformFeeBips() external view returns (uint256) {
+		return platformFeeBips;
 	}
 
-	function platformFeeCollectionAddress() external view returns (address) {
-		return _platformFeeCollectionAddress;
+	function getPlatformFeeCollectionAddress() external view returns (address) {
+		return platformFeeCollectionAddress;
 	}
 
-	function lenders(address tokenAddress) external view returns (Lender[] memory) {
-		return _lenders[tokenAddress];
+	function getLenders(address tokenAddress) external view returns (Lender[] memory) {
+		return lenders[tokenAddress];
 	}
 
 	function setPlatformFeeBips(uint256 bips) external onlyOwner {
-		_platformFeeBips = bips;
+		platformFeeBips = bips;
 	}
 
-	function setPlatformFeeCollectionAddress(address feeCollectionAddress) external onlyOwner {
-		_platformFeeCollectionAddress = feeCollectionAddress;
+	function setPlatformFeeCollectionAddress(address _feeCollectionAddress) external onlyOwner {
+		platformFeeCollectionAddress = _feeCollectionAddress;
 	}
 
-	function setLenders(address tokenAddress, Lender[] memory newLenders) external onlyOwner {
-		delete _lenders[tokenAddress];
-		for (uint256 index = 0; index < newLenders.length; index++) {
-			_lenders[tokenAddress].push(newLenders[index]);
+	function setLenders(address _tokenAddress, Lender[] memory _newLenders) external onlyOwner {
+		delete lenders[_tokenAddress];
+		for (uint256 index = 0; index < _newLenders.length; index++) {
+			lenders[_tokenAddress].push(_newLenders[index]);
 		}
 	}
 }

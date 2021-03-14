@@ -74,9 +74,9 @@ describe('LendingPoolsAggregator', () => {
 			beforeEach(async () => {
 				await LendingPoolsAggregator.connect(owner).setLenders(TestToken.address, [
 					{
-						_address: Lender.address,
-						_feeCollectionAddress: feeCollector.address,
-						_feeBips: 10,
+						pool: Lender.address,
+						feeCollectionAddress: feeCollector.address,
+						feeBips: 10,
 					},
 				]);
 			});
@@ -115,14 +115,14 @@ describe('LendingPoolsAggregator', () => {
 
 				await LendingPoolsAggregator.connect(owner).setLenders(TestToken.address, [
 					{
-						_address: LenderWithNoLiquidity.address,
-						_feeCollectionAddress: feeCollector.address,
-						_feeBips: 10,
+						pool: LenderWithNoLiquidity.address,
+						feeCollectionAddress: feeCollector.address,
+						feeBips: 10,
 					},
 					{
-						_address: Lender.address,
-						_feeCollectionAddress: feeCollector.address,
-						_feeBips: 10,
+						pool: Lender.address,
+						feeCollectionAddress: feeCollector.address,
+						feeBips: 10,
 					},
 				]);
 			});
@@ -155,16 +155,70 @@ describe('LendingPoolsAggregator', () => {
 
 				await LendingPoolsAggregator.connect(owner).setLenders(TestToken.address, [
 					{
-						_address: Lender.address,
-						_feeCollectionAddress: feeCollector.address,
-						_feeBips: 10,
+						pool: Lender.address,
+						feeCollectionAddress: feeCollector.address,
+						feeBips: 10,
 					},
 					{
-						_address: Lender2.address,
-						_feeCollectionAddress: feeCollector.address,
-						_feeBips: 10,
+						pool: Lender2.address,
+						feeCollectionAddress: feeCollector.address,
+						feeBips: 10,
 					},
 				]);
+			});
+
+			it('onFlashLoan should reject if initiator is not LendingPoolAggregator contract', async () => {
+				const dummyCallData = ethers.utils.defaultAbiCoder.encode(['uint256'], [42]);
+				expect(LendingPoolsAggregator.onFlashLoan(
+					user.address,
+					TestToken.address,
+					1000,
+					10,
+					dummyCallData
+				)).to.be.revertedWith("Initiator must be LendingPoolAggregator");
+			});
+
+			it('onFlashLoan should reject if lender pool calls with unsupported step id', async () => {
+
+				const LenderWithLiquidityFactory = await ethers.getContractFactory('LenderPropagatingWrongStepParam');
+				let Lender3 = await LenderWithLiquidityFactory.connect(owner).deploy();
+				await Lender3.deployed();
+
+				await TestToken.transfer(Lender3.address, 1000);
+
+				await LendingPoolsAggregator.connect(owner).setLenders(TestToken.address, [
+					{
+						pool: Lender3.address,
+						feeCollectionAddress: feeCollector.address,
+						feeBips: 10,
+					}
+				]);
+
+				expect(Borrower.borrow(TestToken.address, 100)).to.be.revertedWith("Incorrect flash loan step id");
+			});
+
+			it('onFlashLoan should reject if lender pool calls with another pools step id', async () => {
+
+				const LenderWithLiquidityFactory = await ethers.getContractFactory('LenderPropagatingMaliciousStepParam');
+				let Lender4 = await LenderWithLiquidityFactory.connect(owner).deploy();
+				await Lender4.deployed();
+
+				await TestToken.transfer(Lender4.address, 1000);
+
+				await LendingPoolsAggregator.connect(owner).setLenders(TestToken.address, [
+					{
+						pool: Lender4.address,
+						feeCollectionAddress: feeCollector.address,
+						feeBips: 10,
+					},
+					{
+						pool: Lender2.address,
+						feeCollectionAddress: feeCollector.address,
+						feeBips: 10,
+					}
+				]);
+
+				expect(Borrower.borrow(TestToken.address, 100)).to.be.revertedWith("Caller must be the Lender pool");
 			});
 
 			it('Flash loan should be sourced with combined liquidity from available pools', async () => {
@@ -175,6 +229,17 @@ describe('LendingPoolsAggregator', () => {
 				expect(await TestToken.balanceOf(feeCollector.address)).to.be.equal(165);
 				expect(await TestToken.balanceOf(Lender.address)).to.be.equal(10010);
 				expect(await TestToken.balanceOf(Lender2.address)).to.be.equal(10005);
+			});
+
+			it('Successful flash loan should emit FlashLoan event', async () => {
+				await expect(await Borrower.borrow(TestToken.address, 15000))
+					.to
+					.emit(LendingPoolsAggregator, 'FlashLoan')
+					.withArgs(
+						Borrower.address,
+						TestToken.address,
+						15000
+					);
 			});
 		});
 	});
