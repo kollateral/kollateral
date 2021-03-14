@@ -11,6 +11,12 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 
 	bytes32 public immutable CALLBACK_SUCCESS = keccak256("ERC3156FlashBorrower.onFlashLoan");
 
+	event FlashLoan(
+		address borrower,
+		address token,
+		uint256 amount
+	);
+
 	struct BorrowerData {
 		bytes callerData;
 		uint256 originalAmount;
@@ -78,7 +84,16 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 		BorrowerData memory borrower = BorrowerData(_data, _amount, address(_receiver));
 		FlashStepLoadData memory stepData = FlashStepLoadData(borrower, 0, _amount, 0);
 
-		return executeFlashLoanStep(_token, stepData);
+		bool status = executeFlashLoanStep(_token, stepData);
+		if (status) {
+			emit FlashLoan(
+				address(_receiver),
+				_token,
+				_amount
+			);
+		}
+
+		return status;
 	}
 
 	function executeFlashLoanStep(address _token, FlashStepLoadData memory _stepData) internal returns (bool) {

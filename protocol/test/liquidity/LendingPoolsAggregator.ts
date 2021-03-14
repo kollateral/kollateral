@@ -230,6 +230,17 @@ describe('LendingPoolsAggregator', () => {
 				expect(await TestToken.balanceOf(Lender.address)).to.be.equal(10010);
 				expect(await TestToken.balanceOf(Lender2.address)).to.be.equal(10005);
 			});
+
+			it('Successful flash loan should emit FlashLoan event', async () => {
+				await expect(await Borrower.borrow(TestToken.address, 15000))
+					.to
+					.emit(LendingPoolsAggregator, 'FlashLoan')
+					.withArgs(
+						Borrower.address,
+						TestToken.address,
+						15000
+					);
+			});
 		});
 	});
 });
