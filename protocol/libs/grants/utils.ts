@@ -47,29 +47,29 @@ export const grantees: GrantCollection = {
 		{
 			recipient: '0x5736795e2AC2109970E28556a951E880cfcDFe89', // Treasury
 			amount: 4500, // 5%
-			class: GrantClass.UNLOCKED,
+			class: GrantClass.VESTING,
 		},
 	],
 	rinkeby: [
 		{
-			recipient: '0x0A26a1eBca217c8090f9a7759Ef82f19a1E19ea1', // lepidotteri
+			recipient: '0x0A26a1eBca217c8090f9a7759Ef82f19a1E19ea1',
 			amount: 900, // 1%
 			class: GrantClass.TEAM,
 		},
 		{
-			recipient: '0x67D59BAEE903898AE507460aEc3D9442927f74ab', // Jester
+			recipient: '0x67D59BAEE903898AE507460aEc3D9442927f74ab',
 			amount: 36.5,
 			class: GrantClass.UNLOCKED,
 		},
 		{
-			recipient: '0x09ba909BF9de148952B12c27d3f754fab36aa542', // Peasant
+			recipient: '0x09ba909BF9de148952B12c27d3f754fab36aa542',
 			amount: 0.9,
 			class: GrantClass.UNLOCKED,
 		},
 		{
-			recipient: '0x5736795e2AC2109970E28556a951E880cfcDFe89', // Treasury
+			recipient: '0x5736795e2AC2109970E28556a951E880cfcDFe89',
 			amount: 4500, // 5%
-			class: GrantClass.UNLOCKED,
+			class: GrantClass.VESTING,
 		},
 	],
 };
