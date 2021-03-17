@@ -28,7 +28,7 @@ import "../../interfaces/governance/ILockManager.sol";
 import "../../interfaces/governance/IMasterChef.sol";
 import "../../interfaces/governance/IVault.sol";
 
-abstract contract Treasurer is ReentrancyGuard {
+abstract contract CrownTreasurer is ReentrancyGuard {
 	using SafeERC20 for IERC20;
 
 	/// @notice Info of each user.
@@ -338,32 +338,6 @@ abstract contract Treasurer is ReentrancyGuard {
 		UserInfo storage user = userInfo[pid][msg.sender];
 		_deposit(pid, amount, pool, user);
 	}
-
-	/**
-	 * @notice Deposit tokens to Dragon for rewards allocation, using permit for approval
-	 * @dev It is up to the frontend developer to ensure the pool token implements permit - otherwise this will fail
-	 * @param pid pool id
-	 * @param amount number of tokens to deposit
-	 * @param deadline The time at which to expire the signature
-	 * @param v The recovery byte of the signature
-	 * @param r Half of the ECDSA signature pair
-	 * @param s Half of the ECDSA signature pair
-
-	function depositWithPermit(
-		uint256 pid,
-		uint256 amount,
-		uint256 deadline,
-		uint8 v,
-		bytes32 r,
-		bytes32 s
-	) external nonReentrant {
-		PoolInfo storage pool = poolInfo[pid];
-		UserInfo storage user = userInfo[pid][msg.sender];
-		// TODO: find the best way to provide a richer ERC20 interface here
-		// pool.token.permit(msg.sender, address(this), amount, deadline, v, r, s);
-		// _deposit(pid, amount, pool, user);
-		console.log("Dragon::depositWithPermit: not supported atm");
-	}*/
 
 	/**
 	 * @notice Withdraw tokens from Dragon, claiming rewards.
