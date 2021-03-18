@@ -109,6 +109,10 @@ export const rewards = deployments.createFixture(async () => {
 
 	const treasuryFactory = await ethers.getContractFactory('Treasury');
 	const Treasury = await treasuryFactory.deploy(Lord.address);
+
+	// const alchemistFactory = await ethers.getContractFactory('Alchemist');
+	// const Alchemist = await alchemistFactory.deploy(KING.address, INITIAL_KING_LIQUIDITY, ethers.utils.parseEther('0.9'), true);
+
 	/*
 	// TODO: contract size too big! (Dragon + Treasurer)
 	const dragonFactory = await ethers.getContractFactory('Dragon');

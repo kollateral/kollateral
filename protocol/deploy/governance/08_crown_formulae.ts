@@ -2,7 +2,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DeployFunction } from 'hardhat-deploy/types';
 
 import { italic, cyanBright, magenta } from 'colorette';
-import {logDeployResult, SUSHI_POOL_ADDRESS} from '../../libs/deploy';
+import { logDeployResult, SUSHI_POOL_ADDRESS } from '../../libs/deploy';
 
 export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 	const { deployments, getNamedAccounts } = hre;
@@ -19,14 +19,14 @@ export const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 	});
 	logDeployResult(KingmakerFormula, log);
 
-	const KING = await deployments.get("KING")
+	const KING = await deployments.get('KING');
 	// Deploy Token Registry contract
-	const Scribe = await deploy("Scribe", {
+	const Scribe = await deploy('Scribe', {
 		from: deployer,
-		contract: "Scribe",
+		contract: 'Scribe',
 		gasLimit: 9500000,
 		args: [lepidotteri, [KING.address], [KingmakerFormula.address]],
-		skipIfAlreadyDeployed: true
+		skipIfAlreadyDeployed: true,
 	});
 	logDeployResult(Scribe, log);
 };

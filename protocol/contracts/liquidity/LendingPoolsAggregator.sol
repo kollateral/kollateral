@@ -8,14 +8,9 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./LendingPool.sol";
 
 contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156FlashBorrower {
-
 	bytes32 public immutable CALLBACK_SUCCESS = keccak256("ERC3156FlashBorrower.onFlashLoan");
 
-	event FlashLoan(
-		address borrower,
-		address token,
-		uint256 amount
-	);
+	event FlashLoan(address borrower, address token, uint256 amount);
 
 	struct BorrowerData {
 		bytes callerData;
@@ -44,7 +39,6 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 	}
 
 	function flashFee(address _token, uint256 _amount) external view override returns (uint256) {
-
 		require(lenders[_token].length > 0, "LendingPoolsAggregator: Unsupported currency");
 
 		require(
@@ -75,7 +69,6 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 		uint256 _amount,
 		bytes calldata _data
 	) external override returns (bool) {
-
 		require(
 			_amount <= this.maxFlashLoan(_token),
 			"LendingPoolsAggregator: Liquidity is not sufficient for requested amount"
@@ -86,18 +79,13 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 
 		bool status = executeFlashLoanStep(_token, stepData);
 		if (status) {
-			emit FlashLoan(
-				address(_receiver),
-				_token,
-				_amount
-			);
+			emit FlashLoan(address(_receiver), _token, _amount);
 		}
 
 		return status;
 	}
 
 	function executeFlashLoanStep(address _token, FlashStepLoadData memory _stepData) internal returns (bool) {
-
 		IERC3156FlashLender lender = IERC3156FlashLender(lenders[_token][_stepData.step].pool);
 		uint256 loanAmount = loanableAmount(lender, _token, _stepData.remainingAmount);
 
@@ -118,7 +106,6 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 		uint256 _fee,
 		bytes calldata _data
 	) external override returns (bytes32) {
-
 		require(_initiator == address(this), "Initiator must be LendingPoolAggregator");
 
 		FlashStepLoadData memory stepData = abi.decode(_data, (FlashStepLoadData));

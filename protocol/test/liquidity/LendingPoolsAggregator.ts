@@ -169,17 +169,12 @@ describe('LendingPoolsAggregator', () => {
 
 			it('onFlashLoan should reject if initiator is not LendingPoolAggregator contract', async () => {
 				const dummyCallData = ethers.utils.defaultAbiCoder.encode(['uint256'], [42]);
-				expect(LendingPoolsAggregator.onFlashLoan(
-					user.address,
-					TestToken.address,
-					1000,
-					10,
-					dummyCallData
-				)).to.be.revertedWith("Initiator must be LendingPoolAggregator");
+				expect(LendingPoolsAggregator.onFlashLoan(user.address, TestToken.address, 1000, 10, dummyCallData)).to.be.revertedWith(
+					'Initiator must be LendingPoolAggregator'
+				);
 			});
 
 			it('onFlashLoan should reject if lender pool calls with unsupported step id', async () => {
-
 				const LenderWithLiquidityFactory = await ethers.getContractFactory('LenderPropagatingWrongStepParam');
 				let Lender3 = await LenderWithLiquidityFactory.connect(owner).deploy();
 				await Lender3.deployed();
@@ -191,14 +186,13 @@ describe('LendingPoolsAggregator', () => {
 						pool: Lender3.address,
 						feeCollectionAddress: feeCollector.address,
 						feeBips: 10,
-					}
+					},
 				]);
 
-				expect(Borrower.borrow(TestToken.address, 100)).to.be.revertedWith("Incorrect flash loan step id");
+				expect(Borrower.borrow(TestToken.address, 100)).to.be.revertedWith('Incorrect flash loan step id');
 			});
 
 			it('onFlashLoan should reject if lender pool calls with another pools step id', async () => {
-
 				const LenderWithLiquidityFactory = await ethers.getContractFactory('LenderPropagatingMaliciousStepParam');
 				let Lender4 = await LenderWithLiquidityFactory.connect(owner).deploy();
 				await Lender4.deployed();
@@ -215,10 +209,10 @@ describe('LendingPoolsAggregator', () => {
 						pool: Lender2.address,
 						feeCollectionAddress: feeCollector.address,
 						feeBips: 10,
-					}
+					},
 				]);
 
-				expect(Borrower.borrow(TestToken.address, 100)).to.be.revertedWith("Caller must be the Lender pool");
+				expect(Borrower.borrow(TestToken.address, 100)).to.be.revertedWith('Caller must be the Lender pool');
 			});
 
 			it('Flash loan should be sourced with combined liquidity from available pools', async () => {
@@ -233,13 +227,8 @@ describe('LendingPoolsAggregator', () => {
 
 			it('Successful flash loan should emit FlashLoan event', async () => {
 				await expect(await Borrower.borrow(TestToken.address, 15000))
-					.to
-					.emit(LendingPoolsAggregator, 'FlashLoan')
-					.withArgs(
-						Borrower.address,
-						TestToken.address,
-						15000
-					);
+					.to.emit(LendingPoolsAggregator, 'FlashLoan')
+					.withArgs(Borrower.address, TestToken.address, 15000);
 			});
 		});
 	});

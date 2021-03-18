@@ -4,7 +4,6 @@ pragma solidity ^0.8.2;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract LendingPool is Ownable {
-
 	struct Lender {
 		address pool;
 		address feeCollectionAddress;

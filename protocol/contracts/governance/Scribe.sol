@@ -43,7 +43,7 @@ contract Scribe is ITokenRegistry {
 	mapping(address => address) public tokenFormulae;
 
 	/// @notice Event emitted when the owner of the contract is updated
-	event ApostolicSuccession(address indexed oldOwner, address indexed newOwner);
+	event ApostolicSuccession(address indexed oldClergy, address indexed newClergy);
 
 	/// @notice only clergy can call function
 	modifier onlyChurch {
@@ -81,11 +81,16 @@ contract Scribe is ITokenRegistry {
 
 	/**
 	 * @notice Change owner of token registry contract
-	 * @param newOwner New owner address
+	 * @param newChurch New owner address
 	 */
-	function changeOwner(address newOwner) external override onlyChurch {
-		emit ApostolicSuccession(clergy, newOwner);
-		clergy = newOwner;
+	function changeOwner(address newChurch) external override onlyChurch {
+		require(
+			newChurch != address(0) && newChurch != address(this) && newChurch != clergy,
+			"Monastery::conversion: not valid address"
+		);
+
+		emit ApostolicSuccession(clergy, newChurch);
+		clergy = newChurch;
 	}
 
 	/**

@@ -183,7 +183,7 @@ describe('Treasury', () => {
 			const digest = getEIP712PermitDigest(domainSeparator, deployer.address, treasury.address, lockAmount, nonce, deadline);
 
 			const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
-			const recoveredSig = concatSig(v as unknown as Buffer, r, s);
+			const recoveredSig = concatSig((v as unknown) as Buffer, r, s);
 
 			await treasury.lockTokensWithPermit(
 				govToken.address,
@@ -224,7 +224,7 @@ describe('Treasury', () => {
 			const digest = getEIP712PermitDigest(domainSeparator, deployer.address, treasury.address, lockAmount, nonce, deadline);
 
 			const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
-			const recoveredSig = concatSig(v as unknown as Buffer, r, s);
+			const recoveredSig = concatSig((v as unknown) as Buffer, r, s);
 
 			await expect(
 				treasury.lockTokensWithPermit(
@@ -257,7 +257,7 @@ describe('Treasury', () => {
 			const digest = getEIP712PermitDigest(domainSeparator, deployer.address, treasury.address, lockAmount, nonce, deadline);
 
 			const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
-			const recoveredSig = concatSig(v as unknown as Buffer, r, s);
+			const recoveredSig = concatSig((v as unknown) as Buffer, r, s);
 
 			await expect(
 				treasury.lockTokensWithPermit(
@@ -289,7 +289,7 @@ describe('Treasury', () => {
 			const digest = getEIP712PermitDigest(domainSeparator, deployer.address, treasury.address, lockAmount, nonce, deadline);
 
 			const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
-			const recoveredSig = concatSig(v as unknown as Buffer, r, s);
+			const recoveredSig = concatSig((v as unknown) as Buffer, r, s);
 
 			await expect(
 				treasury.lockTokensWithPermit(
@@ -323,7 +323,7 @@ describe('Treasury', () => {
 			const digest = getEIP712PermitDigest(domainSeparator, deployer.address, treasury.address, lockAmount, nonce, deadline);
 
 			const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(KINGMAKER_DEPLOYER_PK, 'hex'));
-			const recoveredSig = concatSig(v as unknown as Buffer, r, s);
+			const recoveredSig = concatSig((v as unknown) as Buffer, r, s);
 
 			await govToken.transfer(SHA_2048.address, await govToken.balanceOf(deployer.address));
 
