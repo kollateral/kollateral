@@ -11,7 +11,7 @@ export const etherAddress = ETH_Address;
 export const O_Address = '0x0000000000000000000000000000000000000000';
 export const zeroAddress = O_Address;
 
-export const tenPow18 = BigNumber.from(10).pow(18);
+export const to10Pow18 = BigNumber.from(10).pow(18);
 
 export async function getLatestBlock(): Promise<any> {
 	return await ethers.provider.send('eth_getBlockByNumber', ['latest', false]);

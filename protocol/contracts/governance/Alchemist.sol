@@ -1,6 +1,5 @@
 /*
 
- 	Copyright (C) 2020 Hegic Protocol
     Copyright 2020-2021 ARM Finance LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,9 +28,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.2;
 
+import "hardhat/console.sol";
+
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "../libraries/governance/LinearBondingCurve.sol";
+import "../libraries/math/RoyalMath.sol";
 
 /**
  * @title Alchemist
@@ -41,27 +43,28 @@ import "../libraries/governance/LinearBondingCurve.sol";
 contract Alchemist is LinearBondingCurve {
 	using SafeERC20 for IERC20;
 
-	event Transmuted(address indexed user, uint256 etherAmount, uint256 kingAmount);
+	event Transmuted(address indexed user, uint256 etherAmount, uint256 reserveAmount);
 	event Distilled(address indexed pool, uint256 amount);
-	event ReserveDeposited(uint256 amount);
-	event ReserveWithdrawn(uint256 amount);
+	event ReserveDeposited(uint256 indexed start, uint256 indexed amount);
+	event ReserveWithdrawn(uint256 indexed amount);
 
 	/// @notice Event emitted when the owner of the contract is updated
 	event ApostolicSuccession(address indexed oldClergy, address indexed newClergy);
 
-	/// @notice Current clergy of this contract
+	/// @notice The reserve token for the IBCO
 	IERC20 public immutable reserveToken;
 
 	/// @notice Configuration vars for the IBCO
 	uint256 public start;
 	uint256 public immutable end;
 	uint256 public immutable minimumIngredient; // should be 0.9 ether;
-	bool    public immutable competitive;
+	bool public immutable competitive;
 
 	/// @notice counters for keeping track of total offerings and transmutations, used in distillation
 	uint256 public transmutableReserve; // should be 9000_e18;
 	uint256 public totalEtherProvided = 0;
 	uint256 public totalReserveTransmuted = 0;
+	bool public distilled;
 
 	/// @notice Current clergy of this contract
 	address public clergy;
@@ -75,14 +78,12 @@ contract Alchemist is LinearBondingCurve {
 	/**
 	 * @notice Construct a new IBCO
 	 * @param _reserveToken The reserve token to be transmuted
-	 * @param _transmutableReserve The amount of reserve token destined to be transmuted
 	 * @param _minimumIngredient The minimum offering allowed for transmutation to succeed
 	 */
 	constructor(
 		IERC20 _reserveToken,
-		uint256 _transmutableReserve,
 		uint256 _minimumIngredient,
-		bool _competitive
+		bool _competitive // TODO: BC should become non-competitive
 	) public {
 		end = block.timestamp + 9 days;
 
@@ -93,28 +94,61 @@ contract Alchemist is LinearBondingCurve {
 		clergy = msg.sender;
 	}
 
+	/**
+	 * @notice Safely transfers reserve token liquidity from msg.sender to this contract
+	 * @dev requires pre-approval for initial liquidity amount
+	 * @param _transmutableReserve The amount of reserve token to be transmuted
+		TODO: Add _liquidityReserve to 'depositReserve(s)'
+	 */
+	function depositReserve(uint256 _transmutableReserve) external onlyChurch {
+		require(end >= block.timestamp, "Alchemist::depositReserve: Deposit unavailable at the end");
+		require(transmutableReserve == 0, "Alchemist::transmute: Reserve was already deposited");
+
+		reserveToken.safeTransferFrom(clergy, address(this), _transmutableReserve);
+		transmutableReserve = _transmutableReserve / 2; // retain half reserve for the Mines (after the IBCO has ended)
+		start = block.timestamp;
+
+		emit ReserveDeposited(start, transmutableReserve);
+	}
+
 	function transmute() external payable {
-		require(start <= block.timestamp, "Alchemist::transmute: The offering has not started");
-		require(block.timestamp <= end, "Alchemist::transmute: The offering has ended");
 		require(transmutableReserve > 0, "Alchemist::transmute: No reserve was deposited");
-		require(msg.value >= minimumIngredient, "Alchemist::transmute: needs more ingredients (>=0.9 ETH)");
+		require(block.timestamp <= end, "Alchemist::transmute: The offering has ended");
+		require(msg.value >= minimumIngredient, "Alchemist::transmute: more ETH ingredient");
 
 		uint256 etherProvided = msg.value;
 		totalEtherProvided += etherProvided;
 
-		uint256 reserveAmount = 0;
+		uint256 payableReserveAmount = 0;
+		uint256 reserveBefore = reserveToken.balanceOf(address(this));
+
+		console.log("reserveBefore:");
+		console.logUint(reserveBefore);
+
 		if (competitive) {
+			uint256 totalReserveSupply = reserveToken.totalSupply();
 			// Linear distribution
-			reserveAmount = calculatePurchaseReturn(transmutableReserve, totalEtherProvided, totalReserveTransmuted, etherProvided);
+			payableReserveAmount = calculatePurchaseReturn(
+				totalReserveSupply,
+				totalEtherProvided,
+				totalReserveTransmuted,
+				etherProvided
+			);
 		} else {
 			// Flat distribution
-			reserveAmount = (transmutableReserve * etherProvided) / totalEtherProvided;
+			payableReserveAmount = transmutableReserve * etherProvided / totalEtherProvided;
 		}
+		console.log("payableReserveAmount:");
+		console.logUint(payableReserveAmount);
 
-		reserveToken.safeTransfer(msg.sender, reserveAmount);
-		totalReserveTransmuted += reserveAmount;
+		reserveToken.safeTransfer(msg.sender, payableReserveAmount);
+		totalReserveTransmuted += payableReserveAmount;
 
-		emit Transmuted(msg.sender, etherProvided, reserveAmount);
+		uint256 reserveAfter = reserveToken.balanceOf(address(this));
+		console.log("reserveAfter:");
+		console.logUint(reserveAfter);
+
+		emit Transmuted(msg.sender, etherProvided, payableReserveAmount);
 	}
 
 	function distillate() external onlyChurch {
@@ -122,23 +156,12 @@ contract Alchemist is LinearBondingCurve {
 
 		// TODO: lock into the Mines (PLLP)
 
-		payable(clergy).transfer(address(this).balance);
-	}
-
-	function depositReserve(uint256 _transmutableReserve) external onlyChurch {
-		require(end + 9 hours > block.timestamp, "Alchemist::depositReserve: Deposit unavailable now");
-		require(transmutableReserve == 0, "Alchemist::transmute: Reserve was already deposited");
-
-		reserveToken.safeTransferFrom(clergy, address(this), transmutableReserve);
-		transmutableReserve = _transmutableReserve;
-
-		start = block.timestamp;
-
-		emit ReserveDeposited(transmutableReserve);
+		distilled = true;
 	}
 
 	function withdrawReserve() external onlyChurch {
 		require(end + 9 hours < block.timestamp, "Alchemist::withdrawReserve: Withdrawal unavailable yet");
+		require(distilled, "Alchemist::withdrawReserve: distillation must be completed first");
 
 		uint256 reserve = reserveToken.balanceOf(address(this));
 		reserveToken.safeTransfer(clergy, reserve);

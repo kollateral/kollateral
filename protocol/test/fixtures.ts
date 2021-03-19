@@ -63,7 +63,7 @@ export const governance = deployments.createFixture(async () => {
 });
 
 export const rewards = deployments.createFixture(async () => {
-	const [deployer, lepidotteri, SHA_2048, feeCollector, King, dragon] = await ethers.getSigners();
+	const [deployer, lepidotteri, SHA_2048, feeCollector, King, dragon, Peasant] = await ethers.getSigners();
 	const admin = lepidotteri;
 	const liquidityProvider = King;
 	const treasurer = dragon;
@@ -72,15 +72,15 @@ export const rewards = deployments.createFixture(async () => {
 	// e.g. allocate token to "DAO" (Treasurer/Treasury)
 	const govTokenFactory = await ethers.getContractFactory('KING');
 	const KING = await govTokenFactory.deploy(admin.address, deployer.address, FIRST_KING_SUPPLY_CHANGE);
-	await deployer.sendTransaction({ to: treasurer.address, value: ethers.utils.parseEther('1.0') });
 	const balanceOfDeployer = await KING.balanceOf(deployer.address);
 
 	// so, for the sake of Treasury.sol test suites, we manually xfer entire deployer KING balance to the treasurer
 	await KING.connect(deployer).transfer(treasurer.address, ethers.BigNumber.from(balanceOfDeployer));
-	await KING.connect(treasurer).transfer(admin.address, ethers.BigNumber.from(INITIAL_KING_REWARDS_BALANCE));
-	await KING.connect(treasurer).transfer(deployer.address, ethers.BigNumber.from(INITIAL_KING_REWARDS_BALANCE));
-	await KING.connect(treasurer).transfer(lepidotteri.address, ethers.BigNumber.from(INITIAL_KING_LIQUIDITY));
-	await KING.connect(treasurer).transfer(SHA_2048.address, ethers.BigNumber.from(INITIAL_KING_LIQUIDITY));
+	await deployer.sendTransaction({ to: treasurer.address, value: ethers.utils.parseEther('1.0') });
+	// await KING.connect(treasurer).transfer(admin.address, ethers.BigNumber.from(INITIAL_KING_REWARDS_BALANCE));
+	// await KING.connect(treasurer).transfer(deployer.address, ethers.BigNumber.from(INITIAL_KING_REWARDS_BALANCE));
+	// await KING.connect(treasurer).transfer(lepidotteri.address, ethers.BigNumber.from(INITIAL_KING_LIQUIDITY));
+	// await KING.connect(treasurer).transfer(SHA_2048.address, ethers.BigNumber.from(INITIAL_KING_LIQUIDITY));
 	await deployer.sendTransaction({ to: lepidotteri.address, value: ethers.utils.parseEther('1.0') });
 	await deployer.sendTransaction({ to: SHA_2048.address, value: ethers.utils.parseEther('1.0') });
 	// end of manual reconciliation
@@ -141,5 +141,6 @@ export const rewards = deployments.createFixture(async () => {
 		lepidotteri: lepidotteri,
 		SHA_2048: SHA_2048,
 		King: King,
+		Peasant: Peasant
 	};
 });

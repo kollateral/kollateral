@@ -20,8 +20,10 @@ pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-abstract contract LinearBondingCurve {
-	// Set decimals equal to ether and ERC20 standard
+import "../math/RoyalMath.sol";
+
+abstract contract LinearBondingCurve is RoyalMath {
+	// Set decimals equal to ether and ERC20-compliant tokens
 	uint256 public constant decimals = 10**18;
 
 	function calculatePurchaseReturn(
@@ -31,18 +33,9 @@ abstract contract LinearBondingCurve {
 		uint256 _amount
 	) internal pure returns (uint256) {
 		uint256 newTotal = _totalSupply + _amount;
-		return (decimals * newTotal**2) / (2 * decimals * decimals) - _poolBalance; // x^2 / 2 + c
+		return (newTotal**2) / (2 * decimals) - _poolBalance; // x^2 / 2 + c
 	}
 
-	function calculateSaleReturn(
-		uint256 _totalSupply,
-		uint256 _poolBalance,
-		uint256 _reserveRatio,
-		uint256 _amount
-	) internal pure returns (uint256) {
-		uint256 newTotal = _totalSupply - _amount;
-		return _poolBalance - newTotal**2 / (2 * decimals);
-	}
 
 	/**
 	 * @dev Experimental

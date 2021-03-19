@@ -6,7 +6,6 @@
 import hre from 'hardhat';
 
 /*
- * This is the pleb way of deploying ("migrating") smart contracts in Hardhat: https://hardhat.org/guides/deploying.html
  * Must only be used for local (i.e. 'hardhat' network) trial and error
  */
 async function main() {
