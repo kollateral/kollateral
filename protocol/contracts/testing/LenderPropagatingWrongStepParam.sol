@@ -10,6 +10,7 @@ contract LenderPropagatingWrongStepParam is IERC3156FlashLender {
 
 	struct BorrowerData {
 		bytes callerData;
+		IERC3156FlashLender[] lenders;
 		uint256 originalAmount;
 		address receiver;
 	}

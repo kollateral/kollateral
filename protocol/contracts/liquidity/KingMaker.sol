@@ -5,9 +5,9 @@ import "erc3156/contracts/interfaces/IERC3156FlashLender.sol";
 import "erc3156/contracts/interfaces/IERC3156FlashBorrower.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
-import "./LendingPool.sol";
+import "./PlatformFeesManager.sol";
 
-contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156FlashBorrower {
+contract KingMaker is PlatformFeesManager, IERC3156FlashBorrower {
 
 	bytes32 public immutable CALLBACK_SUCCESS = keccak256("ERC3156FlashBorrower.onFlashLoan");
 
@@ -19,6 +19,7 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 
 	struct BorrowerData {
 		bytes callerData;
+		IERC3156FlashLender[] lenders;
 		uint256 originalAmount;
 		address receiver;
 	}
@@ -30,58 +31,57 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 		uint256 cumulativeFee;
 	}
 
-	constructor() {}
+	constructor(uint256 _feeBips, address _feeCollector) PlatformFeesManager(_feeBips, _feeCollector) {}
 
-	function maxFlashLoan(address _token) external view override returns (uint256) {
+	function maxFlashLoan(address _token, IERC3156FlashLender[] memory _lenders) external view returns (uint256) {
 		uint256 maxBalance = 0;
 
-		for (uint256 i = 0; i < lenders[_token].length; i++) {
-			IERC3156FlashLender lender = IERC3156FlashLender(lenders[_token][i].pool);
-			maxBalance = maxBalance + lender.maxFlashLoan(_token);
+		for (uint256 i = 0; i < _lenders.length; i++) {
+			maxBalance = maxBalance + _lenders[i].maxFlashLoan(_token);
 		}
 
 		return maxBalance;
 	}
 
-	function flashFee(address _token, uint256 _amount) external view override returns (uint256) {
+	function flashFee(address _token, uint256 _amount, IERC3156FlashLender[] memory _lenders) external view returns (uint256) {
 
-		require(lenders[_token].length > 0, "LendingPoolsAggregator: Unsupported currency");
+		require(_lenders.length > 0, "KingMaker: Unsupported currency");
 
 		require(
-			_amount <= this.maxFlashLoan(_token),
-			"LendingPoolsAggregator: Liquidity is not sufficient for requested amount"
+			_amount <= this.maxFlashLoan(_token, _lenders),
+			"KingMaker: Liquidity is not sufficient for requested amount"
 		);
 
 		uint256 loanFee = 0;
 		uint256 remainingLoanBalance = _amount;
 
-		for (uint256 i = 0; i < lenders[_token].length && remainingLoanBalance > 0; i++) {
-			Lender memory lenderPool = lenders[_token][i];
-			IERC3156FlashLender lender = IERC3156FlashLender(lenderPool.pool);
+		for (uint256 i = 0; i < _lenders.length && remainingLoanBalance > 0; i++) {
+			IERC3156FlashLender lender = _lenders[i];
 			uint256 loanAmount = loanableAmount(lender, _token, remainingLoanBalance);
 
 			if (loanAmount > 0) {
 				remainingLoanBalance = remainingLoanBalance - loanAmount;
-				loanFee = loanFee + lender.flashFee(_token, loanAmount) + calculatePoolFee(loanAmount, lenderPool);
+				loanFee = loanFee + lender.flashFee(_token, loanAmount);
 			}
 		}
 
-		return loanFee + calculatePlatformFee(_amount);
+		return loanFee + this.calculatePlatformFee(_amount);
 	}
 
 	function flashLoan(
 		IERC3156FlashBorrower _receiver,
 		address _token,
 		uint256 _amount,
+		IERC3156FlashLender[] memory _lenders,
 		bytes calldata _data
-	) external override returns (bool) {
+	) external returns (bool) {
 
 		require(
-			_amount <= this.maxFlashLoan(_token),
-			"LendingPoolsAggregator: Liquidity is not sufficient for requested amount"
+			_amount <= this.maxFlashLoan(_token, _lenders),
+			"KingMaker: Liquidity is not sufficient for requested amount"
 		);
 
-		BorrowerData memory borrower = BorrowerData(_data, _amount, address(_receiver));
+		BorrowerData memory borrower = BorrowerData(_data, _lenders, _amount, address(_receiver));
 		FlashStepLoadData memory stepData = FlashStepLoadData(borrower, 0, _amount, 0);
 
 		bool status = executeFlashLoanStep(_token, stepData);
@@ -98,7 +98,7 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 
 	function executeFlashLoanStep(address _token, FlashStepLoadData memory _stepData) internal returns (bool) {
 
-		IERC3156FlashLender lender = IERC3156FlashLender(lenders[_token][_stepData.step].pool);
+		IERC3156FlashLender lender = _stepData.borrower.lenders[_stepData.step];
 		uint256 loanAmount = loanableAmount(lender, _token, _stepData.remainingAmount);
 
 		if (loanAmount > 0) {
@@ -122,22 +122,19 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 		require(_initiator == address(this), "Initiator must be LendingPoolAggregator");
 
 		FlashStepLoadData memory stepData = abi.decode(_data, (FlashStepLoadData));
-		require(stepData.step < lenders[_token].length, "Incorrect flash loan step id");
+		require(stepData.step < stepData.borrower.lenders.length, "Incorrect flash loan step id");
 
-		Lender memory lender = lenders[_token][stepData.step];
-		require(msg.sender == lender.pool, "Caller must be the Lender pool");
+		IERC3156FlashLender lender = stepData.borrower.lenders[stepData.step];
+		require(msg.sender == address(lender), "Caller must be the Lender pool");
 
-		uint256 poolFee = calculatePoolFee(_amount, lender);
 		stepData.remainingAmount = stepData.remainingAmount - _amount;
-		stepData.cumulativeFee = stepData.cumulativeFee + _fee + poolFee;
+		stepData.cumulativeFee = stepData.cumulativeFee + _fee;
 
 		if (stepData.remainingAmount > 0) {
 			executeNextFlashLoanStep(_token, stepData);
 		} else {
 			concludeFlashLoan(stepData, _token);
 		}
-
-		IERC20(_token).transfer(lender.feeCollectionAddress, poolFee);
 
 		return CALLBACK_SUCCESS;
 	}
@@ -153,7 +150,7 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 			"FlashLender: Transfer failed"
 		);
 
-		uint256 platformFees = calculatePlatformFee(_stepData.borrower.originalAmount);
+		uint256 platformFees = this.calculatePlatformFee(_stepData.borrower.originalAmount);
 		uint256 totalFees = _stepData.cumulativeFee + platformFees;
 
 		IERC3156FlashBorrower receiver = IERC3156FlashBorrower(_stepData.borrower.receiver);
@@ -173,7 +170,7 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 			"FlashLender: Repay failed"
 		);
 
-		IERC20(_token).transfer(platformFeeCollectionAddress, platformFees);
+		IERC20(_token).transfer(this.getPlatformFeeCollectionAddress(), platformFees);
 	}
 
 	function loanableAmount(
@@ -184,11 +181,4 @@ contract LendingPoolsAggregator is LendingPool, IERC3156FlashLender, IERC3156Fla
 		return Math.min(_lender.maxFlashLoan(_token), _amount);
 	}
 
-	function calculatePoolFee(uint256 _tokenAmount, Lender memory _lender) internal pure returns (uint256) {
-		return (_tokenAmount * _lender.feeBips) / 10000;
-	}
-
-	function calculatePlatformFee(uint256 _tokenAmount) internal view returns (uint256) {
-		return (_tokenAmount * platformFeeBips) / 10000;
-	}
 }

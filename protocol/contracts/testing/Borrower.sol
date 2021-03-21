@@ -4,19 +4,20 @@ pragma solidity ^0.8.2;
 import "erc3156/contracts/interfaces/IERC3156FlashLender.sol";
 import "erc3156/contracts/interfaces/IERC3156FlashBorrower.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "../liquidity/KingMaker.sol";
 
 contract Borrower is IERC3156FlashBorrower {
 	string myData = "my precious data";
 
-	IERC3156FlashLender _lender;
+	KingMaker aggregator;
 
-	constructor(IERC3156FlashLender lender) {
-		_lender = lender;
+	constructor(KingMaker _aggregator) {
+		aggregator = _aggregator;
 	}
 
-	function borrow(address token, uint256 amount) external {
+	function borrow(address _token, uint256 _amount, IERC3156FlashLender[] memory _lenders) external {
 		bytes memory data = abi.encode(myData);
-		_lender.flashLoan(this, token, amount, data);
+		aggregator.flashLoan(this, _token, _amount, _lenders, data);
 	}
 
 	function onFlashLoan(
