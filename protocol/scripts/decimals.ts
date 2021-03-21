@@ -15,10 +15,10 @@ async function main() {
 
 	const namedAccounts = await getNamedAccounts();
 
-	const decimalsAmount = ethers.BigNumber.from('111111111111111111');
+	const decimalsAmount = ethers.BigNumber.from('11100000000000000000');
 	const decaAmount = decimalsAmount.div(to10Pow18);
 
-	console.log('BASE10:', decaAmount.toNumber());
+	console.log('BASE10:', decaAmount.toString());
 }
 
 // We recommend this pattern to be able to use async/await everywhere

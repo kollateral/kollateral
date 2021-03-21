@@ -22,44 +22,42 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "../math/RoyalMath.sol";
 
-abstract contract LinearBondingCurve is RoyalMath {
+abstract contract AlchemicalBondingCurve is RoyalMath {
 	// Set decimals equal to ether and ERC20-compliant tokens
 	uint256 public constant decimals = 10**18;
 
-	function calculatePurchaseReturn(
+	function curvedPayable(
 		uint256 _totalSupply,
-		uint256 _poolBalance,
-		uint256 _reserveRatio,
-		uint256 _amount
+		uint256 _totalProvided,
+		uint256 _amount,
+		uint16 _weight
 	) internal pure returns (uint256) {
-		uint256 newTotal = _totalSupply + _amount;
-		return (newTotal**2) / (2 * decimals) - _poolBalance; // x^2 / 2 + c
+		// return _totalSupply * _amount / _totalProvided / (_weight / decimals);
+		// return ((_totalSupply + _amount)**2) / (2 * decimals) - _totalProvided; // x^2 / 2 - c
+
+		uint256 newTotal = _totalSupply - _amount;
+		uint256 newPrice = (newTotal * newTotal / decimals) * (newTotal / decimals);
+		return sqrt(newPrice) * _weight;
+
+		// return (_totalSupply)**2 / (2 * decimals * decimals) - _totalProvided * _amount;
 	}
 
+	function flatPayable(
+		uint256 _totalSupply,
+		uint256 _amount,
+		uint16 _weight
+	) internal pure returns (uint256) {
+		return (_totalSupply * _amount / decimals) / _weight;
+	}
 
 	/**
 	 * @dev Experimental
 	 */
 	function estimateTokenAmountForPrice(
-		uint256 price,
-		uint256 poolBalance,
-		uint256 reserveRatio,
-		uint256 decimals
+		uint256 amount,
+		uint256 totalProvided,
+		uint16 weight
 	) public view returns (uint256 tokenAmount) {
-		tokenAmount = sqrt(((price + poolBalance) * 2) / reserveRatio) * decimals;
-	}
-
-	// babylonian method (https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Babylonian_method)
-	function sqrt(uint256 y) internal pure returns (uint256 z) {
-		if (y > 3) {
-			z = y;
-			uint256 x = y / 2 + 1;
-			while (x < z) {
-				z = x;
-				x = (y / x + x) / 2;
-			}
-		} else if (y != 0) {
-			z = 1;
-		}
+		tokenAmount = sqrt((amount + totalProvided) / weight) * decimals;
 	}
 }

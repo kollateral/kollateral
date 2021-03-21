@@ -32,7 +32,7 @@ import "hardhat/console.sol";
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "../libraries/governance/LinearBondingCurve.sol";
+import "../libraries/governance/AlchemicalBondingCurve.sol";
 import "../libraries/math/RoyalMath.sol";
 
 /**
@@ -40,12 +40,12 @@ import "../libraries/math/RoyalMath.sol";
  * @notice Distributes the reserve token in exchange for bootstrapping liquidity in the PLLPs.
  * @dev Users cannot send ether directly to the contract to participate. Also see Mines.sol
  */
-contract Alchemist is LinearBondingCurve {
+contract Alchemist is AlchemicalBondingCurve {
 	using SafeERC20 for IERC20;
 
 	event Transmuted(address indexed user, uint256 etherAmount, uint256 reserveAmount);
 	event Distilled(address indexed pool, uint256 amount);
-	event ReserveDeposited(uint256 indexed start, uint256 indexed amount);
+	event ReservesDeposited(uint256 indexed transmutableReserve, uint256 indexed liquidityReserve);
 	event ReserveWithdrawn(uint256 indexed amount);
 
 	/// @notice Event emitted when the owner of the contract is updated
@@ -55,13 +55,13 @@ contract Alchemist is LinearBondingCurve {
 	IERC20 public immutable reserveToken;
 
 	/// @notice Configuration vars for the IBCO
-	uint256 public start;
-	uint256 public immutable end;
+	uint256 public end;
 	uint256 public immutable minimumIngredient; // should be 0.9 ether;
 	bool public immutable competitive;
 
 	/// @notice counters for keeping track of total offerings and transmutations, used in distillation
-	uint256 public transmutableReserve; // should be 9000_e18;
+	uint256 public transmutableReserve; // should be 4500_e18;
+	uint256 public liquidityReserve; 	// should be 2700_e18;
 	uint256 public totalEtherProvided = 0;
 	uint256 public totalReserveTransmuted = 0;
 	bool public distilled;
@@ -83,14 +83,11 @@ contract Alchemist is LinearBondingCurve {
 	constructor(
 		IERC20 _reserveToken,
 		uint256 _minimumIngredient,
-		bool _competitive // TODO: BC should become non-competitive
+		bool _competitive
 	) public {
-		end = block.timestamp + 9 days;
-
 		reserveToken = _reserveToken;
 		minimumIngredient = _minimumIngredient;
 		competitive = _competitive;
-
 		clergy = msg.sender;
 	}
 
@@ -98,55 +95,61 @@ contract Alchemist is LinearBondingCurve {
 	 * @notice Safely transfers reserve token liquidity from msg.sender to this contract
 	 * @dev requires pre-approval for initial liquidity amount
 	 * @param _transmutableReserve The amount of reserve token to be transmuted
-		TODO: Add _liquidityReserve to 'depositReserve(s)'
+	 * @param _liquidityReserve The amount of reserve token to be locked into the Mines (along with Ether proceedings)
 	 */
-	function depositReserve(uint256 _transmutableReserve) external onlyChurch {
-		require(end >= block.timestamp, "Alchemist::depositReserve: Deposit unavailable at the end");
+	function depositReserve(uint256 _transmutableReserve, uint256 _liquidityReserve) external onlyChurch {
 		require(transmutableReserve == 0, "Alchemist::transmute: Reserve was already deposited");
 
 		reserveToken.safeTransferFrom(clergy, address(this), _transmutableReserve);
-		transmutableReserve = _transmutableReserve / 2; // retain half reserve for the Mines (after the IBCO has ended)
-		start = block.timestamp;
+		transmutableReserve = _transmutableReserve; // secure the transmutable reserve, offered once for sale
+		reserveToken.safeTransferFrom(clergy, address(this), _liquidityReserve);
+		liquidityReserve = _liquidityReserve; // secure the liquidity reserve, sent to the Mines (PLLP) for distillation
+		end = block.timestamp + 9 days;
 
-		emit ReserveDeposited(start, transmutableReserve);
+		emit ReservesDeposited(transmutableReserve, liquidityReserve);
 	}
 
 	function transmute() external payable {
-		require(transmutableReserve > 0, "Alchemist::transmute: No reserve was deposited");
 		require(block.timestamp <= end, "Alchemist::transmute: The offering has ended");
-		require(msg.value >= minimumIngredient, "Alchemist::transmute: more ETH ingredient");
+		require(msg.value >= minimumIngredient, "Alchemist::transmute: more ETH ingredient needed");
+		require(transmutableReserve > 0, "Alchemist::transmute: Not enough reserve was deposited");
 
 		uint256 etherProvided = msg.value;
-		totalEtherProvided += etherProvided;
 
+		uint256 totalReserveSupply = reserveToken.totalSupply();
+		uint256 totalReserveBefore = reserveToken.balanceOf(address(this));
 		uint256 payableReserveAmount = 0;
-		uint256 reserveBefore = reserveToken.balanceOf(address(this));
 
-		console.log("reserveBefore:");
-		console.logUint(reserveBefore);
+		console.log("totalReserveBefore:");
+		console.logUint(totalReserveBefore - liquidityReserve);
+		console.log("totalEtherProvided:");
+		console.logUint(totalEtherProvided);
 
 		if (competitive) {
-			uint256 totalReserveSupply = reserveToken.totalSupply();
-			// Linear distribution
-			payableReserveAmount = calculatePurchaseReturn(
+			payableReserveAmount = curvedPayable(
 				totalReserveSupply,
 				totalEtherProvided,
-				totalReserveTransmuted,
-				etherProvided
+				etherProvided,
+				9
 			);
 		} else {
-			// Flat distribution
-			payableReserveAmount = transmutableReserve * etherProvided / totalEtherProvided;
+			payableReserveAmount = flatPayable(transmutableReserve, etherProvided, totalEtherProvided == 0 ? 900 : 9000);
 		}
 		console.log("payableReserveAmount:");
 		console.logUint(payableReserveAmount);
 
-		reserveToken.safeTransfer(msg.sender, payableReserveAmount);
+		if (totalReserveBefore < payableReserveAmount) {
+			revert("Alchemist::transmute: Not enough transmutable reserve left");
+		} else {
+			reserveToken.safeTransfer(msg.sender, payableReserveAmount);
+		}
+
 		totalReserveTransmuted += payableReserveAmount;
+		totalEtherProvided += etherProvided;
 
 		uint256 reserveAfter = reserveToken.balanceOf(address(this));
 		console.log("reserveAfter:");
-		console.logUint(reserveAfter);
+		console.logUint(reserveAfter - liquidityReserve);
 
 		emit Transmuted(msg.sender, etherProvided, payableReserveAmount);
 	}
