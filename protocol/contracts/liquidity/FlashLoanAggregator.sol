@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./PlatformFeesManager.sol";
 
-contract KingMaker is PlatformFeesManager, IERC3156FlashBorrower {
+contract FlashLoanAggregator is PlatformFeesManager, IERC3156FlashBorrower {
 
 	bytes32 public immutable CALLBACK_SUCCESS = keccak256("ERC3156FlashBorrower.onFlashLoan");
 
@@ -45,11 +45,11 @@ contract KingMaker is PlatformFeesManager, IERC3156FlashBorrower {
 
 	function flashFee(address _token, uint256 _amount, IERC3156FlashLender[] memory _lenders) external view returns (uint256) {
 
-		require(_lenders.length > 0, "KingMaker: Unsupported currency");
+		require(_lenders.length > 0, "FlashLoanAggregator: Unsupported currency");
 
 		require(
 			_amount <= this.maxFlashLoan(_token, _lenders),
-			"KingMaker: Liquidity is not sufficient for requested amount"
+			"FlashLoanAggregator: Liquidity is not sufficient for requested amount"
 		);
 
 		uint256 loanFee = 0;
@@ -78,7 +78,7 @@ contract KingMaker is PlatformFeesManager, IERC3156FlashBorrower {
 
 		require(
 			_amount <= this.maxFlashLoan(_token, _lenders),
-			"KingMaker: Liquidity is not sufficient for requested amount"
+			"FlashLoanAggregator: Liquidity is not sufficient for requested amount"
 		);
 
 		BorrowerData memory borrower = BorrowerData(_data, _lenders, _amount, address(_receiver));

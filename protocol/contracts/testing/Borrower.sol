@@ -4,14 +4,14 @@ pragma solidity ^0.8.2;
 import "erc3156/contracts/interfaces/IERC3156FlashLender.sol";
 import "erc3156/contracts/interfaces/IERC3156FlashBorrower.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../liquidity/KingMaker.sol";
+import "../liquidity/FlashLoanAggregator.sol";
 
 contract Borrower is IERC3156FlashBorrower {
 	string myData = "my precious data";
 
-	KingMaker aggregator;
+	FlashLoanAggregator aggregator;
 
-	constructor(KingMaker _aggregator) {
+	constructor(FlashLoanAggregator _aggregator) {
 		aggregator = _aggregator;
 	}
 

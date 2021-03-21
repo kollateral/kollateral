@@ -5,8 +5,8 @@ import { ethers } from 'hardhat';
 import { expect } from 'chai';
 import { ETH_Address } from '../../libs/ethereum';
 
-describe('KingMaker', () => {
-	let KingMaker: Contract;
+describe('FlashLoanAggregator', () => {
+	let FlashLoanAggregator: Contract;
 	let owner: SignerWithAddress;
 	let user: SignerWithAddress;
 	let feeCollector: SignerWithAddress;
@@ -19,26 +19,26 @@ describe('KingMaker', () => {
 	});
 
 	beforeEach(async () => {
-		const KingMakerFactory = await ethers.getContractFactory('KingMaker');
-		KingMaker = await KingMakerFactory.connect(owner).deploy(100, feeCollector.address);
-		await KingMaker.deployed();
+		const FlashLoanAggregatorFactory = await ethers.getContractFactory('FlashLoanAggregator');
+		FlashLoanAggregator = await FlashLoanAggregatorFactory.connect(owner).deploy(100, feeCollector.address);
+		await FlashLoanAggregator.deployed();
 	});
 
 	describe('when Aggregator is passed an empty list of pools', () => {
 		it('maxFlashLoan should return 0', async () => {
-			expect(await KingMaker.connect(user).maxFlashLoan(ETH_Address, [])).to.be.equal(0);
+			expect(await FlashLoanAggregator.connect(user).maxFlashLoan(ETH_Address, [])).to.be.equal(0);
 		});
 
 		it('flashFee should raise an exception', () => {
-			expect(KingMaker.connect(user).flashFee(ETH_Address, 1000, [])).to.be.revertedWith(
-				'KingMaker: Unsupported currency'
+			expect(FlashLoanAggregator.connect(user).flashFee(ETH_Address, 1000, [])).to.be.revertedWith(
+				'FlashLoanAggregator: Unsupported currency'
 			);
 		});
 
 		it('flashLoan should raise an exception', () => {
 			const dummyCallData = ethers.utils.defaultAbiCoder.encode(['uint256'], [42]);
-			expect(KingMaker.connect(user).flashLoan(user.address, ETH_Address, 1000, [], dummyCallData)).to.be.revertedWith(
-				'KingMaker: Liquidity is not sufficient for requested amount'
+			expect(FlashLoanAggregator.connect(user).flashLoan(user.address, ETH_Address, 1000, [], dummyCallData)).to.be.revertedWith(
+				'FlashLoanAggregator: Liquidity is not sufficient for requested amount'
 			);
 		});
 	});
@@ -58,7 +58,7 @@ describe('KingMaker', () => {
 			await Lender.deployed();
 
 			const BorrowerFactory = await ethers.getContractFactory('Borrower');
-			Borrower = await BorrowerFactory.connect(owner).deploy(KingMaker.address);
+			Borrower = await BorrowerFactory.connect(owner).deploy(FlashLoanAggregator.address);
 			await Borrower.deployed();
 
 			const supply = 1000000;
@@ -70,22 +70,22 @@ describe('KingMaker', () => {
 		describe('when aggregator has one available pool', () => {
 
 			it('maxFlashLoan should return max available supply in pool', async () => {
-				let aggregatedMax = await KingMaker.connect(user).maxFlashLoan(TestToken.address, [Lender.address]);
+				let aggregatedMax = await FlashLoanAggregator.connect(user).maxFlashLoan(TestToken.address, [Lender.address]);
 				let lenderMax = await Lender.connect(user).maxFlashLoan(TestToken.address);
 
 				expect(aggregatedMax).to.be.equal(lenderMax);
 			});
 
 			it('flashFee should revert if requested amount is more than available liquidity', async () => {
-				let aggregatedMax = await KingMaker.connect(user).maxFlashLoan(TestToken.address, [Lender.address]);
-				expect(KingMaker.connect(user).flashFee(TestToken.address, aggregatedMax.add(1), [Lender.address])).to.be.revertedWith(
-					'KingMaker: Liquidity is not sufficient for requested amount'
+				let aggregatedMax = await FlashLoanAggregator.connect(user).maxFlashLoan(TestToken.address, [Lender.address]);
+				expect(FlashLoanAggregator.connect(user).flashFee(TestToken.address, aggregatedMax.add(1), [Lender.address])).to.be.revertedWith(
+					'FlashLoanAggregator: Liquidity is not sufficient for requested amount'
 				);
 			});
 
 			it('flashFee should correctly include lender, pool and platform fees', async () => {
-				let aggregatedMax = await KingMaker.connect(user).maxFlashLoan(TestToken.address, [Lender.address]);
-				let fee = await KingMaker.connect(user).flashFee(TestToken.address, aggregatedMax, [Lender.address]);
+				let aggregatedMax = await FlashLoanAggregator.connect(user).maxFlashLoan(TestToken.address, [Lender.address]);
+				let fee = await FlashLoanAggregator.connect(user).flashFee(TestToken.address, aggregatedMax, [Lender.address]);
 
 				let lenderFee = await Lender.connect(user).flashFee(TestToken.address, aggregatedMax);
 				let platformFee = aggregatedMax.mul(100).div(10000);
@@ -105,7 +105,7 @@ describe('KingMaker', () => {
 			});
 
 			it('flashFee should ignore lenders with no liquidity', async () => {
-				expect(KingMaker.connect(user)
+				expect(FlashLoanAggregator.connect(user)
 					.flashFee(
 						TestToken.address,
 						BigNumber.from(100),
@@ -118,7 +118,7 @@ describe('KingMaker', () => {
 				await Borrower.borrow(TestToken.address, 10000, [LenderWithNoLiquidity.address, Lender.address]);
 
 				expect(await TestToken.balanceOf(Borrower.address)).to.be.equal(0);
-				expect(await TestToken.balanceOf(KingMaker.address)).to.be.equal(0);
+				expect(await TestToken.balanceOf(FlashLoanAggregator.address)).to.be.equal(0);
 				expect(await TestToken.balanceOf(feeCollector.address)).to.be.equal(100);
 				expect(await TestToken.balanceOf(Lender.address)).to.be.equal(10010);
 			});
@@ -138,7 +138,7 @@ describe('KingMaker', () => {
 
 			it('onFlashLoan should reject if initiator is not LendingPoolAggregator contract', async () => {
 				const dummyCallData = ethers.utils.defaultAbiCoder.encode(['uint256'], [42]);
-				expect(KingMaker.onFlashLoan(
+				expect(FlashLoanAggregator.onFlashLoan(
 					user.address,
 					TestToken.address,
 					1000,
@@ -175,7 +175,7 @@ describe('KingMaker', () => {
 				await Borrower.borrow(TestToken.address, 15000, [Lender.address, Lender2.address]);
 
 				expect(await TestToken.balanceOf(Borrower.address)).to.be.equal(835);
-				expect(await TestToken.balanceOf(KingMaker.address)).to.be.equal(0);
+				expect(await TestToken.balanceOf(FlashLoanAggregator.address)).to.be.equal(0);
 				expect(await TestToken.balanceOf(feeCollector.address)).to.be.equal(150);
 				expect(await TestToken.balanceOf(Lender.address)).to.be.equal(10010);
 				expect(await TestToken.balanceOf(Lender2.address)).to.be.equal(10005);
@@ -184,7 +184,7 @@ describe('KingMaker', () => {
 			it('Successful flash loan should emit FlashLoan event', async () => {
 				await expect(await Borrower.borrow(TestToken.address, 15000, [Lender.address, Lender2.address]))
 					.to
-					.emit(KingMaker, 'FlashLoan')
+					.emit(FlashLoanAggregator, 'FlashLoan')
 					.withArgs(
 						Borrower.address,
 						TestToken.address,
