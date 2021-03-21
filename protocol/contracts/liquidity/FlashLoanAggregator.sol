@@ -6,8 +6,9 @@ import "erc3156/contracts/interfaces/IERC3156FlashBorrower.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./PlatformFeesManager.sol";
+import "./IFlashLoanAggregator.sol";
 
-contract FlashLoanAggregator is PlatformFeesManager, IERC3156FlashBorrower {
+contract FlashLoanAggregator is IFlashLoanAggregator, PlatformFeesManager, IERC3156FlashBorrower {
 
 	bytes32 public immutable CALLBACK_SUCCESS = keccak256("ERC3156FlashBorrower.onFlashLoan");
 
@@ -33,7 +34,7 @@ contract FlashLoanAggregator is PlatformFeesManager, IERC3156FlashBorrower {
 
 	constructor(uint256 _feeBips, address _feeCollector) PlatformFeesManager(_feeBips, _feeCollector) {}
 
-	function maxFlashLoan(address _token, IERC3156FlashLender[] memory _lenders) external view returns (uint256) {
+	function maxFlashLoan(address _token, IERC3156FlashLender[] memory _lenders) external view override returns (uint256) {
 		uint256 maxBalance = 0;
 
 		for (uint256 i = 0; i < _lenders.length; i++) {
@@ -43,7 +44,7 @@ contract FlashLoanAggregator is PlatformFeesManager, IERC3156FlashBorrower {
 		return maxBalance;
 	}
 
-	function flashFee(address _token, uint256 _amount, IERC3156FlashLender[] memory _lenders) external view returns (uint256) {
+	function flashFee(address _token, uint256 _amount, IERC3156FlashLender[] memory _lenders) external view override returns (uint256) {
 
 		require(_lenders.length > 0, "FlashLoanAggregator: Unsupported currency");
 
@@ -74,7 +75,7 @@ contract FlashLoanAggregator is PlatformFeesManager, IERC3156FlashBorrower {
 		uint256 _amount,
 		IERC3156FlashLender[] memory _lenders,
 		bytes calldata _data
-	) external returns (bool) {
+	) external override returns (bool) {
 
 		require(
 			_amount <= this.maxFlashLoan(_token, _lenders),
