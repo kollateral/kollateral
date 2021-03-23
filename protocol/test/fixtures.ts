@@ -142,6 +142,6 @@ export const rewards = deployments.createFixture(async () => {
 		SHA_2048: SHA_2048,
 		King: King,
 		Peasant: Peasant,
-		Jester: Jester
+		Jester: Jester,
 	};
 });

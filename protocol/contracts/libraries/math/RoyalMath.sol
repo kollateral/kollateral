@@ -18,7 +18,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 contract RoyalMath {
-
 	/// @dev Returns 1 in the fixed point representation, with `decimals` decimals.
 	function unit(uint8 decimals) internal pure returns (uint256) {
 		require(decimals <= 77, "Too many decimals");
@@ -26,14 +25,14 @@ contract RoyalMath {
 	}
 
 	/**
- 	 * @dev divides two float values, required since Solidity does not handle floating point values
- 	 * @return the float division result
- 	 */
+	 * @dev divides two float values, required since Solidity does not handle floating point values
+	 * @return the float division result
+	 */
 	function floatDiv(uint256 a, uint256 b) internal pure returns (uint256) {
 		return (a * 1000000000000000000 + b / 2) / b;
 	}
 
-/**
+	/**
 	function fullMul(uint256 x, uint256 y) public pure returns (uint256 l, uint256 h) {
 		uint256 mm = mulmod(x, y, type(uint256).max);
 		l = x * y;

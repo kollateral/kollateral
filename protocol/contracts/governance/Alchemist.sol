@@ -61,7 +61,7 @@ contract Alchemist is AlchemicalBondingCurve {
 
 	/// @notice counters for keeping track of total offerings and transmutations, used in distillation
 	uint256 public transmutableReserve; // should be 4500_e18;
-	uint256 public liquidityReserve; 	// should be 2700_e18;
+	uint256 public liquidityReserve; // should be 2700_e18;
 	uint256 public totalEtherProvided = 0;
 	uint256 public totalReserveTransmuted = 0;
 	bool public distilled;
@@ -115,28 +115,20 @@ contract Alchemist is AlchemicalBondingCurve {
 		require(transmutableReserve > 0, "Alchemist::transmute: Not enough reserve was deposited");
 
 		uint256 etherProvided = msg.value;
-
 		uint256 totalReserveSupply = reserveToken.totalSupply();
 		uint256 totalReserveBefore = reserveToken.balanceOf(address(this));
 		uint256 payableReserveAmount = 0;
 
-		console.log("totalReserveBefore:");
-		console.logUint(totalReserveBefore - liquidityReserve);
-		console.log("totalEtherProvided:");
-		console.logUint(totalEtherProvided);
-
 		if (competitive) {
 			payableReserveAmount = curvedPayable(
 				totalReserveSupply,
-				totalEtherProvided,
+				totalEtherProvided == 0 ? unit(18) : totalEtherProvided,
 				etherProvided,
-				9
+				90000
 			);
 		} else {
 			payableReserveAmount = flatPayable(transmutableReserve, etherProvided, totalEtherProvided == 0 ? 900 : 9000);
 		}
-		console.log("payableReserveAmount:");
-		console.logUint(payableReserveAmount);
 
 		if (totalReserveBefore < payableReserveAmount) {
 			revert("Alchemist::transmute: Not enough transmutable reserve left");
@@ -146,10 +138,6 @@ contract Alchemist is AlchemicalBondingCurve {
 
 		totalReserveTransmuted += payableReserveAmount;
 		totalEtherProvided += etherProvided;
-
-		uint256 reserveAfter = reserveToken.balanceOf(address(this));
-		console.log("reserveAfter:");
-		console.logUint(reserveAfter - liquidityReserve);
 
 		emit Transmuted(msg.sender, etherProvided, payableReserveAmount);
 	}

@@ -30,34 +30,18 @@ abstract contract AlchemicalBondingCurve is RoyalMath {
 		uint256 _totalSupply,
 		uint256 _totalProvided,
 		uint256 _amount,
-		uint16 _weight
+		uint32 _weight
 	) internal pure returns (uint256) {
-		// return _totalSupply * _amount / _totalProvided / (_weight / decimals);
-		// return ((_totalSupply + _amount)**2) / (2 * decimals) - _totalProvided; // x^2 / 2 - c
-
-		uint256 newTotal = _totalSupply - _amount;
-		uint256 newPrice = (newTotal * newTotal / decimals) * (newTotal / decimals);
-		return sqrt(newPrice) * _weight;
-
-		// return (_totalSupply)**2 / (2 * decimals * decimals) - _totalProvided * _amount;
+		uint256 newTotal = _totalSupply + _totalProvided + _amount;
+		uint256 newPrice = newTotal * (newTotal / decimals) * (newTotal / decimals);
+		return sqrt(newPrice / _weight); // -sqrt(x^3/w)
 	}
 
 	function flatPayable(
 		uint256 _totalSupply,
 		uint256 _amount,
-		uint16 _weight
+		uint32 _weight
 	) internal pure returns (uint256) {
-		return (_totalSupply * _amount / decimals) / _weight;
-	}
-
-	/**
-	 * @dev Experimental
-	 */
-	function estimateTokenAmountForPrice(
-		uint256 amount,
-		uint256 totalProvided,
-		uint16 weight
-	) public view returns (uint256 tokenAmount) {
-		tokenAmount = sqrt((amount + totalProvided) / weight) * decimals;
+		return ((_totalSupply * _amount) / decimals) / _weight;
 	}
 }

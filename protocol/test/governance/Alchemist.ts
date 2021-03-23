@@ -6,7 +6,7 @@ import { ethers } from 'hardhat';
 
 import { rewards } from '../fixtures';
 import { getEnv } from '../../libs/config';
-import {INITIAL_KING_LIQUIDITY, INITIAL_KING_OFFERING} from '../../libs/deploy';
+import { INITIAL_KING_LIQUIDITY, INITIAL_KING_OFFERING } from '../../libs/deploy';
 import { to10Pow18 } from '../../libs/ethereum';
 
 const KINGMAKER_DEPLOYER_PK = getEnv('KINGMAKER_DEPLOYER_PK') || '0x';
@@ -119,17 +119,20 @@ describe('Alchemist', () => {
 			expect(transmutedReserve).to.exist;
 		});
 
-		it('non-competitive IBCO returns a flat distribution for each transmuted reserve', async () => {
+		it('non-competitive IBCO returns a correct distribution for each successful transmutation', async () => {
 			await NC_Alchemist.connect(Peasant).transmute({ value: ethers.utils.parseEther('1') });
 			const transmutedReserve1 = await govToken.balanceOf(Peasant.address);
 			await NC_Alchemist.connect(SHA_2048).transmute({ value: ethers.utils.parseEther('10.1') });
 			const transmutedReserve2 = await govToken.balanceOf(SHA_2048.address);
-			await NC_Alchemist.connect(lepidotteri).transmute({ value: ethers.utils.parseEther('1000.01') });
+			await NC_Alchemist.connect(lepidotteri).transmute({ value: ethers.utils.parseEther('100.01') });
 			const transmutedReserve3 = await govToken.balanceOf(lepidotteri.address);
+			await NC_Alchemist.connect(King).transmute({ value: ethers.utils.parseEther('1000.01') });
+			const transmutedReserve4 = await govToken.balanceOf(King.address);
 
 			expect(transmutedReserve1).to.exist;
 			expect(transmutedReserve2).to.exist;
 			expect(transmutedReserve3).to.exist;
+			expect(transmutedReserve4).to.exist;
 		});
 
 		it('non-competitive IBCO should revert if running out of transmutable reserve (whale purchase)', async () => {
@@ -137,13 +140,20 @@ describe('Alchemist', () => {
 		});
 
 		it('competitive IBCO returns transmuted reserve', async () => {
-			await Alchemist.connect(Peasant).transmute({ value: ethers.utils.parseEther('1.0') });
-			const transmutedReserve = await govToken.balanceOf(Peasant.address);
-			await Alchemist.connect(Jester).transmute({ value: ethers.utils.parseEther('1.0') });
-			const transmutedReserve2 = await govToken.balanceOf(Jester.address);
+			await Alchemist.connect(King).transmute({ value: ethers.utils.parseEther('1000.0') });
+			const transmutedReserve = await govToken.balanceOf(King.address);
+			await Alchemist.connect(King).transmute({ value: ethers.utils.parseEther('1500.0') });
+			const transmutedReserve2 = await govToken.balanceOf(King.address);
+			await Alchemist.connect(King).transmute({ value: ethers.utils.parseEther('2000.0') });
+			const transmutedReserve3 = await govToken.balanceOf(King.address);
 
 			expect(transmutedReserve).to.exist;
 			expect(transmutedReserve2).to.exist;
+			expect(transmutedReserve3).to.exist;
+		});
+
+		it('competitive IBCO should not revert if running out of transmutable reserve (whale purchase)', async () => {
+			await expect(Alchemist.connect(King).transmute({ value: ethers.utils.parseEther('100000.000') })).to.not.be.reverted;
 		});
 	});
 });
