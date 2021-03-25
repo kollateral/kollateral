@@ -57,7 +57,6 @@ contract Alchemist is AlchemicalBondingCurve {
 	/// @notice Configuration vars for the IBCO
 	uint256 public end;
 	uint256 public immutable minimumIngredient; // should be 0.9 ether;
-	bool public immutable competitive;
 
 	/// @notice counters for keeping track of total offerings and transmutations, used in distillation
 	uint256 public transmutableReserve; // should be 4500_e18;
@@ -80,14 +79,9 @@ contract Alchemist is AlchemicalBondingCurve {
 	 * @param _reserveToken The reserve token to be transmuted
 	 * @param _minimumIngredient The minimum offering allowed for transmutation to succeed
 	 */
-	constructor(
-		IERC20 _reserveToken,
-		uint256 _minimumIngredient,
-		bool _competitive
-	) public {
+	constructor(IERC20 _reserveToken, uint256 _minimumIngredient) public {
 		reserveToken = _reserveToken;
 		minimumIngredient = _minimumIngredient;
-		competitive = _competitive;
 		clergy = msg.sender;
 	}
 
@@ -115,20 +109,10 @@ contract Alchemist is AlchemicalBondingCurve {
 		require(transmutableReserve > 0, "Alchemist::transmute: Not enough reserve was deposited");
 
 		uint256 etherProvided = msg.value;
-		uint256 totalReserveSupply = reserveToken.totalSupply();
 		uint256 totalReserveBefore = reserveToken.balanceOf(address(this));
 		uint256 payableReserveAmount = 0;
 
-		if (competitive) {
-			payableReserveAmount = curvedPayable(
-				totalReserveSupply,
-				totalEtherProvided == 0 ? unit(18) : totalEtherProvided,
-				etherProvided,
-				90000
-			);
-		} else {
-			payableReserveAmount = flatPayable(transmutableReserve, etherProvided, totalEtherProvided == 0 ? 900 : 9000);
-		}
+		payableReserveAmount = flatPayable(transmutableReserve, etherProvided, totalEtherProvided == 0 ? 900 : 9000);
 
 		if (totalReserveBefore < payableReserveAmount) {
 			revert("Alchemist::transmute: Not enough transmutable reserve left");

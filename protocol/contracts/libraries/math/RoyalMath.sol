@@ -16,12 +16,29 @@
 
 */
 // SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.8.3;
+
+import "@openzeppelin/contracts/utils/math/Math.sol";
 
 contract RoyalMath {
+	using Math for uint256;
+
 	/// @dev Returns 1 in the fixed point representation, with `decimals` decimals.
 	function unit(uint8 decimals) internal pure returns (uint256) {
 		require(decimals <= 77, "Too many decimals");
 		return 10**uint256(decimals);
+	}
+
+	/**
+	 * @notice Returns ceil(x / y)
+	 * @dev panics if y == 0
+	 * @param x The dividend
+	 * @param y The divisor
+	 * @return z The quotient, ceil(x / y)
+	 */
+	function divRoundingUp(uint256 x, uint256 y) internal pure returns (uint256 z) {
+		// addition is safe because (type(uint256).max / 1) + (type(uint256).max % 1 > 0 ? 1 : 0) == type(uint256).max
+		z = (x / y) + (x % y > 0 ? 1 : 0);
 	}
 
 	/**
@@ -32,40 +49,6 @@ contract RoyalMath {
 		return (a * 1000000000000000000 + b / 2) / b;
 	}
 
-	/**
-	function fullMul(uint256 x, uint256 y) public pure returns (uint256 l, uint256 h) {
-		uint256 mm = mulmod(x, y, type(uint256).max);
-		l = x * y;
-		h = mm - l;
-		if (mm < l) {
-			h -= 1;
-		}
-	}
-
-	function mulDiv(uint256 x, uint256 y, uint256 z) public pure returns (uint256) {
-		(uint256 l, uint256 h) = fullMul(x, y);
-		require(h < z);
-		uint256 mm = mulmod(x, y, z);
-		if (mm > l) {
-			h -= 1;
-		}
-		l -= mm;
-		uint256 pow2 = z & -z;
-		z /= pow2;
-		l /= pow2;
-		l += h * ((-pow2) / pow2 + 1);
-		uint256 r = 1;
-		r *= 2 - z * r;
-		r *= 2 - z * r;
-		r *= 2 - z * r;
-		r *= 2 - z * r;
-		r *= 2 - z * r;
-		r *= 2 - z * r;
-		r *= 2 - z * r;
-		r *= 2 - z * r;
-		return l * r;
-	}
-*/
 	// babylonian method (https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Babylonian_method)
 	function sqrt(uint256 y) internal pure returns (uint256 z) {
 		if (y > 3) {

@@ -38,10 +38,10 @@ abstract contract AlchemicalBondingCurve is RoyalMath {
 	}
 
 	function flatPayable(
-		uint256 _totalSupply,
+		uint256 _totalReserve,
 		uint256 _amount,
 		uint32 _weight
 	) internal pure returns (uint256) {
-		return ((_totalSupply * _amount) / decimals) / _weight;
+		return ((_totalReserve * _amount) / decimals) / _weight;
 	}
 }

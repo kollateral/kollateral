@@ -9,7 +9,7 @@ module.exports = {
 		commonjs: true,
 	},
 	plugins: ['@typescript-eslint'],
-	extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'prettier', 'prettier/@typescript-eslint'],
+	extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'prettier'],
 	rules: {
 		'@typescript-eslint/ban-ts-comment': 0,
 		'@typescript-eslint/no-unused-vars': 0,

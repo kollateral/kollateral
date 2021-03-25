@@ -7,7 +7,9 @@ import { DeployResult } from 'hardhat-deploy/types';
 import { magenta, gray, bold, strikethrough, yellowBright } from 'colorette';
 
 import * as diamond from './diamond/utils';
-import { now, year } from './time';
+import { year } from './time';
+
+const now = parseInt(String(Date.now() / 1000));
 
 export const FIRST_KING_SUPPLY_CHANGE = now + year;
 
