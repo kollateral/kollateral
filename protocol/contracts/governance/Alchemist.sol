@@ -68,7 +68,8 @@ contract Alchemist is AlchemicalBondingCurve {
 	event ReserveWithdrawn(uint256 indexed amount);
 
 	/// @notice Event emitted when the owner of the contract is updated
-	event ChangedTreasury(address indexed oldTreasury, address indexed newTreasury);
+	event ChangedTreasury(address indexed oldTreasury, address indexed pendingTreasury);
+	event AcceptedTreasury(address indexed newTreasury);
 
 	/// @notice The reserve token for the IBCO
 	IERC20 public immutable reserveToken;
@@ -87,6 +88,7 @@ contract Alchemist is AlchemicalBondingCurve {
 
 	/// @notice Current treasury of this contract
 	address public treasury;
+	address public pendingTreasury;
 
 	/// @notice only treasury can call function
 	modifier onlyTreasury {
@@ -118,7 +120,7 @@ contract Alchemist is AlchemicalBondingCurve {
 	 * @param _liquidityReserve The amount of reserve token to be locked into the Mines (along with Ether proceedings)
 	 */
 	function depositReserve(uint256 _transmutableReserve, uint256 _liquidityReserve) external onlyTreasury {
-		require(transmutableReserve == 0, "Alchemist::transmute: Reserve was already deposited");
+		require(transmutableReserve == 0, "Alchemist::transmute: reserve was already deposited");
 
 		reserveToken.safeTransferFrom(treasury, address(this), _transmutableReserve);
 		transmutableReserve = _transmutableReserve; // secure the transmutable reserve, offered once for sale
@@ -130,9 +132,9 @@ contract Alchemist is AlchemicalBondingCurve {
 	}
 
 	function transmute() external payable onlyLowGas {
-		require(block.timestamp <= end, "Alchemist::transmute: The offering has ended");
+		require(block.timestamp <= end, "Alchemist::transmute: the offering has ended");
 		require(msg.value >= minimumIngredient, "Alchemist::transmute: more ETH ingredient needed");
-		require(transmutableReserve > 0, "Alchemist::transmute: Not enough reserve was deposited");
+		require(transmutableReserve > 0, "Alchemist::transmute: not enough reserve was deposited");
 
 		uint256 etherProvided = msg.value;
 		uint256 totalReserveBefore = reserveToken.balanceOf(address(this));
@@ -153,8 +155,8 @@ contract Alchemist is AlchemicalBondingCurve {
 	}
 
 	function distillate() external onlyTreasury {
-		require(end < block.timestamp, "Alchemist::distillate: Distillation unavailable yet");
-		require(!distilled, "Alchemist::distillate: Can only distillate once!");
+		require(end < block.timestamp, "Alchemist::distillate: distillation unavailable yet");
+		require(!distilled, "Alchemist::distillate: can only distillate once!");
 
 		IWETH10 wETH10 = IWETH10(0xf4BB2e28688e89fCcE3c0580D37d36A7672E8A9F);
 		// convert all ether proceedings into WETH10
@@ -183,7 +185,7 @@ contract Alchemist is AlchemicalBondingCurve {
 	}
 
 	function withdrawReserve() external onlyTreasury {
-		require(end + 9 hours < block.timestamp, "Alchemist::withdrawReserve: Withdrawal unavailable yet");
+		require(end + 9 hours < block.timestamp, "Alchemist::withdrawReserve: withdrawal unavailable yet");
 		require(distilled, "Alchemist::withdrawReserve: distillation must be completed first");
 
 		uint256 reserve = reserveToken.balanceOf(address(this));
@@ -195,13 +197,22 @@ contract Alchemist is AlchemicalBondingCurve {
 	function changeTreasury(address _treasury) external onlyTreasury {
 		require(
 			_treasury != address(0) && _treasury != address(this) && treasury != _treasury,
-			"Alchemist::conversion: Treasury address is invalid"
+			"Alchemist::changeTreasury: Treasury address is invalid"
 		);
 
 		address oldTreasury = treasury;
-		treasury = _treasury;
+		pendingTreasury = _treasury;
 
-		emit ChangedTreasury(oldTreasury, treasury);
+		emit ChangedTreasury(oldTreasury, pendingTreasury);
+	}
+
+	function acceptTreasury() external {
+		require(msg.sender == pendingTreasury, "Alchemist::acceptTreasury: pending treasury address is invalid");
+
+		treasury = pendingTreasury;
+		pendingTreasury = address(0);
+
+		emit AcceptedTreasury(treasury);
 	}
 
 	function changeGasPrice(uint256 _maximumGasPrice) public onlyTreasury {

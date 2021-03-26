@@ -43,6 +43,7 @@ describe('Alchemist', () => {
 
 		// Transfer of ownership
 		await Alchemist.connect(deployer).changeTreasury(treasurer.address);
+		await Alchemist.connect(treasurer).acceptTreasury();
 
 		// Pre-authorize Alchemist contracts to transfer reserves on behalf of treasury
 		await KING.connect(treasurer).approve(Alchemist.address, ethers.constants.MaxUint256);
@@ -76,7 +77,7 @@ describe('Alchemist', () => {
 
 		it('does not allow to replenish token reserves', async () => {
 			await expect(Alchemist.connect(treasurer).depositReserve(INITIAL_KING_OFFERING, INITIAL_KING_LIQUIDITY)).to.be.revertedWith(
-				'Alchemist::transmute: Reserve was already deposited'
+				'Alchemist::transmute: reserve was already deposited'
 			);
 		});
 
@@ -101,7 +102,7 @@ describe('Alchemist', () => {
 			await ethers.provider.send('evm_mine', []);
 
 			await expect(Alchemist.connect(Peasant).transmute({ value: ethers.utils.parseEther('1.0') })).to.be.revertedWith(
-				'Alchemist::transmute: The offering has ended'
+				'Alchemist::transmute: the offering has ended'
 			);
 		});
 
@@ -142,7 +143,7 @@ describe('Alchemist', () => {
 	context('distillate', async () => {
 		it('Treasury cannot distillate before end of IBCO', async () => {
 			await expect(Alchemist.connect(treasurer).distillate()).to.be.revertedWith(
-				'Alchemist::distillate: Distillation unavailable yet'
+				'Alchemist::distillate: distillation unavailable yet'
 			);
 		});
 
@@ -174,7 +175,7 @@ describe('Alchemist', () => {
 	context('withdrawReserve', async () => {
 		it('Treasury cannot withdraw reserve before end of IBCO', async () => {
 			await expect(Alchemist.connect(treasurer).withdrawReserve()).to.be.revertedWith(
-				'Alchemist::withdrawReserve: Withdrawal unavailable yet'
+				'Alchemist::withdrawReserve: withdrawal unavailable yet'
 			);
 		});
 
