@@ -77,7 +77,7 @@ contract Alchemist is AlchemicalBondingCurve {
 	/// @notice Configuration vars for the IBCO
 	uint256 public end;
 	uint256 public immutable minimumIngredient; // should be 0.9 ether;
-	uint256 public maximumGasPrice = 150 * 10**18;
+	uint256 public maximumGasPrice = 369 gwei;  // 1 gwei == 1e9
 
 	/// @notice counters for keeping track of total contributions and transmutations, used in `distillate`
 	uint256 public transmutableReserve; // should be 4500_e18;
@@ -98,7 +98,7 @@ contract Alchemist is AlchemicalBondingCurve {
 
 	/// @notice only "low" gas tx are allowed
 	modifier onlyLowGas() {
-		require(tx.gasprice <= maximumGasPrice,	"Alchemist::onlyLowGas: gas price too high");
+		require(tx.gasprice <= maximumGasPrice, "Alchemist::onlyLowGas: gas price too high");
 		_;
 	}
 
@@ -161,7 +161,7 @@ contract Alchemist is AlchemicalBondingCurve {
 		IWETH10 wETH10 = IWETH10(0xf4BB2e28688e89fCcE3c0580D37d36A7672E8A9F);
 		// convert all ether proceedings into WETH10
 		wETH10.deposit{ value: totalEtherProvided - unit(18) }();
-		uint wETH = wETH10.balanceOf(address(this));
+		uint256 wETH = wETH10.balanceOf(address(this));
 
 		// TODO: Evaluate UNI_V3
 		// TODO: lock into the Mines right away instead?
@@ -171,12 +171,17 @@ contract Alchemist is AlchemicalBondingCurve {
 		reserveToken.approve(address(UNI_V2_Router), liquidityReserve);
 
 		// create UNI_V2 LP
-		(uint tokenA, uint tokenB, uint liq) = UNI_V2_Router.addLiquidity(
-			address(wETH10), address(reserveToken),
-			wETH, liquidityReserve,
-			wETH, liquidityReserve,
-			msg.sender,	block.timestamp + 1 days
-		);
+		(uint256 tokenA, uint256 tokenB, uint256 liq) =
+			UNI_V2_Router.addLiquidity(
+				address(wETH10),
+				address(reserveToken),
+				wETH,
+				liquidityReserve,
+				wETH,
+				liquidityReserve,
+				msg.sender,
+				block.timestamp + 1 days
+			);
 		assert(tokenA == wETH);
 		assert(tokenB == liquidityReserve);
 
@@ -197,7 +202,7 @@ contract Alchemist is AlchemicalBondingCurve {
 	function changeTreasury(address _treasury) external onlyTreasury {
 		require(
 			_treasury != address(0) && _treasury != address(this) && treasury != _treasury,
-			"Alchemist::changeTreasury: Treasury address is invalid"
+			"Alchemist::changeTreasury: treasury address is invalid"
 		);
 
 		address oldTreasury = treasury;

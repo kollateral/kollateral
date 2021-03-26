@@ -1,6 +1,6 @@
 import { Contract } from 'ethers';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
-import IUniswapV2ERC20 from '@uniswap/v2-core/build/IUniswapV2ERC20.json'
+import IUniswapV2ERC20 from '@uniswap/v2-core/build/IUniswapV2ERC20.json';
 
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
@@ -8,10 +8,10 @@ import { ethers } from 'hardhat';
 import { rewards } from '../fixtures';
 import { getEnv } from '../../libs/config';
 import { INITIAL_KING_LIQUIDITY, INITIAL_KING_OFFERING } from '../../libs/deploy';
-import {moveAtTimestamp, to10Pow18} from '../../libs/ethereum';
+import { moveAtTimestamp, to10Pow18 } from '../../libs/ethereum';
 import { day } from '../../libs/time';
-import {WETH10_ADDRESS} from "../../libs/liquidity/weth";
-import {UNI_V2_FACTORY_ABI, UNI_V2_FACTORY_ADDRESS, UNI_V2_PAIR_ABI} from "../../libs/liquidity/uniswap";
+import { WETH10_ADDRESS } from '../../libs/liquidity/weth';
+import { UNI_V2_FACTORY_ABI, UNI_V2_FACTORY_ADDRESS, UNI_V2_PAIR_ABI } from '../../libs/liquidity/uniswap';
 
 const KINGMAKER_DEPLOYER_PK = getEnv('KINGMAKER_DEPLOYER_PK') || '0x';
 
@@ -142,9 +142,7 @@ describe('Alchemist', () => {
 
 	context('distillate', async () => {
 		it('Treasury cannot distillate before end of IBCO', async () => {
-			await expect(Alchemist.connect(treasurer).distillate()).to.be.revertedWith(
-				'Alchemist::distillate: distillation unavailable yet'
-			);
+			await expect(Alchemist.connect(treasurer).distillate()).to.be.revertedWith('Alchemist::distillate: distillation unavailable yet');
 		});
 
 		it('Non-treasury cannot distillate', async () => {
@@ -186,6 +184,17 @@ describe('Alchemist', () => {
 			await expect(Alchemist.connect(treasurer).withdrawReserve()).to.be.revertedWith(
 				'Alchemist::withdrawReserve: distillation must be completed first'
 			);
+		});
+	});
+
+	context('onlyLowGas', async () => {
+		it('IBCO does not allow transmutations with gas price too high', async () => {
+			await expect(
+				Alchemist.connect(King).transmute({
+					value: ethers.utils.parseEther('1010'),
+					gasPrice: ethers.utils.parseUnits('1010', 'gwei')
+				})
+			).to.be.revertedWith('Alchemist::onlyLowGas: gas price too high');
 		});
 	});
 });
