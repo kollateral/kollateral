@@ -55,9 +55,9 @@
 pragma solidity ^0.8.2;
 
 /**
- * @title Mines
+ * @title RoyalMines
  * @dev Manages permanently-locked LPs throughout the Kingmaker ecosystem
  */
-contract Mines {
+contract RoyalMines {
 
 }

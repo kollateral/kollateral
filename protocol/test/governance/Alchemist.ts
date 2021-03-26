@@ -1,5 +1,6 @@
 import { Contract } from 'ethers';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
+import IUniswapV2ERC20 from '@uniswap/v2-core/build/IUniswapV2ERC20.json'
 
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
@@ -7,13 +8,15 @@ import { ethers } from 'hardhat';
 import { rewards } from '../fixtures';
 import { getEnv } from '../../libs/config';
 import { INITIAL_KING_LIQUIDITY, INITIAL_KING_OFFERING } from '../../libs/deploy';
-import { moveAtTimestamp } from '../../libs/ethereum';
+import {moveAtTimestamp, to10Pow18} from '../../libs/ethereum';
 import { day } from '../../libs/time';
+import {WETH10_ADDRESS} from "../../libs/liquidity/weth";
+import {UNI_V2_FACTORY_ABI, UNI_V2_FACTORY_ADDRESS, UNI_V2_PAIR_ABI} from "../../libs/liquidity/uniswap";
 
 const KINGMAKER_DEPLOYER_PK = getEnv('KINGMAKER_DEPLOYER_PK') || '0x';
 
 describe('Alchemist', () => {
-	let govToken: Contract;
+	let KING: Contract;
 	let Alchemist: Contract;
 
 	let deployer: SignerWithAddress;
@@ -26,7 +29,7 @@ describe('Alchemist', () => {
 
 	beforeEach(async function () {
 		const f = await rewards();
-		govToken = f.govToken;
+		KING = f.govToken;
 		deployer = f.deployer;
 		treasurer = f.treasurer;
 		lepidotteri = f.lepidotteri;
@@ -36,13 +39,13 @@ describe('Alchemist', () => {
 		Jester = f.Jester;
 
 		const alchemistFactory = await ethers.getContractFactory('Alchemist');
-		Alchemist = await alchemistFactory.deploy(govToken.address, ethers.utils.parseEther('0.9'));
+		Alchemist = await alchemistFactory.deploy(KING.address, ethers.utils.parseEther('0.9'));
 
 		// Transfer of ownership
-		await Alchemist.connect(deployer).conversion(treasurer.address);
+		await Alchemist.connect(deployer).changeTreasury(treasurer.address);
 
 		// Pre-authorize Alchemist contracts to transfer reserves on behalf of treasury
-		await govToken.connect(treasurer).approve(Alchemist.address, ethers.constants.MaxUint256);
+		await KING.connect(treasurer).approve(Alchemist.address, ethers.constants.MaxUint256);
 
 		// Provide initial KING liquidity
 		await Alchemist.connect(treasurer).depositReserve(INITIAL_KING_OFFERING, INITIAL_KING_LIQUIDITY);
@@ -79,7 +82,7 @@ describe('Alchemist', () => {
 
 		it('does not allow non-owner to deposit token reserves', async () => {
 			await expect(Alchemist.connect(SHA_2048).depositReserve(INITIAL_KING_OFFERING, INITIAL_KING_LIQUIDITY)).to.be.revertedWith(
-				'Alchemist::onlyChurch: not clergy'
+				'Alchemist::onlyTreasury: not treasury'
 			);
 		});
 	});
@@ -110,20 +113,20 @@ describe('Alchemist', () => {
 
 		it('IBCO returns a correct distribution for a successful transmutation', async () => {
 			await Alchemist.connect(Peasant).transmute({ value: ethers.utils.parseEther('0.9') });
-			const transmutedReserve = await govToken.balanceOf(Peasant.address);
+			const transmutedReserve = await KING.balanceOf(Peasant.address);
 
 			expect(transmutedReserve).to.exist;
 		});
 
 		it('IBCO returns a correct distribution for each successful transmutation', async () => {
 			await Alchemist.connect(Peasant).transmute({ value: ethers.utils.parseEther('1') });
-			const transmutedReserve1 = await govToken.balanceOf(Peasant.address);
+			const transmutedReserve1 = await KING.balanceOf(Peasant.address);
 			await Alchemist.connect(SHA_2048).transmute({ value: ethers.utils.parseEther('10.1') });
-			const transmutedReserve2 = await govToken.balanceOf(SHA_2048.address);
+			const transmutedReserve2 = await KING.balanceOf(SHA_2048.address);
 			await Alchemist.connect(lepidotteri).transmute({ value: ethers.utils.parseEther('100.01') });
-			const transmutedReserve3 = await govToken.balanceOf(lepidotteri.address);
+			const transmutedReserve3 = await KING.balanceOf(lepidotteri.address);
 			await Alchemist.connect(King).transmute({ value: ethers.utils.parseEther('1000.01') });
-			const transmutedReserve4 = await govToken.balanceOf(King.address);
+			const transmutedReserve4 = await KING.balanceOf(King.address);
 
 			expect(transmutedReserve1).to.exist;
 			expect(transmutedReserve2).to.exist;
@@ -136,14 +139,46 @@ describe('Alchemist', () => {
 		});
 	});
 
+	context('distillate', async () => {
+		it('Treasury cannot distillate before end of IBCO', async () => {
+			await expect(Alchemist.connect(treasurer).distillate()).to.be.revertedWith(
+				'Alchemist::distillate: Distillation unavailable yet'
+			);
+		});
+
+		it('Non-treasury cannot distillate', async () => {
+			const now = parseInt(String(Date.now() / 1000));
+			await moveAtTimestamp(now + 10 * day);
+
+			await expect(Alchemist.connect(Peasant).distillate()).to.be.reverted;
+		});
+
+		it('Treasury should hold UNI_V2_LP tokens after successful distillation', async () => {
+			// emulate IBCO proceedings
+			await Alchemist.connect(lepidotteri).transmute({ value: ethers.utils.parseEther('101') });
+
+			const now = parseInt(String(Date.now() / 1000));
+			await moveAtTimestamp(now + 10 * day);
+
+			await Alchemist.connect(treasurer).distillate();
+
+			const UNI_V2_Factory = new ethers.Contract(UNI_V2_FACTORY_ADDRESS, UNI_V2_FACTORY_ABI, treasurer);
+			const UNI_V2_PAIR_ADDRESS = await UNI_V2_Factory.getPair(WETH10_ADDRESS, KING.address);
+			const UNI_V2_PAIR = new ethers.Contract(UNI_V2_PAIR_ADDRESS, UNI_V2_PAIR_ABI, treasurer);
+
+			const treasuryLPBalance = await UNI_V2_PAIR.balanceOf(treasurer.address);
+			expect(treasuryLPBalance).to.exist;
+		});
+	});
+
 	context('withdrawReserve', async () => {
-		it('Clergy cannot withdraw reserve before end of IBCO', async () => {
+		it('Treasury cannot withdraw reserve before end of IBCO', async () => {
 			await expect(Alchemist.connect(treasurer).withdrawReserve()).to.be.revertedWith(
 				'Alchemist::withdrawReserve: Withdrawal unavailable yet'
 			);
 		});
 
-		it('Clergy cannot withdraw reserve before distillation', async () => {
+		it('Treasury cannot withdraw reserve before distillation', async () => {
 			const now = parseInt(String(Date.now() / 1000));
 			await moveAtTimestamp(now + 10 * day);
 

@@ -14,16 +14,32 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-               *    .
-        '  +   ___    @    .
-            .-" __"-.   +
-    *      /:.'`__`'.\       '
-        . |:: .'_ `. :|   *
-   @      |:: '._' : :| .
-      +    \:'.__.' :/       '
-            /`-...-'\  '   +
-   '       /         \   .    @
-     *     `-.,___,.-'
+
+                ██████████
+            ████▓▓▓▓▓▓▓▓▓▓████
+        ████▓▓▓▓▒▒▓▓  ▒▒▓▓▓▓▓▓████
+      ██▓▓▓▓▒▒  ▒▒▒▒▒▒  ▒▒  ▓▓▓▓▓▓██
+      ██▓▓▓▓  ▒▒░░░░░░  ░░▒▒▒▒  ▓▓██
+    ██▓▓  ▒▒░░    ░░░░░░  ░░  ▒▒▒▒▓▓██
+    ██▓▓▓▓  ░░  ░░▓▓▓▓▒▒░░  ░░    ▓▓██
+  ██▓▓▒▒▒▒░░  ░░▓▓▒▒▒▒▒▒▓▓░░  ░░▒▒▓▓▓▓██
+  ██▓▓▒▒    ░░▓▓▒▒░░░░░░▒▒▓▓░░░░    ▓▓██
+  ██▓▓  ▒▒░░░░▓▓▒▒░░  ░░▒▒▓▓░░  ▒▒▓▓▓▓██
+  ██▓▓▓▓▒▒░░░░▓▓▒▒░░░░░░▒▒▓▓░░░░▒▒  ▓▓██
+  ██▒▒▒▒▒▒░░  ░░▓▓▒▒▒▒▒▒▓▓░░      ▒▒▓▓██
+    ▓▓▓▓▒▒  ░░  ░░▓▓▓▓▓▓░░  ░░▒▒▒▒▓▓▓▓
+    ██▓▓  ▒▒░░░░  ░░░░░░    ░░▒▒  ▓▓██
+      ██▓▓▒▒▒▒  ░░░░░░  ░░▒▒    ▓▓██
+      ██▓▓▓▓▓▓  ▒▒▒▒▒▒  ▒▒▓▓▓▓▓▓▓▓██
+        ████▓▓▓▓  ▒▒  ▒▒▒▒▓▓▓▓████
+          ░░████▓▓▓▓▓▓▓▓▓▓████░░
+          ░░░░░░▓▓▓▓▓▓▓▓▓▓░░░░░░
+            ░░░░▒▒▒▒░░░░▒▒░░░░
+            ░░░░  ░░      ░░░░
+          ░░░░▒▒░░░░░░░░░░░░░░░░
+        ▒▒░░░░  ░░    ░░░░  ░░░░░░
+            ░░░░░░░░░░░░░░░░░░
+
 */
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.2;
@@ -31,14 +47,17 @@ pragma solidity ^0.8.2;
 import "hardhat/console.sol";
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 
 import "../libraries/governance/AlchemicalBondingCurve.sol";
 import "../libraries/math/RoyalMath.sol";
 
+import "../interfaces/governance/IWETH10.sol";
+
 /**
  * @title Alchemist
  * @notice Distributes the reserve token in exchange for bootstrapping liquidity in the PLLPs.
- * @dev Users cannot send ether directly to the contract to participate. Also see Mines.sol
+ * @dev Users cannot send ether directly to the contract to participate. Also see RoyalMines.sol
  */
 contract Alchemist is AlchemicalBondingCurve {
 	using SafeERC20 for IERC20;
@@ -49,7 +68,7 @@ contract Alchemist is AlchemicalBondingCurve {
 	event ReserveWithdrawn(uint256 indexed amount);
 
 	/// @notice Event emitted when the owner of the contract is updated
-	event ApostolicSuccession(address indexed oldClergy, address indexed newClergy);
+	event ChangedTreasury(address indexed oldTreasury, address indexed newTreasury);
 
 	/// @notice The reserve token for the IBCO
 	IERC20 public immutable reserveToken;
@@ -57,32 +76,39 @@ contract Alchemist is AlchemicalBondingCurve {
 	/// @notice Configuration vars for the IBCO
 	uint256 public end;
 	uint256 public immutable minimumIngredient; // should be 0.9 ether;
+	uint256 public maximumGasPrice = 150 * 10**18;
 
-	/// @notice counters for keeping track of total offerings and transmutations, used in distillation
+	/// @notice counters for keeping track of total contributions and transmutations, used in `distillate`
 	uint256 public transmutableReserve; // should be 4500_e18;
 	uint256 public liquidityReserve; // should be 2700_e18;
 	uint256 public totalEtherProvided = 0;
 	uint256 public totalReserveTransmuted = 0;
 	bool public distilled;
 
-	/// @notice Current clergy of this contract
-	address public clergy;
+	/// @notice Current treasury of this contract
+	address public treasury;
 
-	/// @notice only clergy can call function
-	modifier onlyChurch {
-		require(msg.sender == clergy, "Alchemist::onlyChurch: not clergy");
+	/// @notice only treasury can call function
+	modifier onlyTreasury {
+		require(msg.sender == treasury, "Alchemist::onlyTreasury: not treasury");
+		_;
+	}
+
+	/// @notice only "low" gas tx are allowed
+	modifier onlyLowGas() {
+		require(tx.gasprice <= maximumGasPrice,	"Alchemist::onlyLowGas: gas price too high");
 		_;
 	}
 
 	/**
 	 * @notice Construct a new IBCO
 	 * @param _reserveToken The reserve token to be transmuted
-	 * @param _minimumIngredient The minimum offering allowed for transmutation to succeed
+	 * @param _minimumIngredient The minimum contribution required per transmutation
 	 */
 	constructor(IERC20 _reserveToken, uint256 _minimumIngredient) public {
 		reserveToken = _reserveToken;
 		minimumIngredient = _minimumIngredient;
-		clergy = msg.sender;
+		treasury = msg.sender;
 	}
 
 	/**
@@ -91,19 +117,19 @@ contract Alchemist is AlchemicalBondingCurve {
 	 * @param _transmutableReserve The amount of reserve token to be transmuted
 	 * @param _liquidityReserve The amount of reserve token to be locked into the Mines (along with Ether proceedings)
 	 */
-	function depositReserve(uint256 _transmutableReserve, uint256 _liquidityReserve) external onlyChurch {
+	function depositReserve(uint256 _transmutableReserve, uint256 _liquidityReserve) external onlyTreasury {
 		require(transmutableReserve == 0, "Alchemist::transmute: Reserve was already deposited");
 
-		reserveToken.safeTransferFrom(clergy, address(this), _transmutableReserve);
+		reserveToken.safeTransferFrom(treasury, address(this), _transmutableReserve);
 		transmutableReserve = _transmutableReserve; // secure the transmutable reserve, offered once for sale
-		reserveToken.safeTransferFrom(clergy, address(this), _liquidityReserve);
+		reserveToken.safeTransferFrom(treasury, address(this), _liquidityReserve);
 		liquidityReserve = _liquidityReserve; // secure the liquidity reserve, sent to the Mines (PLLP) for distillation
 		end = block.timestamp + 9 days;
 
 		emit ReservesDeposited(transmutableReserve, liquidityReserve);
 	}
 
-	function transmute() external payable {
+	function transmute() external payable onlyLowGas {
 		require(block.timestamp <= end, "Alchemist::transmute: The offering has ended");
 		require(msg.value >= minimumIngredient, "Alchemist::transmute: more ETH ingredient needed");
 		require(transmutableReserve > 0, "Alchemist::transmute: Not enough reserve was deposited");
@@ -126,37 +152,59 @@ contract Alchemist is AlchemicalBondingCurve {
 		emit Transmuted(msg.sender, etherProvided, payableReserveAmount);
 	}
 
-	function distillate() external onlyChurch {
-		require(end < block.timestamp, "Alchemist::distillate:The offering must be completed");
+	function distillate() external onlyTreasury {
+		require(end < block.timestamp, "Alchemist::distillate: Distillation unavailable yet");
+		require(!distilled, "Alchemist::distillate: Can only distillate once!");
 
-		// TODO: lock into the Mines (PLLP)
+		IWETH10 wETH10 = IWETH10(0xf4BB2e28688e89fCcE3c0580D37d36A7672E8A9F);
+		// convert all ether proceedings into WETH10
+		wETH10.deposit{ value: totalEtherProvided - unit(18) }();
+		uint wETH = wETH10.balanceOf(address(this));
 
+		// TODO: Evaluate UNI_V3
+		// TODO: lock into the Mines right away instead?
+		IUniswapV2Router02 UNI_V2_Router = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
+		// approve
+		wETH10.approve(address(UNI_V2_Router), wETH);
+		reserveToken.approve(address(UNI_V2_Router), liquidityReserve);
+
+		// create UNI_V2 LP
+		(uint tokenA, uint tokenB, uint liq) = UNI_V2_Router.addLiquidity(
+			address(wETH10), address(reserveToken),
+			wETH, liquidityReserve,
+			wETH, liquidityReserve,
+			msg.sender,	block.timestamp + 1 days
+		);
+		assert(tokenA == wETH);
+		assert(tokenB == liquidityReserve);
+
+		// Unclaimed IBCO KING reserve should now be claimed by Treasury, with `withdrawReserve`
 		distilled = true;
 	}
 
-	function withdrawReserve() external onlyChurch {
+	function withdrawReserve() external onlyTreasury {
 		require(end + 9 hours < block.timestamp, "Alchemist::withdrawReserve: Withdrawal unavailable yet");
 		require(distilled, "Alchemist::withdrawReserve: distillation must be completed first");
 
 		uint256 reserve = reserveToken.balanceOf(address(this));
-		reserveToken.safeTransfer(clergy, reserve);
+		reserveToken.safeTransfer(treasury, reserve);
 
 		emit ReserveWithdrawn(reserve);
 	}
 
-	/**
-	 * @notice Change alchemist clergy
-	 * @param newClergy New clergy address
-	 */
-	function conversion(address newClergy) external onlyChurch {
+	function changeTreasury(address _treasury) external onlyTreasury {
 		require(
-			newClergy != address(0) && newClergy != address(this) && newClergy != clergy,
-			"Alchemist::conversion: not a valid clergy address"
+			_treasury != address(0) && _treasury != address(this) && treasury != _treasury,
+			"Alchemist::conversion: Treasury address is invalid"
 		);
 
-		address oldClergy = clergy;
-		clergy = newClergy;
+		address oldTreasury = treasury;
+		treasury = _treasury;
 
-		emit ApostolicSuccession(oldClergy, newClergy);
+		emit ChangedTreasury(oldTreasury, treasury);
+	}
+
+	function changeGasPrice(uint256 _maximumGasPrice) public onlyTreasury {
+		maximumGasPrice = _maximumGasPrice;
 	}
 }
