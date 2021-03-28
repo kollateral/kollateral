@@ -120,7 +120,7 @@ contract FlashLoanAggregator is IFlashLoanAggregator, PlatformFeesManager, IERC3
 		bytes calldata _data
 	) external override returns (bytes32) {
 
-		require(_initiator == address(this), "Initiator must be LendingPoolAggregator");
+		require(_initiator == address(this), "Initiator must be FlashLoanAggregator");
 
 		FlashStepLoadData memory stepData = abi.decode(_data, (FlashStepLoadData));
 		require(stepData.step < stepData.borrower.lenders.length, "Incorrect flash loan step id");

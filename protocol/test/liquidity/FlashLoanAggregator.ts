@@ -136,7 +136,7 @@ describe('FlashLoanAggregator', () => {
 				await TestToken.transfer(Borrower.address, 1000);
 			});
 
-			it('onFlashLoan should reject if initiator is not LendingPoolAggregator contract', async () => {
+			it('onFlashLoan should reject if initiator is not FlashLoanAggregator contract', async () => {
 				const dummyCallData = ethers.utils.defaultAbiCoder.encode(['uint256'], [42]);
 				expect(FlashLoanAggregator.onFlashLoan(
 					user.address,
@@ -144,7 +144,7 @@ describe('FlashLoanAggregator', () => {
 					1000,
 					10,
 					dummyCallData
-				)).to.be.revertedWith("Initiator must be LendingPoolAggregator");
+				)).to.be.revertedWith("Initiator must be FlashLoanAggregator");
 			});
 
 			it('onFlashLoan should reject if lender pool calls with unsupported step id', async () => {
