@@ -16,16 +16,17 @@ contract FlashLoanAggregatorProxy is IERC3156FlashLender, IERC3156FlashBorrower,
 
 	bytes32 public immutable CALLBACK_SUCCESS = keccak256("ERC3156FlashBorrower.onFlashLoan");
 
+	bool internal callSortOnFlashLoan;
 	IFlashLoanAggregator internal aggregator;
-	IERC3156FlashLender[] internal lenders;
+	mapping(address => IERC3156FlashLender[]) internal lenders;
 
-	constructor(IFlashLoanAggregator _aggregator, IERC3156FlashLender[] memory _lenders) {
+	constructor(IFlashLoanAggregator _aggregator, bool _callSortOnFlashLoan) {
+		callSortOnFlashLoan = _callSortOnFlashLoan;
 		aggregator = _aggregator;
-		lenders = _lenders;
 	}
 
-	function setLenders(IERC3156FlashLender[] memory _lenders) external onlyOwner {
-		lenders = _lenders;
+	function setLenders(IERC3156FlashLender[] memory _lenders, address _token) external virtual onlyOwner {
+		sortLenders(_lenders, _token);
 	}
 
 	function setAggregator(IFlashLoanAggregator _aggregator) external onlyOwner {
@@ -33,11 +34,11 @@ contract FlashLoanAggregatorProxy is IERC3156FlashLender, IERC3156FlashBorrower,
 	}
 
 	function maxFlashLoan(address _token) external view override returns (uint256) {
-		return aggregator.maxFlashLoan(_token, lenders);
+		return aggregator.maxFlashLoan(_token, lenders[_token]);
 	}
 
 	function flashFee(address _token, uint256 _amount) external view override returns (uint256) {
-		return aggregator.flashFee(_token, _amount, lenders);
+		return aggregator.flashFee(_token, _amount, lenders[_token]);
 	}
 
 	function flashLoan(
@@ -46,8 +47,13 @@ contract FlashLoanAggregatorProxy is IERC3156FlashLender, IERC3156FlashBorrower,
 		uint256 _amount,
 		bytes calldata _data
 	) external override returns (bool) {
+
+		if (callSortOnFlashLoan) {
+			sortLenders(lenders[_token], _token);
+		}
+
 		bytes memory data = abi.encode(Receiver(_data, _receiver));
-		return aggregator.flashLoan(IERC3156FlashBorrower(this), _token, _amount, lenders, data);
+		return aggregator.flashLoan(IERC3156FlashBorrower(this), _token, _amount, lenders[_token], data);
 	}
 
 	function onFlashLoan(
@@ -78,6 +84,10 @@ contract FlashLoanAggregatorProxy is IERC3156FlashLender, IERC3156FlashBorrower,
 		);
 
 		return CALLBACK_SUCCESS;
+	}
+
+	function sortLenders(IERC3156FlashLender[] memory _lenders, address _token) internal virtual {
+		lenders[_token] = _lenders;
 	}
 
 }
