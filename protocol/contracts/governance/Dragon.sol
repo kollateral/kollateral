@@ -61,13 +61,13 @@ import "../interfaces/governance/IMasterChef.sol";
 import "../interfaces/governance/IVault.sol";
 
 import "../libraries/governance/LibCrownStorage.sol";
-import "../libraries/governance/Treasurer.sol";
+import "../libraries/governance/CrownTreasurer.sol";
 
 /**
  * @title Dragon (prev. RewardsManager)
  * @dev Oversees rewards distribution withing the Kingmaker ecosystem
  */
-contract Dragon is Treasurer {
+contract Dragon is CrownTreasurer {
 	using SafeERC20 for IERC20;
 
 	/**

@@ -55,7 +55,8 @@ contract LenderPropagatingWrongStepParam is IERC3156FlashLender {
 		bytes memory stepEncodedData = abi.encode(stepData);
 
 		require(
-			receiver.onFlashLoan(msg.sender, token, amount, fee, stepEncodedData) == keccak256("ERC3156FlashBorrower.onFlashLoan"),
+			receiver.onFlashLoan(msg.sender, token, amount, fee, stepEncodedData) ==
+				keccak256("ERC3156FlashBorrower.onFlashLoan"),
 			"IERC3156: Callback failed"
 		);
 

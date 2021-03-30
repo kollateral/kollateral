@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
-// @ts-ignore
 import { ecsign } from 'ethereumjs-util';
 
 import { governance } from '../fixtures';

@@ -405,8 +405,8 @@ contract Crown is PrismProxyImplementation, ReentrancyGuardUpgradeSafe {
 	 * @param blockNumber The block number to get the vote balance at
 	 * @return The number of votes the account had as of the given block
 	 */
-	function votingPowerOfAt(address account, uint256 blockNumber) public view returns (uint256) {
-		require(blockNumber < block.number, "Crown::votingPowerOfAt: not yet determined");
+	function votingPowerOfAtBlock(address account, uint256 blockNumber) public view returns (uint256) {
+		require(blockNumber < block.number, "Crown::votingPowerOfAtBlock: not yet determined");
 
 		CrownCheckpointStorage storage cs = LibCrownStorage.checkpointStorage();
 		uint32 nCheckpoints = cs.numCheckpoints[account];

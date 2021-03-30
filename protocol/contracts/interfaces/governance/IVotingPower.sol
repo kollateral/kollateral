@@ -105,5 +105,5 @@ interface IVotingPower {
 
 	function balanceOf(address account) external view returns (uint256);
 
-	function balanceOfAt(address account, uint256 blockNumber) external view returns (uint256);
+	function balanceOfAtBlock(address account, uint256 blockNumber) external view returns (uint256);
 }

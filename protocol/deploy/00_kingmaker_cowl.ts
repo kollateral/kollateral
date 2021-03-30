@@ -38,7 +38,7 @@ func.skip = async (hre: HardhatRuntimeEnvironment): Promise<boolean> => {
 	const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 	if (ZERO_ADDRESS == O_Address) {
 		// @ts-ignore
-		log(`   - Skipping deployment for ${magenta(cowl.contractName)}.sol`);
+		log(`   - Skipping deployment for ${magenta(cowl.contractName + '.sol')}`);
 		return true;
 	} else {
 		return false;

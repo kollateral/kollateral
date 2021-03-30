@@ -1,18 +1,7 @@
-import { ethers, deployments, getNamedAccounts, getUnnamedAccounts } from 'hardhat';
-import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import {
-	FIRST_KING_SUPPLY_CHANGE,
-	INITIAL_KING_REWARDS_BALANCE,
-	INITIAL_KING_LIQUIDITY,
-	SUSHI_ADDRESS,
-	MASTERCHEF_ADDRESS,
-	KING_REWARDS_PER_BLOCK,
-	KING_REWARDS_START_BLOCK,
-	SUSHI_LP_VP_CVR,
-	SUSHI_POOL_ADDRESS,
-} from '../libs/deploy';
+import { ethers, deployments } from 'hardhat';
+import { FIRST_KING_SUPPLY_CHANGE, INITIAL_KING_REWARDS_BALANCE, INITIAL_KING_LIQUIDITY } from '../libs/deploy';
 
-export const token = deployments.createFixture(async (hre: HardhatRuntimeEnvironment) => {
+export const token = deployments.createFixture(async () => {
 	const [deployer, lepidotteri, SHA_2048, Jester] = await ethers.getSigners();
 	const admin = lepidotteri;
 
@@ -33,7 +22,7 @@ export const token = deployments.createFixture(async (hre: HardhatRuntimeEnviron
 	};
 });
 
-export const governance = deployments.createFixture(async (hre: HardhatRuntimeEnvironment) => {
+export const governance = deployments.createFixture(async () => {
 	const [deployer, lepidotteri, SHA_2048, King, Bishop, Jester] = await ethers.getSigners();
 	const admin = lepidotteri;
 
@@ -73,8 +62,8 @@ export const governance = deployments.createFixture(async (hre: HardhatRuntimeEn
 	};
 });
 
-export const rewards = deployments.createFixture(async (hre: HardhatRuntimeEnvironment) => {
-	const [deployer, lepidotteri, SHA_2048, feeCollector, King, dragon] = await ethers.getSigners();
+export const rewards = deployments.createFixture(async () => {
+	const [deployer, lepidotteri, SHA_2048, feeCollector, King, dragon, Peasant, Jester] = await ethers.getSigners();
 	const admin = lepidotteri;
 	const liquidityProvider = King;
 	const treasurer = dragon;
@@ -83,15 +72,15 @@ export const rewards = deployments.createFixture(async (hre: HardhatRuntimeEnvir
 	// e.g. allocate token to "DAO" (Treasurer/Treasury)
 	const govTokenFactory = await ethers.getContractFactory('KING');
 	const KING = await govTokenFactory.deploy(admin.address, deployer.address, FIRST_KING_SUPPLY_CHANGE);
-	await deployer.sendTransaction({ to: treasurer.address, value: ethers.utils.parseEther('1.0') });
 	const balanceOfDeployer = await KING.balanceOf(deployer.address);
 
 	// so, for the sake of Treasury.sol test suites, we manually xfer entire deployer KING balance to the treasurer
-	await KING.connect(deployer).transfer(treasurer.address, ethers.BigNumber.from(balanceOfDeployer));
-	await KING.connect(treasurer).transfer(admin.address, ethers.BigNumber.from(INITIAL_KING_REWARDS_BALANCE));
-	await KING.connect(treasurer).transfer(deployer.address, ethers.BigNumber.from(INITIAL_KING_REWARDS_BALANCE));
-	await KING.connect(treasurer).transfer(lepidotteri.address, ethers.BigNumber.from(INITIAL_KING_LIQUIDITY));
-	await KING.connect(treasurer).transfer(SHA_2048.address, ethers.BigNumber.from(INITIAL_KING_LIQUIDITY));
+	await KING.connect(deployer).transfer(treasurer.address, balanceOfDeployer);
+	await deployer.sendTransaction({ to: treasurer.address, value: ethers.utils.parseEther('1.0') });
+	// await KING.connect(treasurer).transfer(admin.address, ethers.BigNumber.from(INITIAL_KING_REWARDS_BALANCE));
+	// await KING.connect(treasurer).transfer(deployer.address, ethers.BigNumber.from(INITIAL_KING_REWARDS_BALANCE));
+	// await KING.connect(treasurer).transfer(lepidotteri.address, ethers.BigNumber.from(INITIAL_KING_LIQUIDITY));
+	// await KING.connect(treasurer).transfer(SHA_2048.address, ethers.BigNumber.from(INITIAL_KING_LIQUIDITY));
 	await deployer.sendTransaction({ to: lepidotteri.address, value: ethers.utils.parseEther('1.0') });
 	await deployer.sendTransaction({ to: SHA_2048.address, value: ethers.utils.parseEther('1.0') });
 	// end of manual reconciliation
@@ -120,6 +109,10 @@ export const rewards = deployments.createFixture(async (hre: HardhatRuntimeEnvir
 
 	const treasuryFactory = await ethers.getContractFactory('Treasury');
 	const Treasury = await treasuryFactory.deploy(Lord.address);
+
+	// const alchemistFactory = await ethers.getContractFactory('Alchemist');
+	// const Alchemist = await alchemistFactory.deploy(KING.address, INITIAL_KING_LIQUIDITY, ethers.utils.parseEther('0.9'), true);
+
 	/*
 	// TODO: contract size too big! (Dragon + Treasurer)
 	const dragonFactory = await ethers.getContractFactory('Dragon');
@@ -148,5 +141,7 @@ export const rewards = deployments.createFixture(async (hre: HardhatRuntimeEnvir
 		lepidotteri: lepidotteri,
 		SHA_2048: SHA_2048,
 		King: King,
+		Peasant: Peasant,
+		Jester: Jester,
 	};
 });

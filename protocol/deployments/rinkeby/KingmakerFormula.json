@@ -1,0 +1,75 @@
+{
+  "address": "0x82e93ba8449F809FB20f9035fd3b1Cf3051a6c9B",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "toVotingPower",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x813397c6ae2845550222d58205f0be576acb06449393a37505c630ce997e5910",
+  "receipt": {
+    "to": null,
+    "from": "0xfEeDc0DE1EBE0A72f52590Df786101e1c3944545",
+    "contractAddress": "0x82e93ba8449F809FB20f9035fd3b1Cf3051a6c9B",
+    "transactionIndex": 2,
+    "gasUsed": "113005",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x74e0b9ccfff8a1664dd36c5cb57de7305aa9fef95dc38d392d844b95b2eeb9be",
+    "transactionHash": "0x813397c6ae2845550222d58205f0be576acb06449393a37505c630ce997e5910",
+    "logs": [],
+    "blockNumber": 8229076,
+    "cumulativeGasUsed": "515451",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "solcInputHash": "e885469200b403bc2af39246669116fe",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.2+commit.92b52cbf\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"toVotingPower\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"Convert Kingmaker Crown governance token to its voting power equivalent to aid in gov calculations\",\"kind\":\"dev\",\"methods\":{\"toVotingPower(uint256)\":{\"details\":\"Always converts 1-1\",\"params\":{\"amount\":\"token amount\"},\"returns\":{\"_0\":\"voting power amount\"}}},\"title\":\"KingmakerFormula\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"toVotingPower(uint256)\":{\"notice\":\"Convert KING amount to voting power\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/governance/formulae/KingmakerFormula.sol\":\"KingmakerFormula\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":false,\"runs\":1000},\"remappings\":[]},\"sources\":{\"contracts/governance/formulae/KingmakerFormula.sol\":{\"content\":\"/*\\n\\n\\tCopyright (c) [2020] [Archer DAO]\\n    Copyright 2020-2021 ARM Finance LLC\\n\\n    Licensed under the Apache License, Version 2.0 (the \\\"License\\\");\\n    you may not use this file except in compliance with the License.\\n    You may obtain a copy of the License at\\n\\n    http://www.apache.org/licenses/LICENSE-2.0\\n\\n    Unless required by applicable law or agreed to in writing, software\\n    distributed under the License is distributed on an \\\"AS IS\\\" BASIS,\\n    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\\n    See the License for the specific language governing permissions and\\n    limitations under the License.\\n\\n*/\\n// SPDX-License-Identifier: Apache-2.0\\npragma solidity ^0.8.2;\\n\\nimport \\\"../../interfaces/governance/IVotingPowerFormula.sol\\\";\\n\\n/**\\n * @title KingmakerFormula\\n * @dev Convert Kingmaker Crown governance token to its voting power equivalent to aid in gov calculations\\n */\\ncontract KingmakerFormula is IVotingPowerFormula {\\n\\t/**\\n\\t * @notice Convert KING amount to voting power\\n\\t * @dev Always converts 1-1\\n\\t * @param amount token amount\\n\\t * @return voting power amount\\n\\t */\\n\\tfunction toVotingPower(uint256 amount) external pure override returns (uint256) {\\n\\t\\treturn amount;\\n\\t}\\n}\\n\",\"keccak256\":\"0xb4ef724a6aa036a24a5a056584e1345ffcaaa2a3c2224891ac11ef38020b5897\",\"license\":\"Apache-2.0\"},\"contracts/interfaces/governance/IVotingPowerFormula.sol\":{\"content\":\"/*\\n\\n\\tCopyright (c) [2020] [Archer DAO]\\n    Copyright 2020-2021 ARM Finance LLC\\n\\n    Licensed under the Apache License, Version 2.0 (the \\\"License\\\");\\n    you may not use this file except in compliance with the License.\\n    You may obtain a copy of the License at\\n\\n    http://www.apache.org/licenses/LICENSE-2.0\\n\\n    Unless required by applicable law or agreed to in writing, software\\n    distributed under the License is distributed on an \\\"AS IS\\\" BASIS,\\n    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\\n    See the License for the specific language governing permissions and\\n    limitations under the License.\\n\\n*/\\n// SPDX-License-Identifier: Apache-2.0\\npragma solidity ^0.8.2;\\n\\ninterface IVotingPowerFormula {\\n\\tfunction toVotingPower(uint256 amount) external view returns (uint256);\\n}\\n\",\"keccak256\":\"0x8ebd8b6755ce1c297d00c0b8d2c0f23b690d820dc3498de10f9b2864472db823\",\"license\":\"Apache-2.0\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b50610114806100206000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80635a16f50214602d575b600080fd5b60436004803603810190603f91906074565b6057565b604051604e919060a7565b60405180910390f35b6000819050919050565b600081359050606e8160ca565b92915050565b600060208284031215608557600080fd5b60006091848285016061565b91505092915050565b60a18160c0565b82525050565b600060208201905060ba6000830184609a565b92915050565b6000819050919050565b60d18160c0565b811460db57600080fd5b5056fea2646970667358221220a470a1b7ec6e850a357b585a103f7f4abb7528d79033c1e9763e6167ca3b6c0d64736f6c63430008020033",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060285760003560e01c80635a16f50214602d575b600080fd5b60436004803603810190603f91906074565b6057565b604051604e919060a7565b60405180910390f35b6000819050919050565b600081359050606e8160ca565b92915050565b600060208284031215608557600080fd5b60006091848285016061565b91505092915050565b60a18160c0565b82525050565b600060208201905060ba6000830184609a565b92915050565b6000819050919050565b60d18160c0565b811460db57600080fd5b5056fea2646970667358221220a470a1b7ec6e850a357b585a103f7f4abb7528d79033c1e9763e6167ca3b6c0d64736f6c63430008020033",
+  "devdoc": {
+    "details": "Convert Kingmaker Crown governance token to its voting power equivalent to aid in gov calculations",
+    "kind": "dev",
+    "methods": {
+      "toVotingPower(uint256)": {
+        "details": "Always converts 1-1",
+        "params": {
+          "amount": "token amount"
+        },
+        "returns": {
+          "_0": "voting power amount"
+        }
+      }
+    },
+    "title": "KingmakerFormula",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "toVotingPower(uint256)": {
+        "notice": "Convert KING amount to voting power"
+      }
+    },
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}

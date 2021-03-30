@@ -86,6 +86,8 @@ import "hardhat/console.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
+import "erc3156/contracts/interfaces/IERC3156FlashBorrower.sol";
+
 import "../interfaces/governance/ICrownGovernanceToken.sol";
 
 /**
@@ -123,9 +125,12 @@ contract KING is ICrownGovernanceToken {
 
 	/// @notice Hard cap on the minimum waiting time for changing the token supply
 	uint32 public constant override supplyChangeWaitingPeriodMinimum = 1 days * 90;
-	// solhint-disable-next-line max-line-length
-	/// @notice Cap on the total amount that can be minted at each mint (measured in bips: 10,000 bips = 1% of current totalSupply)
+
+	/// @notice Cap on the total amount that can be minted at each mint (measured in bips: 10,000 bips = 1% of totalSupply)
 	uint32 public override mintCap = 900000;
+
+	/// @dev Current amount of flash-minted WETH10 token.
+	uint256 public flashMintedSupply;
 
 	/// @dev Allowance amounts on behalf of others
 	mapping(address => mapping(address => uint256)) internal allowances;
@@ -512,6 +517,69 @@ contract KING is ICrownGovernanceToken {
 	function getDomainSeparator() public view returns (bytes32) {
 		return
 			keccak256(abi.encode(DOMAIN_SEPARATOR, keccak256(bytes(name)), VERSION_HASH, _getChainId(), address(this)));
+	}
+
+	/// @dev Return the amount of KING token that can be flash-minted
+	function maxFlashLoan(address token) external view returns (uint256) {
+		return token == address(this) ? type(uint112).max - flashMintedSupply : 0;
+	}
+
+	/// @dev Return the fee (zero) for flash minting any amount of KING token
+	function flashFee(address token, uint256) external view returns (uint256) {
+		require(token == address(this), "KING::flashFee: only KING is flash mintable");
+		return 0;
+	}
+
+	/**
+	 * @notice Flash mints and lends `amount` KING token to the receiver address.
+	 * By the end of the transaction, `amount` KING token will be burned from the receiver.
+	 * Emits {Approval} event to reflect reduced allowance `amount` for this contract to spend from receiver account,
+	 * unless allowance was set to `type(uint256).max`
+	 * Emits two {Transfer} events for minting and burning of the flash-minted amount.
+	 *
+	 * @param token the only flash mintable token is this contract itself
+	 * @param receiver must be a EIP3156-compliant borrower
+	 * @param data can be passed as a bytes calldata parameter
+	 * @return boolean flag indicating whether the operation succeeded
+	 * @dev `amount` must be less or equal to type(uint112).max.
+	 * @dev The total of all flash loans in a tx must be less or equal to type(uint112).max.
+	 */
+	function flashLoan(
+		IERC3156FlashBorrower receiver,
+		address token,
+		uint256 amount,
+		bytes calldata data
+	) external returns (bool) {
+		require(token == address(this), "KING::flashLoan: only KING is flash mintable");
+		require(amount <= totalSupply, "KING::flashLoan: flash mint limit exceeded");
+		flashMintedSupply = flashMintedSupply + amount;
+		require(flashMintedSupply <= type(uint112).max, "KING::flashLoan: total flash mint limit exceeded");
+
+		balances[address(receiver)] += amount;
+		emit Transfer(address(0), address(receiver), amount);
+
+		bytes32 CALLBACK_SUCCESS = keccak256("ERC3156FlashBorrower.onFlashLoan");
+		require(
+			receiver.onFlashLoan(msg.sender, address(this), amount, 0, data) == CALLBACK_SUCCESS,
+			"KING::flashLoan: unsuccessful flash mint"
+		);
+
+		uint256 allowed = allowances[address(receiver)][address(this)];
+		if (allowed != type(uint256).max) {
+			require(allowed >= amount, "KING::flashLoan: request exceeds allowance");
+			uint256 reduced = allowed - amount;
+			allowances[address(receiver)][address(this)] = reduced;
+			emit Approval(address(receiver), address(this), reduced);
+		}
+
+		uint256 balance = balances[address(receiver)];
+		require(balance >= amount, "KING::flashLoan: burn amount exceeds balance");
+		balances[address(receiver)] = balance - amount;
+		emit Transfer(address(receiver), address(0), amount);
+
+		flashMintedSupply = flashMintedSupply - amount;
+
+		return true;
 	}
 
 	/**
