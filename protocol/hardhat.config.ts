@@ -5,6 +5,7 @@ import 'hardhat-deploy-ethers';
 // import "hardhat-typechain";
 import 'hardhat-log-remover';
 import 'hardhat-gas-reporter';
+import "hardhat-contract-sizer";
 import 'solidity-coverage';
 // import "@tenderly/hardhat-tenderly"
 
@@ -31,7 +32,7 @@ const config: HardhatUserConfig = {
 			accounts: kingmakerAccounts,
 			forking: {
 				url: `https://eth-mainnet.alchemyapi.io/v2/${getEnv('ALCHEMY_PROJECT_ID')}`,
-				blockNumber: 12000000,
+				blockNumber: 12121212,
 			},
 			live: false,
 			saveDeployments: true,
@@ -142,6 +143,12 @@ const config: HardhatUserConfig = {
 		coinmarketcap: process.env.CMC_API_KEY || undefined,
 		enabled: !!process.env.REPORT_GAS,
 		showTimeSpent: true,
+	},
+	// @ts-ignore
+	contractSizer: {
+		alphaSort: true,
+		runOnCompile: true,
+		disambiguatePaths: false,
 	},
 	// tenderly: {
 	//   username: TENDERLY_USERNAME,

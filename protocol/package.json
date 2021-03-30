@@ -67,6 +67,7 @@
 		"ethers": "^5.0.32",
 		"fs-extra": "^9.1.0",
 		"hardhat": "^2.1.1",
+		"hardhat-contract-sizer": "^2.0.3",
 		"hardhat-deploy": "^0.7.0-beta.48",
 		"hardhat-deploy-ethers": "^0.3.0-beta.7",
 		"hardhat-gas-reporter": "^1.0.4",
