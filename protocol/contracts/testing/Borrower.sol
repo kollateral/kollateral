@@ -15,7 +15,11 @@ contract Borrower is IERC3156FlashBorrower {
 		aggregator = _aggregator;
 	}
 
-	function borrow(address _token, uint256 _amount, IERC3156FlashLender[] memory _lenders) external {
+	function borrow(
+		address _token,
+		uint256 _amount,
+		IERC3156FlashLender[] memory _lenders
+	) external {
 		bytes memory data = abi.encode(myData);
 		aggregator.flashLoan(this, _token, _amount, _lenders, data);
 	}

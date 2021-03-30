@@ -77,7 +77,7 @@ contract Alchemist is AlchemicalBondingCurve {
 	/// @notice Configuration vars for the IBCO
 	uint256 public end;
 	uint256 public immutable minimumIngredient; // should be 0.9 ether;
-	uint256 public maximumGasPrice = 369 gwei;  // 1 gwei == 1e9
+	uint256 public maximumGasPrice = 369 gwei; // 1 gwei == 1e9
 
 	/// @notice counters for keeping track of total contributions and transmutations, used in `distillate`
 	uint256 public transmutableReserve; // should be 4500_e18;

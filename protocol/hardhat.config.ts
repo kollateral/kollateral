@@ -5,7 +5,7 @@ import 'hardhat-deploy-ethers';
 // import "hardhat-typechain";
 import 'hardhat-log-remover';
 import 'hardhat-gas-reporter';
-import "hardhat-contract-sizer";
+import 'hardhat-contract-sizer';
 import 'solidity-coverage';
 // import "@tenderly/hardhat-tenderly"
 

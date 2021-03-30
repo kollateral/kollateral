@@ -9,14 +9,9 @@ import "./PlatformFeesManager.sol";
 import "./IFlashLoanAggregator.sol";
 
 contract FlashLoanAggregator is IFlashLoanAggregator, PlatformFeesManager, IERC3156FlashBorrower {
-
 	bytes32 public immutable CALLBACK_SUCCESS = keccak256("ERC3156FlashBorrower.onFlashLoan");
 
-	event FlashLoan(
-		address borrower,
-		address token,
-		uint256 amount
-	);
+	event FlashLoan(address borrower, address token, uint256 amount);
 
 	struct BorrowerData {
 		bytes callerData;
@@ -34,7 +29,12 @@ contract FlashLoanAggregator is IFlashLoanAggregator, PlatformFeesManager, IERC3
 
 	constructor(uint256 _feeBips, address _feeCollector) PlatformFeesManager(_feeBips, _feeCollector) {}
 
-	function maxFlashLoan(address _token, IERC3156FlashLender[] memory _lenders) external view override returns (uint256) {
+	function maxFlashLoan(address _token, IERC3156FlashLender[] memory _lenders)
+		external
+		view
+		override
+		returns (uint256)
+	{
 		uint256 maxBalance = 0;
 
 		for (uint256 i = 0; i < _lenders.length; i++) {
@@ -44,8 +44,11 @@ contract FlashLoanAggregator is IFlashLoanAggregator, PlatformFeesManager, IERC3
 		return maxBalance;
 	}
 
-	function flashFee(address _token, uint256 _amount, IERC3156FlashLender[] memory _lenders) external view override returns (uint256) {
-
+	function flashFee(
+		address _token,
+		uint256 _amount,
+		IERC3156FlashLender[] memory _lenders
+	) external view override returns (uint256) {
 		require(_lenders.length > 0, "FlashLoanAggregator: Unsupported currency");
 
 		require(
@@ -76,7 +79,6 @@ contract FlashLoanAggregator is IFlashLoanAggregator, PlatformFeesManager, IERC3
 		IERC3156FlashLender[] memory _lenders,
 		bytes calldata _data
 	) external override returns (bool) {
-
 		require(
 			_amount <= this.maxFlashLoan(_token, _lenders),
 			"FlashLoanAggregator: Liquidity is not sufficient for requested amount"
@@ -87,18 +89,13 @@ contract FlashLoanAggregator is IFlashLoanAggregator, PlatformFeesManager, IERC3
 
 		bool status = executeFlashLoanStep(_token, stepData);
 		if (status) {
-			emit FlashLoan(
-				address(_receiver),
-				_token,
-				_amount
-			);
+			emit FlashLoan(address(_receiver), _token, _amount);
 		}
 
 		return status;
 	}
 
 	function executeFlashLoanStep(address _token, FlashStepLoadData memory _stepData) internal returns (bool) {
-
 		IERC3156FlashLender lender = _stepData.borrower.lenders[_stepData.step];
 		uint256 loanAmount = loanableAmount(lender, _token, _stepData.remainingAmount);
 
@@ -119,7 +116,6 @@ contract FlashLoanAggregator is IFlashLoanAggregator, PlatformFeesManager, IERC3
 		uint256 _fee,
 		bytes calldata _data
 	) external override returns (bytes32) {
-
 		require(_initiator == address(this), "Initiator must be FlashLoanAggregator");
 
 		FlashStepLoadData memory stepData = abi.decode(_data, (FlashStepLoadData));
@@ -181,5 +177,4 @@ contract FlashLoanAggregator is IFlashLoanAggregator, PlatformFeesManager, IERC3
 	) internal view returns (uint256) {
 		return Math.min(_lender.maxFlashLoan(_token), _amount);
 	}
-
 }

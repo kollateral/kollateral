@@ -192,7 +192,7 @@ describe('Alchemist', () => {
 			await expect(
 				Alchemist.connect(King).transmute({
 					value: ethers.utils.parseEther('1010'),
-					gasPrice: ethers.utils.parseUnits('1010', 'gwei')
+					gasPrice: ethers.utils.parseUnits('1010', 'gwei'),
 				})
 			).to.be.revertedWith('Alchemist::onlyLowGas: gas price too high');
 		});

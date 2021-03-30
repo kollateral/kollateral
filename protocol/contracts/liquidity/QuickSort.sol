@@ -2,19 +2,23 @@
 pragma solidity ^0.8.2;
 
 library QuickSort {
-
-	function quickSortByValues(uint[] memory indexes, int[] calldata values) external pure {
+	function quickSortByValues(uint256[] memory indexes, int256[] calldata values) external pure {
 		if (indexes.length > 1) {
 			sortByValues(indexes, values, 0, indexes.length - 1);
 		}
 	}
 
-	function sortByValues(uint[] memory indexes, int[] calldata values, uint low, uint high) internal pure {
+	function sortByValues(
+		uint256[] memory indexes,
+		int256[] calldata values,
+		uint256 low,
+		uint256 high
+	) internal pure {
 		if (low < high) {
-			int pivotVal = values[indexes[(low + high) / 2]];
+			int256 pivotVal = values[indexes[(low + high) / 2]];
 
-			uint low1 = low;
-			uint high1 = high;
+			uint256 low1 = low;
+			uint256 high1 = high;
 			for (;;) {
 				while (values[indexes[low1]] < pivotVal) low1++;
 				while (values[indexes[high1]] > pivotVal) high1--;
@@ -28,5 +32,4 @@ library QuickSort {
 			if (high1 < high) sortByValues(indexes, values, high1, high);
 		}
 	}
-
 }

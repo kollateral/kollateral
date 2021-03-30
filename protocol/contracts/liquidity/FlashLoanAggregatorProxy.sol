@@ -8,7 +8,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./IFlashLoanAggregator.sol";
 
 contract FlashLoanAggregatorProxy is IERC3156FlashLender, IERC3156FlashBorrower, Ownable {
-
 	struct Receiver {
 		bytes data;
 		IERC3156FlashBorrower receiver;
@@ -47,7 +46,6 @@ contract FlashLoanAggregatorProxy is IERC3156FlashLender, IERC3156FlashBorrower,
 		uint256 _amount,
 		bytes calldata _data
 	) external override returns (bool) {
-
 		if (callSortOnFlashLoan) {
 			sortLenders(lenders[_token], _token);
 		}
@@ -63,15 +61,11 @@ contract FlashLoanAggregatorProxy is IERC3156FlashLender, IERC3156FlashBorrower,
 		uint256 _fee,
 		bytes calldata _data
 	) external override returns (bytes32) {
-
 		require(_initiator == address(this), "Initiator must be FlashLoanAggregatorProxy");
 
 		Receiver memory data = abi.decode(_data, (Receiver));
 
-		require(
-			IERC20(_token).transfer(address(data.receiver), _amount),
-			"FlashLoanAggregatorProxy: Transfer failed"
-		);
+		require(IERC20(_token).transfer(address(data.receiver), _amount), "FlashLoanAggregatorProxy: Transfer failed");
 
 		require(
 			data.receiver.onFlashLoan(address(this), _token, _amount, _fee, data.data) == CALLBACK_SUCCESS,
@@ -89,5 +83,4 @@ contract FlashLoanAggregatorProxy is IERC3156FlashLender, IERC3156FlashBorrower,
 	function sortLenders(IERC3156FlashLender[] memory _lenders, address _token) internal virtual {
 		lenders[_token] = _lenders;
 	}
-
 }
