@@ -52,7 +52,7 @@ import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "../libraries/governance/AlchemicalBondingCurve.sol";
 import "../libraries/math/RoyalMath.sol";
 
-import "../interfaces/governance/IWETH10.sol";
+import "../interfaces/IWETH10.sol";
 
 /**
  * @title Alchemist
